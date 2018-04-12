@@ -1,0 +1,52 @@
+﻿<Window x:Class="GridSetter.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Style="{StaticResource WindowStyle}"
+        MouseDown="WindowMouseDown"
+        MouseEnter="WindowMouseEnter"
+        MouseLeave="WindowMouseLeave"
+        MouseUp="WindowMouseUp"
+        MouseDoubleClick="WindowMouseDouble">
+    <Window.Background>
+        <ImageBrush ImageSource="{StaticResource Background}" />
+    </Window.Background>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Row="2" x:Name="Version" Text="{Binding Version}" Style="{StaticResource VersionTextBlockStyle}"/>
+        <Grid Grid.Row="4" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="15"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="80" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="1" x:Name="AppTitle" Text="{Binding AppTitle}" Style="{StaticResource SpeedTextBlockStyle}" />
+            <Button Grid.Row="2" Grid.Column="1" Command="{Binding ResetCommand}" Click="ResetNewClick" Content="{Binding ResetNewLabel}" Style="{StaticResource ActionButtonStyle}" />
+            <Button Grid.Row="4" Grid.Column="1" Command="{Binding EmptyContentCommand}" Content="Empty all" Style="{StaticResource ActionButtonStyle}" />
+            <Button Grid.Row="6" Grid.Column="1" Command="{Binding ToggleLockCommand}" Click="ToggleLockClick" Content="{Binding ToggleLockLabel}" Style="{StaticResource ActionButtonStyle}" />
+            <Button Grid.Row="8" Grid.Column="1" Command="{Binding ExitCommand}" Content="Exit" Style="{StaticResource DefaultButtonStyle}" />
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,17 @@
+﻿<Window x:Class="GridSetter.Views.Grid"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GridSetter.Views"
+        mc:Ignorable="d"
+        Title="Grid"
+        WindowStyle="None"
+        AllowsTransparency="True">
+    <Window.Background>
+        <SolidColorBrush Color="Azure" Opacity="0.3" />
+    </Window.Background>
+    <Window.CommandBindings>
+        <CommandBinding Command="{x:Static local:Grid.ToggleLockCommand}" Executed="ShortcutToggleLock"/>
+    </Window.CommandBindings>
+</Window>
