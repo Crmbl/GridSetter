@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -137,7 +138,28 @@ namespace GridSetter.Views
 
         #region Events
 
-        #region Split event
+		/// <summary>
+		/// Triggered when the drag end.
+		/// </summary>
+		/// <param name="sender">Don't care.</param>
+		/// <param name="args">Don't know.</param>
+		public void GridSplitterDragEnd(object sender, DragCompletedEventArgs args)
+		{
+			foreach (var child in MainGrid.Children.Cast<UIElement>().Where(e => e is GGrid grid && grid.Name == "imageGrid"))
+			{
+				if (child is GGrid grid)
+				{
+					// FU
+					var imageControl = grid.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
+					if (imageControl is Image image && image.Source != null 
+					    && image.ActualWidth == grid.ActualWidth && image.ActualHeight == grid.ActualHeight)
+					{
+						if (grid.ActualWidth > grid.DesiredSize.Width || grid.ActualHeight > grid.DesiredSize.Height)
+							grid.Arrange(new Rect(grid.DesiredSize));
+					}
+				}
+			}
+		}
 
         /// <summary>
         /// Remove a column on click.
@@ -158,9 +180,9 @@ namespace GridSetter.Views
 				for (var y = 0; y < actualColSpan; y++)
 				{
 					if (y % 2 != 0)
-						UserInterfaceTools.AddGridSplitter(MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Vertical);
+						UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Vertical);
 					else if (i % 2 != 0)
-						UserInterfaceTools.AddGridSplitter(MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Horizontal);
+						UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Horizontal);
 					else
 					{
 						UserInterfaceTools.AddControlButtons(this, currentRow + i, currentCol + y);
@@ -171,8 +193,6 @@ namespace GridSetter.Views
 
 			UserInterfaceTools.UpdateControlButtons(MainGrid);
 		}
-
-		#endregion // Split event
 
 		#region Add events
 
@@ -190,14 +210,14 @@ namespace GridSetter.Views
 			MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { Width = new GridLength(5, GridUnitType.Pixel) });
 			UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Left, currentCol);
 			for (var i = 0; i < rowAmount; i++)
-				UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Vertical);
+				UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Vertical);
 
 			MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 			UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Left, currentCol);
 			for (var i = 0; i < rowAmount; i++)
 			{
 				if (i % 2 != 0)
-					UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Horizontal);
+					UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Horizontal);
 				else
 				{
 					UserInterfaceTools.AddControlButtons(this, i, currentCol);
@@ -224,7 +244,7 @@ namespace GridSetter.Views
 			for (var i = 0; i < rowAmount; i++)
 			{
 				if (i % 2 != 0)
-					UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Horizontal);
+					UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Horizontal);
 				else
 				{
 					UserInterfaceTools.AddControlButtons(this, i, currentCol);
@@ -235,7 +255,7 @@ namespace GridSetter.Views
 			MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { Width = new GridLength(5, GridUnitType.Pixel) });
 			UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Right, currentCol);
 			for (var i = 0; i < rowAmount; i++)
-				UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Vertical);
+				UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Vertical);
 
 			UserInterfaceTools.UpdateControlButtons(MainGrid);
 		}
@@ -254,14 +274,14 @@ namespace GridSetter.Views
 			MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { Height = new GridLength(5, GridUnitType.Pixel) });
 			UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Up, currentRow);
 			for (var i = 0; i < colAmount; i++)
-				UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Horizontal);
+				UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Horizontal);
 
 			MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 			UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Up, currentRow);
 			for (var i = 0; i < colAmount; i++)
 			{
 				if (i % 2 != 0)
-					UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Vertical);
+					UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Vertical);
 				else
 				{
 					UserInterfaceTools.AddControlButtons(this, currentRow, i);
@@ -288,7 +308,7 @@ namespace GridSetter.Views
 			for (var i = 0; i < colAmount; i++)
 			{
 				if (i % 2 != 0)
-					UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Vertical);
+					UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Vertical);
 				else
 				{
 					UserInterfaceTools.AddControlButtons(this, currentRow, i);
@@ -299,7 +319,7 @@ namespace GridSetter.Views
 			MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { Height = new GridLength(5, GridUnitType.Pixel) });
 			UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Down, currentRow);
 			for (var i = 0; i < colAmount; i++)
-				UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Horizontal);
+				UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Horizontal);
 
 			UserInterfaceTools.UpdateControlButtons(MainGrid);
 		}

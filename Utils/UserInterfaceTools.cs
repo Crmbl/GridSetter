@@ -27,11 +27,12 @@ namespace GridSetter.Utils
 		/// <summary>
 		/// Add the gridSplitter between to grids.
 		/// </summary>
+		/// <param name="window">Defines the binding.</param>
 		/// <param name="grid">Defines the grid to attach to button into.</param>
 		/// <param name="rowId">The row where the gridSplitter will be created.</param>
 		/// <param name="colId">The column where the gridSplitter will be created.</param>
 		/// <param name="direction">The direction for the gridSplitter.</param>
-		public static void AddGridSplitter(Grid grid, int rowId, int colId, DirectionsEnum direction)
+		public static void AddGridSplitter(Views.Grid window, Grid grid, int rowId, int colId, DirectionsEnum direction)
 		{
 			GridSplitter gridSplitter;
 			if (direction == DirectionsEnum.Vertical)
@@ -53,6 +54,7 @@ namespace GridSetter.Utils
 					ForceCursor = true
 				};
 
+			gridSplitter.DragCompleted += window.GridSplitterDragEnd;
 
 			Grid.SetColumn(gridSplitter, colId);
 			Grid.SetRow(gridSplitter, rowId);
