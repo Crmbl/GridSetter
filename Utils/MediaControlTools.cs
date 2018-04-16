@@ -165,15 +165,10 @@ namespace GridSetter.Utils
 			    imageToDrop.UriSource = new Uri(files.First());
 			    imageToDrop.EndInit();
 
-				//control.Width = imageToDrop.Width;
-				//control.Height = imageToDrop.Height;
-			    control.Tag = new Rect
-			    {
-                    Height = imageToDrop.Height,
-                    Width = imageToDrop.Width,
-			    };
+				control.Width = imageToDrop.Width;
+				control.Height = imageToDrop.Height;
 
-                ImageBehavior.SetAnimatedSource(control, imageToDrop);
+				ImageBehavior.SetAnimatedSource(control, imageToDrop);
             }
 			else if (files.First().Contains(".avi") || files.First().Contains(".mp4") || files.First().Contains(".wmv") || files.First().Contains("webm"))
 			{
