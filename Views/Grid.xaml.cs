@@ -138,28 +138,71 @@ namespace GridSetter.Views
 
         #region Events
 
-		/// <summary>
-		/// Triggered when the drag end.
-		/// </summary>
-		/// <param name="sender">Don't care.</param>
-		/// <param name="args">Don't know.</param>
-		public void GridSplitterDragEnd(object sender, DragCompletedEventArgs args)
-		{
-			foreach (var child in MainGrid.Children.Cast<UIElement>().Where(e => e is GGrid grid && grid.Name == "imageGrid"))
-			{
-				if (child is GGrid grid)
-				{
-					// FU
-					var imageControl = grid.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
-					if (imageControl is Image image && image.Source != null 
-					    && image.ActualWidth == grid.ActualWidth && image.ActualHeight == grid.ActualHeight)
-					{
-						if (grid.ActualWidth > grid.DesiredSize.Width || grid.ActualHeight > grid.DesiredSize.Height)
-							grid.Arrange(new Rect(grid.DesiredSize));
-					}
-				}
-			}
-		}
+        /// <summary>
+        /// Triggered when the drag end.
+        /// </summary>
+        /// <param name="sender">Don't care.</param>
+        /// <param name="args">Don't know.</param>
+        public void GridSplitterDragEnd(object sender, DragCompletedEventArgs args)
+        {
+            foreach (var child in MainGrid.Children.Cast<UIElement>().Where(e => e is GGrid grid && grid.Name == "imageGrid"))
+            {
+                if (!(child is GGrid grid))
+                    continue;
+
+                var imageControl = grid.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
+                if (!(imageControl is Image image) || image.Source == null)
+                    continue;
+
+                var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+                var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                //if (image.Width - grid.ActualWidth != 0)
+                //{
+                //    image.Width = ((Rect)image.Tag).Width;
+                //    translateTransform.X += grid.ActualWidth - grid.DesiredSize.Width;
+                //}
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                //if (image.Height - grid.ActualHeight != 0)
+                //{
+                //    image.Height = ((Rect)image.Tag).Height;
+                //    translateTransform.Y += grid.ActualHeight - grid.DesiredSize.Height;
+                //}
+
+                if (args.VerticalChange < 0 && sender is GridSplitter verticalGridSplitter && verticalGridSplitter.Width == 5
+                    || args.HorizontalChange < 0 && sender is GridSplitter horiGridSplitter && horiGridSplitter.Height == 5)
+                {
+                    var relativePoint = image.TranslatePoint(new Point(0, 0), grid);
+                    Rect rectum = new Rect(new Point(relativePoint.X, relativePoint.Y), new Size(grid.DesiredSize.Width, grid.DesiredSize.Height));
+                    translateTransform.Y = 0;
+                    translateTransform.X = 0;
+                    scaleTransform.ScaleX = 1;
+                    scaleTransform.ScaleY = 1;
+
+                    image.Arrange(rectum);
+                }
+
+                // REUSSIR A JUSTE MODIFIER LA SIZE DE LA GRID.... fuck this shit.
+                //image.Width = grid.DesiredSize.Width;
+                //image.Height = grid.DesiredSize.Height;
+
+                //if (grid.ActualWidth > grid.DesiredSize.Width)
+                //{
+                //    image.Width = grid.DesiredSize.Width;
+                //    Rect rectum = new Rect(new Point(), new Size(image.Width, image.Height));
+
+                //    //translateTransform.X -= (grid.ActualWidth - grid.DesiredSize.Width) / 2;
+                //    //scaleTransform.CenterX -= (grid.ActualWidth - grid.DesiredSize.Width) / 2; prob avec taille de l'image
+                //}
+                //if (grid.ActualHeight > grid.DesiredSize.Height)
+                //{
+                //    //image.Height = grid.DesiredSize.Height;
+                //    //translateTransform.Y -= (grid.ActualHeight - grid.DesiredSize.Height) / 2;
+                //    //scaleTransform.CenterY -= (grid.ActualHeight - grid.DesiredSize.Height) / 2; prob avec taille de l'image
+                //}
+            }
+        }
 
         /// <summary>
         /// Remove a column on click.
@@ -467,7 +510,7 @@ namespace GridSetter.Views
 				return;
 
 			var grid = UserInterfaceTools.FindParent(image);
-		    var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+		    var scaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
             var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
 			var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
 
@@ -513,7 +556,14 @@ namespace GridSetter.Views
 				return;
 
 			var grid = UserInterfaceTools.FindParent(image);
-		    var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+		    var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
+		    var renderScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
+		    ScaleTransform scaleTransform;
+		    if (renderScaleTransform.ScaleX != 0 || renderScaleTransform.ScaleY != 0)
+		        scaleTransform = renderScaleTransform;
+		    else
+		        scaleTransform = layoutScaleTransform;
+
 		    var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
 		    var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
 
@@ -562,7 +612,7 @@ namespace GridSetter.Views
 			    if (image?.Source == null)
 			        return;
 
-			    var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+			    var scaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
                 var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
 			    var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
 			    var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
@@ -660,7 +710,7 @@ namespace GridSetter.Views
 		    var imageGrid = grandParentGrid.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
 		    if (!(imageGrid is Image image)) return;
 
-		    var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+		    var scaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
 			switch (child.Name)
 		    {
 				case "takeHeightButton":

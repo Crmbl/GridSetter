@@ -98,13 +98,17 @@ namespace GridSetter.Utils
                 ClipToBounds = true
 			};
 
-			var transformGroup = new TransformGroup();
+		    var layoutTransformGroup = new TransformGroup();
 			var scaleTransform = new ScaleTransform();
-			transformGroup.Children.Add(scaleTransform);
-			var transflateTransform = new TranslateTransform();
-			transformGroup.Children.Add(transflateTransform);
+		    layoutTransformGroup.Children.Add(scaleTransform);
+		    var renderTransformGroup = new TransformGroup();
+            var transflateTransform = new TranslateTransform();
+		    var renderScaleTransform = new ScaleTransform();
+            renderTransformGroup.Children.Add(transflateTransform);
+		    renderTransformGroup.Children.Add(renderScaleTransform);
 
-			imageDisplay.RenderTransform = transformGroup;
+            imageDisplay.LayoutTransform = layoutTransformGroup;
+			imageDisplay.RenderTransform = renderTransformGroup;
 			imageDisplay.MouseLeftButtonDown += window.ImageDisplayOnMouseLeftButtonDown;
 			imageDisplay.MouseLeftButtonUp += window.ImageDisplayOnMouseLeftButtonUp;
 			imageDisplay.MouseMove += window.ImageDisplayOnMouseMove;

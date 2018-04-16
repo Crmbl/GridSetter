@@ -41,15 +41,22 @@ namespace GridSetter.Utils
 		public static void ImageZoom(Image image, MouseWheelEventArgs args)
 		{
 			image.RenderTransformOrigin = new Point(0.5, 0.5);
-			var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
-			var zoom = args.Delta > 0 ? ZoomRatio : -ZoomRatio;
+			var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
+		    var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+            var zoom = args.Delta > 0 ? ZoomRatio : -ZoomRatio;
 
-			var grid = UserInterfaceTools.FindParent(image);
+		    var grid = UserInterfaceTools.FindParent(image);
 		    var relativePointCache = image.TranslatePoint(new Point(0, 0), grid);
             grid.Height = grid.ActualHeight;
 		    grid.Width = grid.ActualWidth;
 
-			if (scaleTransform.ScaleX + zoom > ZoomMinTreshold && scaleTransform.ScaleX + zoom < ZoomMaxTreshold
+            ScaleTransform scaleTransform;
+		    if (image.ActualHeight * zoom <= grid.ActualHeight || image.ActualWidth * zoom <= grid.ActualWidth)
+		        scaleTransform = renderScaleTransform;
+		    else
+		        scaleTransform = layoutScaleTransform;
+
+            if (scaleTransform.ScaleX + zoom > ZoomMinTreshold && scaleTransform.ScaleX + zoom < ZoomMaxTreshold
 				&& scaleTransform.ScaleY + zoom > ZoomMinTreshold && scaleTransform.ScaleY + zoom < ZoomMaxTreshold)
 			{
 				scaleTransform.ScaleX += zoom;
@@ -89,7 +96,7 @@ namespace GridSetter.Utils
 		public static void ForceZoom(Image image, double zoom, double previous)
 		{
 			image.RenderTransformOrigin = new Point(0.5, 0.5);
-			var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+			var scaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
 
 			var grid = UserInterfaceTools.FindParent(image);
 			grid.Height = grid.ActualHeight;
@@ -153,7 +160,7 @@ namespace GridSetter.Utils
 				control.HorizontalAlignment = HorizontalAlignment.Center;
 				control.VerticalAlignment = VerticalAlignment.Center;
 
-			    var scaleTransform = (ScaleTransform)((TransformGroup)control.RenderTransform).Children.First(tr => tr is ScaleTransform);
+			    var scaleTransform = (ScaleTransform)((TransformGroup)control.LayoutTransform).Children.First(tr => tr is ScaleTransform);
 			    var translateTransform = (TranslateTransform)((TransformGroup)control.RenderTransform).Children.First(tr => tr is TranslateTransform);
 			    translateTransform.Y = 0;
 			    translateTransform.X = 0;
