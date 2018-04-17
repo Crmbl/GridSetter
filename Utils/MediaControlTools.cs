@@ -174,6 +174,11 @@ namespace GridSetter.Utils
 
 				control.Width = imageToDrop.Width;
 				control.Height = imageToDrop.Height;
+			    control.Tag = new Rect
+			    {
+			        Height = control.Height,
+			        Width = control.Width
+			    };
 
 				ImageBehavior.SetAnimatedSource(control, imageToDrop);
             }

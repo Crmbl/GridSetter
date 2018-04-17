@@ -54,6 +54,8 @@ namespace GridSetter.Utils
 					ForceCursor = true
 				};
 
+		    gridSplitter.DragStarted += window.GridSplitterDragStart;
+		    gridSplitter.DragDelta += window.GridSplitterDragDelta;
 			gridSplitter.DragCompleted += window.GridSplitterDragEnd;
 
 			Grid.SetColumn(gridSplitter, colId);

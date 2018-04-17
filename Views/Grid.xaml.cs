@@ -15,6 +15,7 @@ using DataFormats = System.Windows.DataFormats;
 using DragEventArgs = System.Windows.DragEventArgs;
 using GGrid = System.Windows.Controls.Grid;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+// ReSharper disable CompareOfFloatsByEqualityOperator
 
 /* TODO : 
  *
@@ -95,6 +96,11 @@ namespace GridSetter.Views
         /// </summary>
         public bool IsLocked { get; set; }
 
+        /// <summary>
+        /// Defines the position before drag start.
+        /// </summary>
+        private Point OriginGridSplitter { get; set; }
+
         #region Static
 
         /// <summary>
@@ -138,8 +144,55 @@ namespace GridSetter.Views
 
         #region Events
 
+	    /// <summary>
+	    /// Triggered when the drag starts.
+	    /// </summary>
+	    /// <param name="sender">Don't care.</param>
+	    /// <param name="args">Don't know.</param>
+	    public void GridSplitterDragStart(object sender, DragStartedEventArgs args)
+	    {
+	        if (!(sender is GridSplitter gridSplitter)) return;
+            OriginGridSplitter = gridSplitter.TranslatePoint(new Point(0, 0), MainGrid);
+        }
+
         /// <summary>
-        /// Triggered when the drag end.
+        /// Triggered when is dragging.
+        /// </summary>
+        /// <param name="sender">Fart powder.</param>
+        /// <param name="args">Yup.</param>
+	    public void GridSplitterDragDelta(object sender, DragDeltaEventArgs args)
+	    {
+            // TODO : pas forcément le meilleur event, puisqu'il intervient APRES génération d'un delta, faire le check avant.
+
+	        if (!(sender is GridSplitter gridSplitter)) return;
+
+	        var delta = gridSplitter.TranslatePoint(new Point(0, 0), MainGrid) - OriginGridSplitter;
+	        if (delta.X != 0)
+	        {
+	            int column;
+	            if (delta.X > 0) // vers la droite
+	                column = GGrid.GetColumn(gridSplitter) + 1;
+                else // vers la gauche
+                    column = GGrid.GetColumn(gridSplitter) - 1;
+
+                if (Math.Round(MainGrid.ColumnDefinitions[column].ActualWidth, MidpointRounding.AwayFromZero) <= 195)
+	                gridSplitter.CancelDrag();
+            }
+            else if (delta.Y != 0)
+	        {
+	            int row;
+	            if (delta.Y > 0) // vers le bas
+	                row = GGrid.GetRow(gridSplitter) + 1;
+	            else // vers le haut
+	                row = GGrid.GetRow(gridSplitter) - 1;
+
+                if (Math.Round(MainGrid.RowDefinitions[row].ActualHeight, MidpointRounding.AwayFromZero) <= 100)
+	                gridSplitter.CancelDrag();
+            }
+        }
+
+	    /// <summary>
+        /// Triggered when the drag ends.
         /// </summary>
         /// <param name="sender">Don't care.</param>
         /// <param name="args">Don't know.</param>
@@ -147,60 +200,100 @@ namespace GridSetter.Views
         {
             foreach (var child in MainGrid.Children.Cast<UIElement>().Where(e => e is GGrid grid && grid.Name == "imageGrid"))
             {
-                if (!(child is GGrid grid))
-                    continue;
-
+                if (!(child is GGrid grid)) continue;
+                if (!(sender is GridSplitter gridSplitter)) continue;
+                if (GGrid.GetRow(gridSplitter) - 1 != GGrid.GetRow(grid) &&
+                    GGrid.GetRow(gridSplitter) + 1 != GGrid.GetRow(grid) &&
+                    GGrid.GetColumn(gridSplitter) - 1 != GGrid.GetColumn(grid) &&
+                    GGrid.GetColumn(gridSplitter) + 1 != GGrid.GetColumn(grid)) continue;
                 var imageControl = grid.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
-                if (!(imageControl is Image image) || image.Source == null)
-                    continue;
+                if (!(imageControl is Image image) || image.Source == null) continue;
 
-                var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-                var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+                var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+                var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
+                ScaleTransform scaleTransform;
+                if (renderScaleTransform.ScaleX != 1 || renderScaleTransform.ScaleY != 1)
+                    scaleTransform = renderScaleTransform;
+                else
+                    scaleTransform = layoutScaleTransform;
 
-                // ReSharper disable once CompareOfFloatsByEqualityOperator
-                //if (image.Width - grid.ActualWidth != 0)
-                //{
-                //    image.Width = ((Rect)image.Tag).Width;
-                //    translateTransform.X += grid.ActualWidth - grid.DesiredSize.Width;
-                //}
-                // ReSharper disable once CompareOfFloatsByEqualityOperator
-                //if (image.Height - grid.ActualHeight != 0)
-                //{
-                //    image.Height = ((Rect)image.Tag).Height;
-                //    translateTransform.Y += grid.ActualHeight - grid.DesiredSize.Height;
-                //}
+                var imageHeight = Math.Round(image.ActualHeight * scaleTransform.ScaleY, MidpointRounding.AwayFromZero);
+                var imageWidth = Math.Round(image.ActualWidth * scaleTransform.ScaleX, MidpointRounding.AwayFromZero);
+                var gridHeight = Math.Round(grid.ActualHeight, MidpointRounding.AwayFromZero);
+                var gridWidth = Math.Round(grid.ActualWidth, MidpointRounding.AwayFromZero);
+                var newPos = gridSplitter.TranslatePoint(new Point(0, 0), MainGrid);
+                var delta = newPos - OriginGridSplitter;
 
-                if (args.VerticalChange < 0 && sender is GridSplitter verticalGridSplitter && verticalGridSplitter.Width == 5
-                    || args.HorizontalChange < 0 && sender is GridSplitter horiGridSplitter && horiGridSplitter.Height == 5)
+                if (imageHeight == gridHeight || imageWidth == gridWidth)
                 {
-                    var relativePoint = image.TranslatePoint(new Point(0, 0), grid);
-                    Rect rectum = new Rect(new Point(relativePoint.X, relativePoint.Y), new Size(grid.DesiredSize.Width, grid.DesiredSize.Height));
-                    translateTransform.Y = 0;
-                    translateTransform.X = 0;
+                    UIElement oppositeGridSplitter;
+                    if (delta.X != 0)
+                    {
+                        int column;
+                        if (GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid))
+                            column = GGrid.GetColumn(grid) - 1;
+                        else
+                            column = GGrid.GetColumn(grid) + 1;
+
+                        oppositeGridSplitter = MainGrid.Children.Cast<UIElement>().FirstOrDefault(e =>
+                            GGrid.GetColumn(e) == column && GGrid.GetRow(e) == GGrid.GetRow(gridSplitter) && e is GridSplitter);
+                    }
+                    else if (delta.Y != 0)
+                    {
+                        int row;
+                        if (GGrid.GetRow(gridSplitter) > GGrid.GetRow(grid))
+                            row = GGrid.GetRow(grid) - 1;
+                        else
+                            row = GGrid.GetRow(grid) + 1;
+
+                        oppositeGridSplitter = MainGrid.Children.Cast<UIElement>().FirstOrDefault(e =>
+                            GGrid.GetRow(e) == row && GGrid.GetColumn(e) == GGrid.GetColumn(gridSplitter) && e is GridSplitter);
+                    }
+                    else
+                        return;
+
+                    var posOpposite = oppositeGridSplitter?.TranslatePoint(new Point(0, 0), MainGrid);
+                    Vector value;
+                    if (GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid))
+                        // ReSharper disable once PossibleInvalidOperationException
+                        value = (Vector) (newPos - posOpposite);
+                    else
+                        // ReSharper disable once PossibleInvalidOperationException
+                        value = (Vector) (posOpposite - newPos);
+
+                    var scale = (value.X - 5) / image.ActualWidth;
+                    scaleTransform.ScaleX = Math.Round(scale, 2);
+                    scaleTransform.ScaleY = Math.Round(scale, 2);
+                }
+                else if (imageHeight < ((Rect) image.Tag).Height && grid.ActualHeight > imageHeight ||
+                         imageWidth < ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
+                {
+                    double scale;
+                    if (delta.X != 0)
+                        scale = grid.ActualWidth / image.ActualWidth;
+                    else if (delta.Y != 0)
+                        scale = grid.ActualHeight / image.ActualHeight;
+                    else
+                        return;
+
+                    if (image.ActualHeight * scale > ((Rect) image.Tag).Height
+                        || image.ActualWidth * scale > ((Rect) image.Tag).Width)
+                    {
+                        scaleTransform.ScaleX = 1;
+                        scaleTransform.ScaleY = 1;
+                    }
+                    else
+                    {
+                        scaleTransform.ScaleX = Math.Round(scale, 2);
+                        scaleTransform.ScaleY = Math.Round(scale, 2);
+                    }
+                }
+                else if (imageHeight > ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight ||
+                         imageWidth > ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
+                {
                     scaleTransform.ScaleX = 1;
                     scaleTransform.ScaleY = 1;
-
-                    image.Arrange(rectum);
                 }
-
-                // REUSSIR A JUSTE MODIFIER LA SIZE DE LA GRID.... fuck this shit.
-                //image.Width = grid.DesiredSize.Width;
-                //image.Height = grid.DesiredSize.Height;
-
-                //if (grid.ActualWidth > grid.DesiredSize.Width)
-                //{
-                //    image.Width = grid.DesiredSize.Width;
-                //    Rect rectum = new Rect(new Point(), new Size(image.Width, image.Height));
-
-                //    //translateTransform.X -= (grid.ActualWidth - grid.DesiredSize.Width) / 2;
-                //    //scaleTransform.CenterX -= (grid.ActualWidth - grid.DesiredSize.Width) / 2; prob avec taille de l'image
-                //}
-                //if (grid.ActualHeight > grid.DesiredSize.Height)
-                //{
-                //    //image.Height = grid.DesiredSize.Height;
-                //    //translateTransform.Y -= (grid.ActualHeight - grid.DesiredSize.Height) / 2;
-                //    //scaleTransform.CenterY -= (grid.ActualHeight - grid.DesiredSize.Height) / 2; prob avec taille de l'image
-                //}
             }
         }
 
