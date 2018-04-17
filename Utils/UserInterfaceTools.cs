@@ -42,7 +42,8 @@ namespace GridSetter.Utils
 					Cursor = Cursors.SizeWE,
 					Background = new SolidColorBrush(Colors.DarkGray),
 					HorizontalAlignment = HorizontalAlignment.Stretch,
-					ForceCursor = true
+					ForceCursor = true,
+					DragIncrement = 0.1
 				};
 			else
 				gridSplitter = new GridSplitter
@@ -51,10 +52,12 @@ namespace GridSetter.Utils
 					Cursor = Cursors.SizeNS,
 					Background = new SolidColorBrush(Colors.DarkGray),
 					HorizontalAlignment = HorizontalAlignment.Stretch,
-					ForceCursor = true
+					ForceCursor = true,
+					DragIncrement = 0.1
 				};
 
-		    gridSplitter.DragStarted += window.GridSplitterDragStart;
+			gridSplitter.MouseMove += window.GridSplitterMouseMove;
+			gridSplitter.DragStarted += window.GridSplitterDragStart;
 		    gridSplitter.DragDelta += window.GridSplitterDragDelta;
 			gridSplitter.DragCompleted += window.GridSplitterDragEnd;
 
@@ -80,6 +83,7 @@ namespace GridSetter.Utils
 				Visibility = Visibility.Collapsed,
 				AllowDrop = true,
                 ClipToBounds = true,
+				ShowGridLines = true,
                 Background = new SolidColorBrush(Colors.Transparent)
 			};
 			imageGrid.Drop += window.ImageGridOnDrop;

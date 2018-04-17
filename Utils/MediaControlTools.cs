@@ -19,7 +19,7 @@ namespace GridSetter.Utils
 		/// <summary>
 		/// Defines the zoom limit min.
 		/// </summary>
-		private const double ZoomMinTreshold = 0.10;
+		private const double ZoomMinTreshold = 0.1;
 
         /// <summary>
         /// Defines the zoom limit max.

@@ -10,6 +10,7 @@ using System.Windows.Media;
 using GridSetter.Utils;
 using GridSetter.Utils.Enums;
 using Button = System.Windows.Controls.Button;
+using Control = System.Windows.Forms.Control;
 using Cursors = System.Windows.Input.Cursors;
 using DataFormats = System.Windows.DataFormats;
 using DragEventArgs = System.Windows.DragEventArgs;
@@ -86,6 +87,11 @@ namespace GridSetter.Views
 		/// </summary>
 		private Point OriginPosition { get; set; }
 
+		/// <summary>
+		/// The mouse when dragging the gridsplitter.
+		/// </summary>
+		private Point MouseSplitterPosition { get; set; }
+
         /// <summary>
         /// Defines the mouse speed when starting the drag event.
         /// </summary>
@@ -100,6 +106,11 @@ namespace GridSetter.Views
         /// Defines the position before drag start.
         /// </summary>
         private Point OriginGridSplitter { get; set; }
+
+		/// <summary>
+		/// Defines the gridSplitter draggingDirection.
+		/// </summary>
+		private bool[] DraggingDirection { get; set; }
 
         #region Static
 
@@ -153,7 +164,71 @@ namespace GridSetter.Views
 	    {
 	        if (!(sender is GridSplitter gridSplitter)) return;
             OriginGridSplitter = gridSplitter.TranslatePoint(new Point(0, 0), MainGrid);
-        }
+
+		    MouseSplitterPosition = new Point(Control.MousePosition.X, Control.MousePosition.Y);
+		    DraggingDirection = new[] {true, true, true, true};
+			const int value = 1;
+		    if (gridSplitter.ActualWidth == 5)
+		    {
+			    var columnRight = GGrid.GetColumn(gridSplitter) + 1;
+			    var columnLeft = GGrid.GetColumn(gridSplitter) - 1;
+			    if (Math.Round(MainGrid.ColumnDefinitions[columnLeft].ActualWidth, MidpointRounding.AwayFromZero) - value <= 195 && args.VerticalOffset > 0)
+				    DraggingDirection[0] = false;
+			    if (Math.Round(MainGrid.ColumnDefinitions[columnRight].ActualWidth, MidpointRounding.AwayFromZero) - value <= 195 && args.VerticalOffset < 0)
+				    DraggingDirection[1] = false;
+			}
+		    else if (gridSplitter.ActualHeight == 5)
+		    {
+			    var rowBottom = GGrid.GetRow(gridSplitter) + 1;
+			    var rowTop = GGrid.GetRow(gridSplitter) - 1;
+
+			    if (Math.Round(MainGrid.RowDefinitions[rowBottom].ActualHeight, MidpointRounding.AwayFromZero) - value <= 100 && args.HorizontalOffset > 0)
+				    DraggingDirection[2] = false;
+				if (Math.Round(MainGrid.RowDefinitions[rowTop].ActualHeight, MidpointRounding.AwayFromZero) - value <= 100 && args.HorizontalOffset < 0)
+					DraggingDirection[3] = false;
+			}
+		}
+
+		/// <summary>
+		/// Triggered when the mouse move over the gridsplitter.
+		/// </summary>
+		/// <param name="sender">YO!</param>
+		/// <param name="args">WADDUP.</param>
+		public void GridSplitterMouseMove(object sender, MouseEventArgs args)
+		{
+			if (!(sender is GridSplitter gridSplitter && gridSplitter.IsDragging) || args.LeftButton != MouseButtonState.Pressed) return;
+
+			var newMousePos = new Point(Control.MousePosition.X, Control.MousePosition.Y);
+			var delta = newMousePos - MouseSplitterPosition;
+			if (gridSplitter.ActualWidth == 5)
+			{
+				if (delta.X < 0)
+				{
+					if (!DraggingDirection[0])
+						gridSplitter.CancelDrag();
+				}
+				else
+				{
+					if (!DraggingDirection[1])
+						gridSplitter.CancelDrag();
+				}
+			}
+			else if (gridSplitter.ActualHeight == 5)
+			{
+				if (delta.Y > 0)
+				{
+					if (!DraggingDirection[2])
+						gridSplitter.CancelDrag();
+				}
+				else
+				{
+					if (!DraggingDirection[3])
+						gridSplitter.CancelDrag();
+				}
+			}
+
+			Console.WriteLine($"Y : {delta.Y} /// X : {delta.X}");
+		}
 
         /// <summary>
         /// Triggered when is dragging.
@@ -162,34 +237,32 @@ namespace GridSetter.Views
         /// <param name="args">Yup.</param>
 	    public void GridSplitterDragDelta(object sender, DragDeltaEventArgs args)
 	    {
-            // TODO : pas forcément le meilleur event, puisqu'il intervient APRES génération d'un delta, faire le check avant.
+			if (!(sender is GridSplitter gridSplitter)) return;
 
-	        if (!(sender is GridSplitter gridSplitter)) return;
+			var delta = gridSplitter.TranslatePoint(new Point(0, 0), MainGrid) - OriginGridSplitter;
+			if (delta.X != 0)
+			{
+				int column;
+				if (delta.X > 0) // vers la droite
+					column = GGrid.GetColumn(gridSplitter) + 1;
+				else // vers la gauche
+					column = GGrid.GetColumn(gridSplitter) - 1;
 
-	        var delta = gridSplitter.TranslatePoint(new Point(0, 0), MainGrid) - OriginGridSplitter;
-	        if (delta.X != 0)
-	        {
-	            int column;
-	            if (delta.X > 0) // vers la droite
-	                column = GGrid.GetColumn(gridSplitter) + 1;
-                else // vers la gauche
-                    column = GGrid.GetColumn(gridSplitter) - 1;
+				if (Math.Round(MainGrid.ColumnDefinitions[column].ActualWidth, MidpointRounding.AwayFromZero) <= 195)
+					gridSplitter.CancelDrag();
+			}
+			else if (delta.Y != 0)
+			{
+				int row;
+				if (delta.Y > 0) // vers le bas
+					row = GGrid.GetRow(gridSplitter) + 1;
+				else // vers le haut
+					row = GGrid.GetRow(gridSplitter) - 1;
 
-                if (Math.Round(MainGrid.ColumnDefinitions[column].ActualWidth, MidpointRounding.AwayFromZero) <= 195)
-	                gridSplitter.CancelDrag();
-            }
-            else if (delta.Y != 0)
-	        {
-	            int row;
-	            if (delta.Y > 0) // vers le bas
-	                row = GGrid.GetRow(gridSplitter) + 1;
-	            else // vers le haut
-	                row = GGrid.GetRow(gridSplitter) - 1;
-
-                if (Math.Round(MainGrid.RowDefinitions[row].ActualHeight, MidpointRounding.AwayFromZero) <= 100)
-	                gridSplitter.CancelDrag();
-            }
-        }
+				if (Math.Round(MainGrid.RowDefinitions[row].ActualHeight, MidpointRounding.AwayFromZero) <= 100)
+					gridSplitter.CancelDrag();
+			}
+		}
 
 	    /// <summary>
         /// Triggered when the drag ends.
