@@ -10,7 +10,6 @@ using System.Windows.Media;
 using GridSetter.Utils;
 using GridSetter.Utils.Enums;
 using Button = System.Windows.Controls.Button;
-using Control = System.Windows.Forms.Control;
 using Cursors = System.Windows.Input.Cursors;
 using DataFormats = System.Windows.DataFormats;
 using DragEventArgs = System.Windows.DragEventArgs;
@@ -87,11 +86,6 @@ namespace GridSetter.Views
 		/// </summary>
 		private Point OriginPosition { get; set; }
 
-		/// <summary>
-		/// The mouse when dragging the gridsplitter.
-		/// </summary>
-		private Point MouseSplitterPosition { get; set; }
-
         /// <summary>
         /// Defines the mouse speed when starting the drag event.
         /// </summary>
@@ -106,11 +100,6 @@ namespace GridSetter.Views
         /// Defines the position before drag start.
         /// </summary>
         private Point OriginGridSplitter { get; set; }
-
-		/// <summary>
-		/// Defines the gridSplitter draggingDirection.
-		/// </summary>
-		private bool[] DraggingDirection { get; set; }
 
         #region Static
 
@@ -140,8 +129,8 @@ namespace GridSetter.Views
 		    Height = Screen.FromPoint(new System.Drawing.Point((int)Left, (int)Top)).WorkingArea.Height;
 
             MainGrid = new GGrid { ShowGridLines = false };
-			MainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-			MainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+			MainGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = 195, Width = new GridLength(1, GridUnitType.Star) });
+			MainGrid.RowDefinitions.Add(new RowDefinition { MinHeight = 100, Height = new GridLength(1, GridUnitType.Star) });
 
 			AddChild(MainGrid);
 			UserInterfaceTools.AddControlButtons(this);
@@ -164,104 +153,6 @@ namespace GridSetter.Views
 	    {
 	        if (!(sender is GridSplitter gridSplitter)) return;
             OriginGridSplitter = gridSplitter.TranslatePoint(new Point(0, 0), MainGrid);
-
-		    MouseSplitterPosition = new Point(Control.MousePosition.X, Control.MousePosition.Y);
-		    DraggingDirection = new[] {true, true, true, true};
-			const int value = 1;
-		    if (gridSplitter.ActualWidth == 5)
-		    {
-			    var columnRight = GGrid.GetColumn(gridSplitter) + 1;
-			    var columnLeft = GGrid.GetColumn(gridSplitter) - 1;
-			    if (Math.Round(MainGrid.ColumnDefinitions[columnLeft].ActualWidth, MidpointRounding.AwayFromZero) - value <= 195 && args.VerticalOffset > 0)
-				    DraggingDirection[0] = false;
-			    if (Math.Round(MainGrid.ColumnDefinitions[columnRight].ActualWidth, MidpointRounding.AwayFromZero) - value <= 195 && args.VerticalOffset < 0)
-				    DraggingDirection[1] = false;
-			}
-		    else if (gridSplitter.ActualHeight == 5)
-		    {
-			    var rowBottom = GGrid.GetRow(gridSplitter) + 1;
-			    var rowTop = GGrid.GetRow(gridSplitter) - 1;
-
-			    if (Math.Round(MainGrid.RowDefinitions[rowBottom].ActualHeight, MidpointRounding.AwayFromZero) - value <= 100 && args.HorizontalOffset > 0)
-				    DraggingDirection[2] = false;
-				if (Math.Round(MainGrid.RowDefinitions[rowTop].ActualHeight, MidpointRounding.AwayFromZero) - value <= 100 && args.HorizontalOffset < 0)
-					DraggingDirection[3] = false;
-			}
-		}
-
-		/// <summary>
-		/// Triggered when the mouse move over the gridsplitter.
-		/// </summary>
-		/// <param name="sender">YO!</param>
-		/// <param name="args">WADDUP.</param>
-		public void GridSplitterMouseMove(object sender, MouseEventArgs args)
-		{
-			if (!(sender is GridSplitter gridSplitter && gridSplitter.IsDragging) || args.LeftButton != MouseButtonState.Pressed) return;
-
-			var newMousePos = new Point(Control.MousePosition.X, Control.MousePosition.Y);
-			var delta = newMousePos - MouseSplitterPosition;
-			if (gridSplitter.ActualWidth == 5)
-			{
-				if (delta.X < 0)
-				{
-					if (!DraggingDirection[0])
-						gridSplitter.CancelDrag();
-				}
-				else
-				{
-					if (!DraggingDirection[1])
-						gridSplitter.CancelDrag();
-				}
-			}
-			else if (gridSplitter.ActualHeight == 5)
-			{
-				if (delta.Y > 0)
-				{
-					if (!DraggingDirection[2])
-						gridSplitter.CancelDrag();
-				}
-				else
-				{
-					if (!DraggingDirection[3])
-						gridSplitter.CancelDrag();
-				}
-			}
-
-			Console.WriteLine($"Y : {delta.Y} /// X : {delta.X}");
-		}
-
-        /// <summary>
-        /// Triggered when is dragging.
-        /// </summary>
-        /// <param name="sender">Fart powder.</param>
-        /// <param name="args">Yup.</param>
-	    public void GridSplitterDragDelta(object sender, DragDeltaEventArgs args)
-	    {
-			if (!(sender is GridSplitter gridSplitter)) return;
-
-			var delta = gridSplitter.TranslatePoint(new Point(0, 0), MainGrid) - OriginGridSplitter;
-			if (delta.X != 0)
-			{
-				int column;
-				if (delta.X > 0) // vers la droite
-					column = GGrid.GetColumn(gridSplitter) + 1;
-				else // vers la gauche
-					column = GGrid.GetColumn(gridSplitter) - 1;
-
-				if (Math.Round(MainGrid.ColumnDefinitions[column].ActualWidth, MidpointRounding.AwayFromZero) <= 195)
-					gridSplitter.CancelDrag();
-			}
-			else if (delta.Y != 0)
-			{
-				int row;
-				if (delta.Y > 0) // vers le bas
-					row = GGrid.GetRow(gridSplitter) + 1;
-				else // vers le haut
-					row = GGrid.GetRow(gridSplitter) - 1;
-
-				if (Math.Round(MainGrid.RowDefinitions[row].ActualHeight, MidpointRounding.AwayFromZero) <= 100)
-					gridSplitter.CancelDrag();
-			}
 		}
 
 	    /// <summary>
@@ -349,8 +240,7 @@ namespace GridSetter.Views
                     else
                         return;
 
-                    if (image.ActualHeight * scale > ((Rect) image.Tag).Height
-                        || image.ActualWidth * scale > ((Rect) image.Tag).Width)
+                    if (image.ActualHeight * scale > ((Rect) image.Tag).Height || image.ActualWidth * scale > ((Rect) image.Tag).Width)
                     {
                         scaleTransform.ScaleX = 1;
                         scaleTransform.ScaleY = 1;
@@ -421,7 +311,7 @@ namespace GridSetter.Views
 			for (var i = 0; i < rowAmount; i++)
 				UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Vertical);
 
-			MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+			MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { MinWidth = 195, Width = new GridLength(1, GridUnitType.Star) });
 			UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Left, currentCol);
 			for (var i = 0; i < rowAmount; i++)
 			{
@@ -448,7 +338,7 @@ namespace GridSetter.Views
 			var currentCol = GGrid.GetColumn(parent) + GGrid.GetColumnSpan(parent);
 			var rowAmount = MainGrid.RowDefinitions.Count;
 
-			MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+			MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { MinWidth = 195, Width = new GridLength(1, GridUnitType.Star) });
 			UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Right, currentCol);
 			for (var i = 0; i < rowAmount; i++)
 			{
@@ -485,7 +375,7 @@ namespace GridSetter.Views
 			for (var i = 0; i < colAmount; i++)
 				UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Horizontal);
 
-			MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+			MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { MinHeight = 100, Height = new GridLength(1, GridUnitType.Star) });
 			UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Up, currentRow);
 			for (var i = 0; i < colAmount; i++)
 			{
@@ -512,7 +402,7 @@ namespace GridSetter.Views
 			var currentRow = GGrid.GetRow(parent) + GGrid.GetRowSpan(parent);
 			var colAmount = MainGrid.ColumnDefinitions.Count;
 
-			MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+			MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { MinHeight = 100, Height = new GridLength(1, GridUnitType.Star) });
 			UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Down, currentRow);
 			for (var i = 0; i < colAmount; i++)
 			{

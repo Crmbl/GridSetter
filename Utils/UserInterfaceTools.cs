@@ -56,9 +56,7 @@ namespace GridSetter.Utils
 					DragIncrement = 0.1
 				};
 
-			gridSplitter.MouseMove += window.GridSplitterMouseMove;
 			gridSplitter.DragStarted += window.GridSplitterDragStart;
-		    gridSplitter.DragDelta += window.GridSplitterDragDelta;
 			gridSplitter.DragCompleted += window.GridSplitterDragEnd;
 
 			Grid.SetColumn(gridSplitter, colId);
