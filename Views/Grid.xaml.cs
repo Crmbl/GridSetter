@@ -16,16 +16,9 @@ using DragEventArgs = System.Windows.DragEventArgs;
 using GGrid = System.Windows.Controls.Grid;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 // ReSharper disable CompareOfFloatsByEqualityOperator
+// ReSharper disable PossibleInvalidOperationException
 
 /* TODO : 
- *
- * Gestion IMAGES
- * {
- *  Lors de la réduction de taille dû aux gridsplitter, la taille s'accorde pas bien
- *  Les boutons ne se centrent pas quand on réduit la taille w/ gridsplitter
- *  ====> piste de réflexion
- *         La desiredSize se met bien à jour, l'utiliser pour force move ?.. Event maybe ?
- * }
  *
  * Autre
  * {
@@ -144,12 +137,277 @@ namespace GridSetter.Views
 
         #region Events
 
-	    /// <summary>
-	    /// Triggered when the drag starts.
-	    /// </summary>
-	    /// <param name="sender">Don't care.</param>
-	    /// <param name="args">Don't know.</param>
-	    public void GridSplitterDragStart(object sender, DragStartedEventArgs args)
+        #region Setup
+
+        /// <summary>
+        /// Remove a column on click.
+        /// </summary>
+        /// <param name="sender">The button clicked.</param>
+        /// <param name="e">The routed args.</param>
+        public void SplitButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            var parent = UserInterfaceTools.FindParent((Button)sender);
+            var currentCol = GGrid.GetColumn(parent);
+            var currentRow = GGrid.GetRow(parent);
+            var actualColSpan = GGrid.GetColumnSpan(parent);
+            var actualRowSpan = GGrid.GetRowSpan(parent);
+
+            UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.None);
+            for (var i = 0; i < actualRowSpan; i++)
+            {
+                for (var y = 0; y < actualColSpan; y++)
+                {
+                    if (y % 2 != 0)
+                        UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Vertical);
+                    else if (i % 2 != 0)
+                        UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Horizontal);
+                    else
+                    {
+                        UserInterfaceTools.AddControlButtons(this, currentRow + i, currentCol + y);
+                        UserInterfaceTools.AddImageControl(this, currentRow + i, currentCol + y);
+                    }
+                }
+            }
+
+            UserInterfaceTools.UpdateControlButtons(MainGrid);
+        }
+
+        #region Add events
+
+        /// <summary>
+        /// Add a column on the left of the grid containing the clicked button.
+        /// </summary>
+        /// <param name="sender">The button clicked.</param>
+        /// <param name="routedEventArgs">The routed args.</param>
+        public void AddLeftColButtonOnClick(object sender, RoutedEventArgs routedEventArgs)
+        {
+            var parent = UserInterfaceTools.FindParent((Button)sender);
+            var currentCol = GGrid.GetColumn(parent);
+            var rowAmount = MainGrid.RowDefinitions.Count;
+
+            MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { Width = new GridLength(5, GridUnitType.Pixel) });
+            UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Left, currentCol);
+            for (var i = 0; i < rowAmount; i++)
+                UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Vertical);
+
+            MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { MinWidth = 195, Width = new GridLength(1, GridUnitType.Star) });
+            UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Left, currentCol);
+            for (var i = 0; i < rowAmount; i++)
+            {
+                if (i % 2 != 0)
+                    UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Horizontal);
+                else
+                {
+                    UserInterfaceTools.AddControlButtons(this, i, currentCol);
+                    UserInterfaceTools.AddImageControl(this, i, currentCol);
+                }
+            }
+
+            UserInterfaceTools.UpdateControlButtons(MainGrid);
+        }
+
+        /// <summary>
+        /// Add a column on the right of the grid containing the clicked button.
+        /// </summary>
+        /// <param name="sender">The button clicked.</param>
+        /// <param name="routedEventArgs">The routed args.</param>
+        public void AddRightColButtonOnClick(object sender, RoutedEventArgs routedEventArgs)
+        {
+            var parent = UserInterfaceTools.FindParent((Button)sender);
+            var currentCol = GGrid.GetColumn(parent) + GGrid.GetColumnSpan(parent);
+            var rowAmount = MainGrid.RowDefinitions.Count;
+
+            MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { MinWidth = 195, Width = new GridLength(1, GridUnitType.Star) });
+            UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Right, currentCol);
+            for (var i = 0; i < rowAmount; i++)
+            {
+                if (i % 2 != 0)
+                    UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Horizontal);
+                else
+                {
+                    UserInterfaceTools.AddControlButtons(this, i, currentCol);
+                    UserInterfaceTools.AddImageControl(this, i, currentCol);
+                }
+            }
+
+            MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { Width = new GridLength(5, GridUnitType.Pixel) });
+            UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Right, currentCol);
+            for (var i = 0; i < rowAmount; i++)
+                UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Vertical);
+
+            UserInterfaceTools.UpdateControlButtons(MainGrid);
+        }
+
+        /// <summary>
+        /// Add a row on the top of the grid containing the clicked button.
+        /// </summary>
+        /// <param name="sender">The button clicked.</param>
+        /// <param name="routedEventArgs">The routed args.</param>
+        public void AddUpRowButtonOnClick(object sender, RoutedEventArgs routedEventArgs)
+        {
+            var parent = UserInterfaceTools.FindParent((Button)sender);
+            var currentRow = GGrid.GetRow(parent);
+            var colAmount = MainGrid.ColumnDefinitions.Count;
+
+            MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { Height = new GridLength(5, GridUnitType.Pixel) });
+            UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Up, currentRow);
+            for (var i = 0; i < colAmount; i++)
+                UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Horizontal);
+
+            MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { MinHeight = 100, Height = new GridLength(1, GridUnitType.Star) });
+            UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Up, currentRow);
+            for (var i = 0; i < colAmount; i++)
+            {
+                if (i % 2 != 0)
+                    UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Vertical);
+                else
+                {
+                    UserInterfaceTools.AddControlButtons(this, currentRow, i);
+                    UserInterfaceTools.AddImageControl(this, currentRow, i);
+                }
+            }
+
+            UserInterfaceTools.UpdateControlButtons(MainGrid);
+        }
+
+        /// <summary>
+        /// Add a row under the grid containing the clicked button.
+        /// </summary>
+        /// <param name="sender">The button clicked.</param>
+        /// <param name="routedEventArgs">The routed args.</param>
+        public void AddDownRowButtonOnClick(object sender, RoutedEventArgs routedEventArgs)
+        {
+            var parent = UserInterfaceTools.FindParent((Button)sender);
+            var currentRow = GGrid.GetRow(parent) + GGrid.GetRowSpan(parent);
+            var colAmount = MainGrid.ColumnDefinitions.Count;
+
+            MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { MinHeight = 100, Height = new GridLength(1, GridUnitType.Star) });
+            UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Down, currentRow);
+            for (var i = 0; i < colAmount; i++)
+            {
+                if (i % 2 != 0)
+                    UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Vertical);
+                else
+                {
+                    UserInterfaceTools.AddControlButtons(this, currentRow, i);
+                    UserInterfaceTools.AddImageControl(this, currentRow, i);
+                }
+            }
+
+            MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { Height = new GridLength(5, GridUnitType.Pixel) });
+            UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Down, currentRow);
+            for (var i = 0; i < colAmount; i++)
+                UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Horizontal);
+
+            UserInterfaceTools.UpdateControlButtons(MainGrid);
+        }
+
+        #endregion // Add events
+
+        #region Merge events
+
+        /// <summary>
+        /// Merge the cell from left with the current one.
+        /// </summary>
+        /// <param name="sender">The button clicked.</param>
+        /// <param name="mouseButtonEventArgs">The mouse args.</param>
+        public void MergeLeftButtonOnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        {
+            var parent = UserInterfaceTools.FindParent((Image)sender);
+            var currentCol = GGrid.GetColumn(parent);
+            var currentRow = GGrid.GetRow(parent);
+            var currentColSpan = GGrid.GetColumnSpan(parent);
+            var currentRowSpan = GGrid.GetRowSpan(parent);
+
+            var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol - 2, DirectionsEnum.Left);
+            for (var i = 0; i < currentRowSpan; i++)
+                UserInterfaceTools.DeleteContent(MainGrid, currentRow + i, currentCol - 1, DirectionsEnum.Left);
+            UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Left);
+
+            UserInterfaceTools.AddControlButtons(this, currentRow, currentCol - dicSpan["colSpan"] - 1, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
+            UserInterfaceTools.AddImageControl(this, currentRow, currentCol - dicSpan["colSpan"] - 1, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
+            UserInterfaceTools.UpdateControlButtons(MainGrid);
+        }
+
+        /// <summary>
+        /// Merge the cell from right with the current one.
+        /// </summary>
+        /// <param name="sender">The button clicked.</param>
+        /// <param name="mouseButtonEventArgs">The mouse args.</param>
+        public void MergeRightButtonOnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        {
+            var parent = UserInterfaceTools.FindParent((Image)sender);
+            var currentCol = GGrid.GetColumn(parent);
+            var currentRow = GGrid.GetRow(parent);
+            var currentColSpan = GGrid.GetColumnSpan(parent);
+            var currentRowSpan = GGrid.GetRowSpan(parent);
+
+            UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Right);
+            for (var i = 0; i < currentRowSpan; i++)
+                UserInterfaceTools.DeleteContent(MainGrid, currentRow + i, currentCol + currentColSpan, DirectionsEnum.Right);
+            var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol + currentColSpan + 1, DirectionsEnum.Right);
+
+            UserInterfaceTools.AddControlButtons(this, currentRow, currentCol, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
+            UserInterfaceTools.AddImageControl(this, currentRow, currentCol, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
+            UserInterfaceTools.UpdateControlButtons(MainGrid);
+        }
+
+        /// <summary>
+        /// Merge the cell from top with the current one.
+        /// </summary>
+        /// <param name="sender">The button clicked.</param>
+        /// <param name="mouseButtonEventArgs">The mouse args.</param>
+        public void MergeTopButtonOnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        {
+            var parent = UserInterfaceTools.FindParent((Image)sender);
+            var currentCol = GGrid.GetColumn(parent);
+            var currentRow = GGrid.GetRow(parent);
+            var currentRowSpan = GGrid.GetRowSpan(parent);
+            var currentColSpan = GGrid.GetColumnSpan(parent);
+
+            var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow - 2, currentCol, DirectionsEnum.Up);
+            for (var i = 0; i < currentColSpan; i++)
+                UserInterfaceTools.DeleteContent(MainGrid, currentRow - 1, currentCol + i, DirectionsEnum.Up);
+            UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Up);
+
+            UserInterfaceTools.AddControlButtons(this, currentRow - dicSpan["rowSpan"] - 1, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
+            UserInterfaceTools.AddImageControl(this, currentRow - dicSpan["rowSpan"] - 1, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
+            UserInterfaceTools.UpdateControlButtons(MainGrid);
+        }
+
+        /// <summary>
+        /// Merge the cell from under with the current one.
+        /// </summary>
+        /// <param name="sender">The button clicked.</param>
+        /// <param name="mouseButtonEventArgs">The mouse args.</param>
+        public void MergeDownButtonOnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        {
+            var parent = UserInterfaceTools.FindParent((Image)sender);
+            var currentCol = GGrid.GetColumn(parent);
+            var currentRow = GGrid.GetRow(parent);
+            var currentRowSpan = GGrid.GetRowSpan(parent);
+            var currentColSpan = GGrid.GetColumnSpan(parent);
+
+            UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Down);
+            for (var i = 0; i < currentColSpan; i++)
+                UserInterfaceTools.DeleteContent(MainGrid, currentRow + currentRowSpan, currentCol + i, DirectionsEnum.Down);
+            var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow + currentRowSpan + 1, currentCol, DirectionsEnum.Down);
+
+            UserInterfaceTools.AddControlButtons(this, currentRow, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
+            UserInterfaceTools.AddImageControl(this, currentRow, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
+            UserInterfaceTools.UpdateControlButtons(MainGrid);
+        }
+
+        #endregion // Merge events
+
+        #endregion // Setup
+
+        /// <summary>
+        /// Triggered when the drag starts.
+        /// </summary>
+        /// <param name="sender">Don't care.</param>
+        /// <param name="args">Don't know.</param>
+        public void GridSplitterDragStart(object sender, DragStartedEventArgs args)
 	    {
 	        if (!(sender is GridSplitter gridSplitter)) return;
             OriginGridSplitter = gridSplitter.TranslatePoint(new Point(0, 0), MainGrid);
@@ -176,10 +434,28 @@ namespace GridSetter.Views
                 var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
                 var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
                 ScaleTransform scaleTransform;
-                if (renderScaleTransform.ScaleX != 1 || renderScaleTransform.ScaleY != 1)
-                    scaleTransform = renderScaleTransform;
-                else
+                if (grid.ActualHeight <= ((Rect)image.Tag).Height || grid.ActualWidth <= ((Rect)image.Tag).Width)
+                {
+                    if (renderScaleTransform.ScaleX != 1 && renderScaleTransform.ScaleY != 1)
+                    {
+                        layoutScaleTransform.ScaleX = renderScaleTransform.ScaleX;
+                        layoutScaleTransform.ScaleY = renderScaleTransform.ScaleY;
+                        renderScaleTransform.ScaleX = 1;
+                        renderScaleTransform.ScaleY = 1;
+                    }
                     scaleTransform = layoutScaleTransform;
+                }
+                else
+                {
+                    if (layoutScaleTransform.ScaleX != 1 && layoutScaleTransform.ScaleY != 1)
+                    {
+                        renderScaleTransform.ScaleX = layoutScaleTransform.ScaleX;
+                        renderScaleTransform.ScaleY = layoutScaleTransform.ScaleY;
+                        layoutScaleTransform.ScaleX = 1;
+                        layoutScaleTransform.ScaleY = 1;
+                    }
+                    scaleTransform = renderScaleTransform;
+                }
 
                 var imageHeight = Math.Round(image.ActualHeight * scaleTransform.ScaleY, MidpointRounding.AwayFromZero);
                 var imageWidth = Math.Round(image.ActualWidth * scaleTransform.ScaleX, MidpointRounding.AwayFromZero);
@@ -193,23 +469,13 @@ namespace GridSetter.Views
                     UIElement oppositeGridSplitter;
                     if (delta.X != 0)
                     {
-                        int column;
-                        if (GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid))
-                            column = GGrid.GetColumn(grid) - 1;
-                        else
-                            column = GGrid.GetColumn(grid) + 1;
-
+                        var column = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? GGrid.GetColumn(grid) - 1 : GGrid.GetColumn(grid) + 1;
                         oppositeGridSplitter = MainGrid.Children.Cast<UIElement>().FirstOrDefault(e =>
                             GGrid.GetColumn(e) == column && GGrid.GetRow(e) == GGrid.GetRow(gridSplitter) && e is GridSplitter);
                     }
                     else if (delta.Y != 0)
                     {
-                        int row;
-                        if (GGrid.GetRow(gridSplitter) > GGrid.GetRow(grid))
-                            row = GGrid.GetRow(grid) - 1;
-                        else
-                            row = GGrid.GetRow(grid) + 1;
-
+                        var row = GGrid.GetRow(gridSplitter) > GGrid.GetRow(grid) ? GGrid.GetRow(grid) - 1 : GGrid.GetRow(grid) + 1;
                         oppositeGridSplitter = MainGrid.Children.Cast<UIElement>().FirstOrDefault(e =>
                             GGrid.GetRow(e) == row && GGrid.GetColumn(e) == GGrid.GetColumn(gridSplitter) && e is GridSplitter);
                     }
@@ -217,19 +483,13 @@ namespace GridSetter.Views
                         return;
 
                     var posOpposite = oppositeGridSplitter?.TranslatePoint(new Point(0, 0), MainGrid);
-                    Vector value;
-                    if (GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid))
-                        // ReSharper disable once PossibleInvalidOperationException
-                        value = (Vector) (newPos - posOpposite);
-                    else
-                        // ReSharper disable once PossibleInvalidOperationException
-                        value = (Vector) (posOpposite - newPos);
+                    Vector value = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? (Vector)(newPos - posOpposite) : (Vector)(posOpposite - newPos);
 
-                    var scale = (value.X - 5) / image.ActualWidth;
+                    var scale = delta.X != 0 ? (value.X - 5) / image.ActualWidth : (value.Y - 5) / image.ActualHeight;
                     scaleTransform.ScaleX = Math.Round(scale, 2);
                     scaleTransform.ScaleY = Math.Round(scale, 2);
                 }
-                else if (imageHeight < ((Rect) image.Tag).Height && grid.ActualHeight > imageHeight ||
+                else if (imageHeight < ((Rect) image.Tag).Height && grid.ActualHeight > imageHeight || 
                          imageWidth < ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
                 {
                     double scale;
@@ -251,7 +511,7 @@ namespace GridSetter.Views
                         scaleTransform.ScaleY = Math.Round(scale, 2);
                     }
                 }
-                else if (imageHeight > ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight ||
+                else if (imageHeight > ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight ||  
                          imageWidth > ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
                 {
                     scaleTransform.ScaleX = 1;
@@ -259,269 +519,6 @@ namespace GridSetter.Views
                 }
             }
         }
-
-        /// <summary>
-        /// Remove a column on click.
-        /// </summary>
-        /// <param name="sender">The button clicked.</param>
-        /// <param name="e">The routed args.</param>
-        public void SplitButton_OnClick(object sender, RoutedEventArgs e)
-		{
-			var parent = UserInterfaceTools.FindParent((Button)sender);
-			var currentCol = GGrid.GetColumn(parent);
-			var currentRow = GGrid.GetRow(parent);
-			var actualColSpan = GGrid.GetColumnSpan(parent);
-			var actualRowSpan = GGrid.GetRowSpan(parent);
-
-			UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.None);
-			for (var i = 0; i < actualRowSpan; i++)
-			{
-				for (var y = 0; y < actualColSpan; y++)
-				{
-					if (y % 2 != 0)
-						UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Vertical);
-					else if (i % 2 != 0)
-						UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Horizontal);
-					else
-					{
-						UserInterfaceTools.AddControlButtons(this, currentRow + i, currentCol + y);
-						UserInterfaceTools.AddImageControl(this, currentRow + i, currentCol + y);
-					}
-				}
-			}
-
-			UserInterfaceTools.UpdateControlButtons(MainGrid);
-		}
-
-		#region Add events
-
-		/// <summary>
-		/// Add a column on the left of the grid containing the clicked button.
-		/// </summary>
-		/// <param name="sender">The button clicked.</param>
-		/// <param name="routedEventArgs">The routed args.</param>
-		public void AddLeftColButtonOnClick(object sender, RoutedEventArgs routedEventArgs)
-		{
-			var parent = UserInterfaceTools.FindParent((Button)sender);
-			var currentCol = GGrid.GetColumn(parent);
-			var rowAmount = MainGrid.RowDefinitions.Count;
-
-			MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { Width = new GridLength(5, GridUnitType.Pixel) });
-			UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Left, currentCol);
-			for (var i = 0; i < rowAmount; i++)
-				UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Vertical);
-
-			MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { MinWidth = 195, Width = new GridLength(1, GridUnitType.Star) });
-			UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Left, currentCol);
-			for (var i = 0; i < rowAmount; i++)
-			{
-				if (i % 2 != 0)
-					UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Horizontal);
-				else
-				{
-					UserInterfaceTools.AddControlButtons(this, i, currentCol);
-					UserInterfaceTools.AddImageControl(this, i, currentCol);
-				}
-			}
-
-			UserInterfaceTools.UpdateControlButtons(MainGrid);
-		}
-
-		/// <summary>
-		/// Add a column on the right of the grid containing the clicked button.
-		/// </summary>
-		/// <param name="sender">The button clicked.</param>
-		/// <param name="routedEventArgs">The routed args.</param>
-		public void AddRightColButtonOnClick(object sender, RoutedEventArgs routedEventArgs)
-		{
-			var parent = UserInterfaceTools.FindParent((Button)sender);
-			var currentCol = GGrid.GetColumn(parent) + GGrid.GetColumnSpan(parent);
-			var rowAmount = MainGrid.RowDefinitions.Count;
-
-			MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { MinWidth = 195, Width = new GridLength(1, GridUnitType.Star) });
-			UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Right, currentCol);
-			for (var i = 0; i < rowAmount; i++)
-			{
-				if (i % 2 != 0)
-					UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Horizontal);
-				else
-				{
-					UserInterfaceTools.AddControlButtons(this, i, currentCol);
-					UserInterfaceTools.AddImageControl(this, i, currentCol);
-				}
-			}
-
-			MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { Width = new GridLength(5, GridUnitType.Pixel) });
-			UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Right, currentCol);
-			for (var i = 0; i < rowAmount; i++)
-				UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Vertical);
-
-			UserInterfaceTools.UpdateControlButtons(MainGrid);
-		}
-
-		/// <summary>
-		/// Add a row on the top of the grid containing the clicked button.
-		/// </summary>
-		/// <param name="sender">The button clicked.</param>
-		/// <param name="routedEventArgs">The routed args.</param>
-		public void AddUpRowButtonOnClick(object sender, RoutedEventArgs routedEventArgs)
-		{
-			var parent = UserInterfaceTools.FindParent((Button)sender);
-			var currentRow = GGrid.GetRow(parent);
-			var colAmount = MainGrid.ColumnDefinitions.Count;
-
-			MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { Height = new GridLength(5, GridUnitType.Pixel) });
-			UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Up, currentRow);
-			for (var i = 0; i < colAmount; i++)
-				UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Horizontal);
-
-			MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { MinHeight = 100, Height = new GridLength(1, GridUnitType.Star) });
-			UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Up, currentRow);
-			for (var i = 0; i < colAmount; i++)
-			{
-				if (i % 2 != 0)
-					UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Vertical);
-				else
-				{
-					UserInterfaceTools.AddControlButtons(this, currentRow, i);
-					UserInterfaceTools.AddImageControl(this, currentRow, i);
-				}
-			}
-
-			UserInterfaceTools.UpdateControlButtons(MainGrid);
-		}
-
-		/// <summary>
-		/// Add a row under the grid containing the clicked button.
-		/// </summary>
-		/// <param name="sender">The button clicked.</param>
-		/// <param name="routedEventArgs">The routed args.</param>
-		public void AddDownRowButtonOnClick(object sender, RoutedEventArgs routedEventArgs)
-		{
-			var parent = UserInterfaceTools.FindParent((Button)sender);
-			var currentRow = GGrid.GetRow(parent) + GGrid.GetRowSpan(parent);
-			var colAmount = MainGrid.ColumnDefinitions.Count;
-
-			MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { MinHeight = 100, Height = new GridLength(1, GridUnitType.Star) });
-			UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Down, currentRow);
-			for (var i = 0; i < colAmount; i++)
-			{
-				if (i % 2 != 0)
-					UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Vertical);
-				else
-				{
-					UserInterfaceTools.AddControlButtons(this, currentRow, i);
-					UserInterfaceTools.AddImageControl(this, currentRow, i);
-				}
-			}
-
-			MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { Height = new GridLength(5, GridUnitType.Pixel) });
-			UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Down, currentRow);
-			for (var i = 0; i < colAmount; i++)
-				UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Horizontal);
-
-			UserInterfaceTools.UpdateControlButtons(MainGrid);
-		}
-
-		#endregion // Add events
-
-		#region Merge events
-
-		/// <summary>
-		/// Merge the cell from left with the current one.
-		/// </summary>
-		/// <param name="sender">The button clicked.</param>
-		/// <param name="mouseButtonEventArgs">The mouse args.</param>
-		public void MergeLeftButtonOnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
-		{
-			var parent = UserInterfaceTools.FindParent((Image)sender);
-			var currentCol = GGrid.GetColumn(parent);
-			var currentRow = GGrid.GetRow(parent);
-			var currentColSpan = GGrid.GetColumnSpan(parent);
-			var currentRowSpan = GGrid.GetRowSpan(parent);
-
-			var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol - 2, DirectionsEnum.Left);
-			for (var i = 0; i < currentRowSpan; i++)
-				UserInterfaceTools.DeleteContent(MainGrid, currentRow + i, currentCol - 1, DirectionsEnum.Left);
-			UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Left);
-
-			UserInterfaceTools.AddControlButtons(this, currentRow, currentCol - dicSpan["colSpan"] - 1, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
-			UserInterfaceTools.AddImageControl(this, currentRow, currentCol - dicSpan["colSpan"] - 1, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
-			UserInterfaceTools.UpdateControlButtons(MainGrid);
-		}
-
-		/// <summary>
-		/// Merge the cell from right with the current one.
-		/// </summary>
-		/// <param name="sender">The button clicked.</param>
-		/// <param name="mouseButtonEventArgs">The mouse args.</param>
-		public void MergeRightButtonOnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
-		{
-			var parent = UserInterfaceTools.FindParent((Image)sender);
-			var currentCol = GGrid.GetColumn(parent);
-			var currentRow = GGrid.GetRow(parent);
-			var currentColSpan = GGrid.GetColumnSpan(parent);
-			var currentRowSpan = GGrid.GetRowSpan(parent);
-
-			UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Right);
-			for (var i = 0; i < currentRowSpan; i++)
-				UserInterfaceTools.DeleteContent(MainGrid, currentRow + i, currentCol + currentColSpan, DirectionsEnum.Right);
-			var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol + currentColSpan + 1, DirectionsEnum.Right);
-
-			UserInterfaceTools.AddControlButtons(this, currentRow, currentCol, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
-			UserInterfaceTools.AddImageControl(this, currentRow, currentCol, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
-			UserInterfaceTools.UpdateControlButtons(MainGrid);
-		}
-
-		/// <summary>
-		/// Merge the cell from top with the current one.
-		/// </summary>
-		/// <param name="sender">The button clicked.</param>
-		/// <param name="mouseButtonEventArgs">The mouse args.</param>
-		public void MergeTopButtonOnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
-		{
-			var parent = UserInterfaceTools.FindParent((Image)sender);
-			var currentCol = GGrid.GetColumn(parent);
-			var currentRow = GGrid.GetRow(parent);
-			var currentRowSpan = GGrid.GetRowSpan(parent);
-			var currentColSpan = GGrid.GetColumnSpan(parent);
-
-			var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow - 2, currentCol, DirectionsEnum.Up);
-			for (var i = 0; i < currentColSpan; i++)
-				UserInterfaceTools.DeleteContent(MainGrid, currentRow - 1, currentCol + i, DirectionsEnum.Up);
-			UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Up);
-
-			UserInterfaceTools.AddControlButtons(this, currentRow - dicSpan["rowSpan"] - 1, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
-			UserInterfaceTools.AddImageControl(this, currentRow - dicSpan["rowSpan"] - 1, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
-			UserInterfaceTools.UpdateControlButtons(MainGrid);
-		}
-
-		/// <summary>
-		/// Merge the cell from under with the current one.
-		/// </summary>
-		/// <param name="sender">The button clicked.</param>
-		/// <param name="mouseButtonEventArgs">The mouse args.</param>
-		public void MergeDownButtonOnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
-		{
-			var parent = UserInterfaceTools.FindParent((Image)sender);
-			var currentCol = GGrid.GetColumn(parent);
-			var currentRow = GGrid.GetRow(parent);
-			var currentRowSpan = GGrid.GetRowSpan(parent);
-			var currentColSpan = GGrid.GetColumnSpan(parent);
-
-			UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Down);
-			for (var i = 0; i < currentColSpan; i++)
-				UserInterfaceTools.DeleteContent(MainGrid, currentRow + currentRowSpan, currentCol + i, DirectionsEnum.Down);
-			var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow + currentRowSpan + 1, currentCol, DirectionsEnum.Down);
-
-			UserInterfaceTools.AddControlButtons(this, currentRow, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
-			UserInterfaceTools.AddImageControl(this, currentRow, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
-			UserInterfaceTools.UpdateControlButtons(MainGrid);
-		}
-
-        #endregion // Merge events
-
-        #region Media events
 
         #region Image events
 
@@ -615,7 +612,7 @@ namespace GridSetter.Views
 		    var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
 		    var renderScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
 		    ScaleTransform scaleTransform;
-		    if (renderScaleTransform.ScaleX != 0 || renderScaleTransform.ScaleY != 0)
+		    if (renderScaleTransform.ScaleX != 1 || renderScaleTransform.ScaleY != 1)
 		        scaleTransform = renderScaleTransform;
 		    else
 		        scaleTransform = layoutScaleTransform;
@@ -668,7 +665,14 @@ namespace GridSetter.Views
 			    if (image?.Source == null)
 			        return;
 
-			    var scaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
+			    var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
+			    var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+                ScaleTransform scaleTransform;
+			    if (renderScaleTransform.ScaleX != 1 || renderScaleTransform.ScaleY != 1)
+			        scaleTransform = renderScaleTransform;
+			    else
+			        scaleTransform = layoutScaleTransform;
+
                 var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
 			    var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
 			    var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
@@ -766,8 +770,15 @@ namespace GridSetter.Views
 		    var imageGrid = grandParentGrid.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
 		    if (!(imageGrid is Image image)) return;
 
-		    var scaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
-			switch (child.Name)
+	        var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
+            var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+	        ScaleTransform scaleTransform;
+	        if (renderScaleTransform.ScaleX != 1 || renderScaleTransform.ScaleY != 1)
+	            scaleTransform = renderScaleTransform;
+	        else
+	            scaleTransform = layoutScaleTransform;
+
+            switch (child.Name)
 		    {
 				case "takeHeightButton":
 					var scaleHeight = grandParentGrid.ActualHeight / image.ActualHeight;
@@ -802,14 +813,6 @@ namespace GridSetter.Views
         }
 
         #endregion // Image events
-
-        #region Video events
-
-        // EMPTY AS FUCK YOOO
-
-        #endregion // Video events
-
-        #endregion // Media events
 
         #endregion // Events
     }

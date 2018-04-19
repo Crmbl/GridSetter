@@ -529,7 +529,6 @@ namespace GridSetter.Utils
 		/// <param name="isMain">Tells if this is the main grid.</param>
 		public static void RemoveContentFromGrid(Grid grid, bool isMain)
 		{
-			// TODO gérer les vidéo aussi.
 			if (isMain)
 			{
 				foreach (var item in grid.Children.Cast<UIElement>().Where(e => e is Grid && e.Visibility == Visibility.Visible).ToList())
@@ -540,9 +539,15 @@ namespace GridSetter.Utils
 					if (image == null)
 						continue;
 
-                    var scaleTransform = (ScaleTransform)((TransformGroup)((Image)image).RenderTransform).Children.First(tr => tr is ScaleTransform);
-				    scaleTransform.ScaleX = 1;
-				    scaleTransform.ScaleY = 1;
+                    var layoutScaleTransform = (ScaleTransform)((TransformGroup)((Image)image).LayoutTransform).Children.First(tr => tr is ScaleTransform);
+				    var renderScaleTransform = (ScaleTransform)((TransformGroup)((Image)image).RenderTransform).Children.First(tr => tr is ScaleTransform);
+				    var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+                    layoutScaleTransform.ScaleX = 1;
+				    layoutScaleTransform.ScaleY = 1;
+				    renderScaleTransform.ScaleX = 1;
+				    renderScaleTransform.ScaleY = 1;
+				    translateTransform.X = 0;
+				    translateTransform.Y = 0;
                     ((Image)image).Source = null;
                     ((Image)image).Visibility = Visibility.Hidden;
 				}
@@ -568,6 +573,6 @@ namespace GridSetter.Utils
 			}
 		}
 
-		#endregion // Public methods
-	}
+        #endregion // Public methods
+    }
 }
