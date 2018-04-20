@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using GridSetter.Utils;
 using GridSetter.Utils.Enums;
+using WpfAnimatedGif;
 using Button = System.Windows.Controls.Button;
 using Cursors = System.Windows.Input.Cursors;
 using DataFormats = System.Windows.DataFormats;
@@ -485,7 +486,7 @@ namespace GridSetter.Views
                     var posOpposite = oppositeGridSplitter?.TranslatePoint(new Point(0, 0), MainGrid);
                     Vector value = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? (Vector)(newPos - posOpposite) : (Vector)(posOpposite - newPos);
 
-                    var scale = delta.X != 0 ? (value.X - 5) / image.ActualWidth : (value.Y - 5) / image.ActualHeight;
+                    var scale = delta.X != 0 ? (value.X - 5) / image.ActualWidth : (value.Y + 5) / image.ActualHeight;
                     scaleTransform.ScaleX = Math.Round(scale, 2);
                     scaleTransform.ScaleY = Math.Round(scale, 2);
                 }
@@ -551,6 +552,26 @@ namespace GridSetter.Views
 				}
 			}
 		}
+
+        /// <summary>
+        /// Pause or play the gif on double click.
+        /// </summary>
+        /// <param name="sender">Dunno.</param>
+        /// <param name="args">Dontcare.</param>
+	    public void ImageDisplayMouseDown(object sender, MouseButtonEventArgs args)
+	    {
+	        if (!(args.Source is Image image)) return;
+	        if (image.Source == null) return;
+	        if (args.ChangedButton != MouseButton.Left || args.ClickCount != 2) return;
+
+	        var controller = ImageBehavior.GetAnimationController(image);
+            if (controller == null) return;
+
+	        if (controller.IsPaused)
+	            controller.Play();
+	        else
+	            controller.Pause();
+	    }
 
 		/// <summary>
 		/// Defines the image to drag.

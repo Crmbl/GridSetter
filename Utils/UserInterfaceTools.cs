@@ -117,6 +117,7 @@ namespace GridSetter.Utils
 			imageDisplay.MouseLeftButtonUp += window.ImageDisplayOnMouseLeftButtonUp;
 			imageDisplay.MouseMove += window.ImageDisplayOnMouseMove;
             imageDisplay.SizeChanged += window.ImageDisplaySizeChanged;
+		    imageDisplay.MouseDown += window.ImageDisplayMouseDown;
 
             Grid.SetColumn(imageDisplay, 1);
 			Grid.SetRow(imageDisplay, 1);
