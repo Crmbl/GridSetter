@@ -421,122 +421,13 @@ namespace GridSetter.Views
         /// <param name="args">Don't know.</param>
         public void GridSplitterDragEnd(object sender, DragCompletedEventArgs args)
         {
-			#region OLD STUFF
-
-			//        foreach (var child in MainGrid.Children.Cast<UIElement>().Where(e => e is GGrid grid && grid.Name == "imageGrid"))
-			//        {
-			//            if (!(child is GGrid grid)) continue;
-			//            if (!(sender is GridSplitter gridSplitter)) continue;
-			//            if (GGrid.GetRow(gridSplitter) - 1 != GGrid.GetRow(grid) &&
-			//                GGrid.GetRow(gridSplitter) + 1 != GGrid.GetRow(grid) &&
-			//                GGrid.GetColumn(gridSplitter) - 1 != GGrid.GetColumn(grid) &&
-			//                GGrid.GetColumn(gridSplitter) + 1 != GGrid.GetColumn(grid)) continue;
-			//            var imageControl = grid.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
-			//            if (!(imageControl is Image image) || image.Source == null) continue;
-
-			//            var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
-			//            var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
-			//            ScaleTransform scaleTransform;
-			//            if (grid.ActualHeight <= ((Rect)image.Tag).Height || grid.ActualWidth <= ((Rect)image.Tag).Width)
-			//            {
-			//                if (renderScaleTransform.ScaleX != 1 && renderScaleTransform.ScaleY != 1)
-			//                {
-			//                    layoutScaleTransform.ScaleX = renderScaleTransform.ScaleX;
-			//                    layoutScaleTransform.ScaleY = renderScaleTransform.ScaleY;
-			//                    renderScaleTransform.ScaleX = 1;
-			//                    renderScaleTransform.ScaleY = 1;
-			//                }
-			//                scaleTransform = layoutScaleTransform;
-			//            }
-			//            else
-			//            {
-			//                if (layoutScaleTransform.ScaleX != 1 && layoutScaleTransform.ScaleY != 1)
-			//                {
-			//                    renderScaleTransform.ScaleX = layoutScaleTransform.ScaleX;
-			//                    renderScaleTransform.ScaleY = layoutScaleTransform.ScaleY;
-			//                    layoutScaleTransform.ScaleX = 1;
-			//                    layoutScaleTransform.ScaleY = 1;
-			//                }
-			//                scaleTransform = renderScaleTransform;
-			//            }
-
-			//            var imageHeight = Math.Round(image.ActualHeight * scaleTransform.ScaleY, MidpointRounding.AwayFromZero);
-			//            var imageWidth = Math.Round(image.ActualWidth * scaleTransform.ScaleX, MidpointRounding.AwayFromZero);
-			//            var gridHeight = Math.Round(grid.ActualHeight, MidpointRounding.AwayFromZero);
-			//            var gridWidth = Math.Round(grid.ActualWidth, MidpointRounding.AwayFromZero);
-			//            var newPos = gridSplitter.TranslatePoint(new Point(0, 0), MainGrid);
-			//            var delta = newPos - OriginGridSplitter;
-
-			//            if (imageHeight == gridHeight || imageWidth == gridWidth)
-			//            {
-			//                UIElement oppositeGridSplitter;
-			//                if (delta.X != 0)
-			//                {
-			//                    var column = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? GGrid.GetColumn(grid) - 1 : GGrid.GetColumn(grid) + 1;
-			//                    oppositeGridSplitter = MainGrid.Children.Cast<UIElement>().FirstOrDefault(e =>
-			//                        GGrid.GetColumn(e) == column && GGrid.GetRow(e) == GGrid.GetRow(gridSplitter) && e is GridSplitter);
-			//                }
-			//                else if (delta.Y != 0)
-			//                {
-			//                    var row = GGrid.GetRow(gridSplitter) > GGrid.GetRow(grid) ? GGrid.GetRow(grid) - 1 : GGrid.GetRow(grid) + 1;
-			//                    oppositeGridSplitter = MainGrid.Children.Cast<UIElement>().FirstOrDefault(e =>
-			//                        GGrid.GetRow(e) == row && GGrid.GetColumn(e) == GGrid.GetColumn(gridSplitter) && e is GridSplitter);
-			//                }
-			//                else
-			//                    return;
-
-			//                var posOpposite = oppositeGridSplitter?.TranslatePoint(new Point(0, 0), MainGrid);
-			//                Vector value = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? (Vector)(newPos - posOpposite) : (Vector)(posOpposite - newPos);
-
-			//                var scale = delta.X != 0 ? (value.X - 5) / image.ActualWidth : (value.Y + 5) / image.ActualHeight;
-			//                scaleTransform.ScaleX = Math.Round(scale, 2);
-			//                scaleTransform.ScaleY = Math.Round(scale, 2);
-			//            }
-			//            else if (imageHeight < ((Rect) image.Tag).Height && grid.ActualHeight > imageHeight)
-			//            {
-			//                var scale = grid.ActualHeight / image.ActualHeight;
-			//                if (image.ActualHeight * scale > ((Rect) image.Tag).Height)
-			//                {
-			//		// TODO HERE
-			//                    scaleTransform.ScaleX = 1;
-			//                    scaleTransform.ScaleY = 1;
-			//                }
-			//                else
-			//                {
-			//                    scaleTransform.ScaleX = Math.Round(scale, 2);
-			//                    scaleTransform.ScaleY = Math.Round(scale, 2);
-			//                }
-			//            }
-			//else if (imageWidth < ((Rect) image.Tag).Width && grid.ActualWidth > imageWidth)
-			//            {
-			//             var scale = grid.ActualWidth / image.ActualWidth;
-			//             if (image.ActualWidth * scale > ((Rect)image.Tag).Width)
-			//             {
-			//              // TODO HERE
-			//		scaleTransform.ScaleX = 1;
-			//              scaleTransform.ScaleY = 1;
-			//             }
-			//             else
-			//             {
-			//              scaleTransform.ScaleX = Math.Round(scale, 2);
-			//              scaleTransform.ScaleY = Math.Round(scale, 2);
-			//             }
-			//}
-			//            else if (imageHeight > ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight || imageWidth > ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
-			//            {
-			//                scaleTransform.ScaleX = 1;
-			//                scaleTransform.ScaleY = 1;
-			//            }
-			//        }
-
-			#endregion // OLD STUFF
-
 			if (!(sender is GridSplitter gridSplitter)) return;
 
 			Func<UIElement, bool> predicate = e => e is GGrid grid && grid.Name == "imageGrid" &&
 				(GGrid.GetRow(gridSplitter) - 1 == GGrid.GetRow(grid) || GGrid.GetRow(gridSplitter) + 1 == GGrid.GetRow(grid) ||
 				GGrid.GetColumn(gridSplitter) - 1 == GGrid.GetColumn(grid) || GGrid.GetColumn(gridSplitter) + 1 == GGrid.GetColumn(grid));
 			var eligibleGrids = MainGrid.Children.Cast<UIElement>().Where(predicate);
+
 			foreach (var child in eligibleGrids)
 			{
 				var grid = child as GGrid;
@@ -572,7 +463,6 @@ namespace GridSetter.Views
 				}
 
 				#endregion // Def scale transform
-
 				#region Maths rounded values
 
 				var imageHeight = Math.Round(image.ActualHeight * scaleTransform.ScaleY, MidpointRounding.AwayFromZero);
@@ -584,80 +474,85 @@ namespace GridSetter.Views
 
 				#endregion // Maths rounded values
 
-				if (imageHeight == gridHeight || imageWidth == gridWidth)
+				//* WIDTH MODIFICATION
+				if (gridSplitter.Width == 5)
 				{
-					UIElement oppositeGridSplitter;
-					bool isWidthMove;
-					if (delta.X != 0)
+					//* Grid width is equal to the image width
+					if (imageWidth == gridWidth)
 					{
 						var column = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? GGrid.GetColumn(grid) - 1 : GGrid.GetColumn(grid) + 1;
-						oppositeGridSplitter = MainGrid.Children.Cast<UIElement>().FirstOrDefault(e =>
+						UIElement oppositeGridSplitter = MainGrid.Children.Cast<UIElement>().FirstOrDefault(e =>
 							GGrid.GetColumn(e) == column && GGrid.GetRow(e) == GGrid.GetRow(gridSplitter) && e is GridSplitter);
 
-						isWidthMove = true;
+						var posOpposite = oppositeGridSplitter?.TranslatePoint(new Point(0, 0), MainGrid);
+						Vector value = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? (Vector)(newPos - posOpposite) : (Vector)(posOpposite - newPos);
+
+						var scale = Math.Round((value.X - 5) / image.ActualWidth, 2);
+						scaleTransform.ScaleX = scale;
+						scaleTransform.ScaleY = scale;
 					}
-					else if (delta.Y != 0)
+					//* Grid width smaller than image original width and bigger than image actual width
+					else if (imageWidth < ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
+					{
+						var scale = grid.ActualWidth / image.ActualWidth;
+						if (image.ActualWidth * scale > ((Rect)image.Tag).Width)
+						{
+							// TODO if OriginHeight > OriginWidth && GridHeight == ImageHeight, return
+							if (((Rect)image.Tag).Height > ((Rect)image.Tag).Width && imageHeight == gridHeight) return;
+							scaleTransform.ScaleX = 1;
+							scaleTransform.ScaleY = 1;
+						}
+						else
+						{
+							scaleTransform.ScaleX = Math.Round(scale, 2);
+							scaleTransform.ScaleY = Math.Round(scale, 2);
+						}
+					}
+				}
+				//* HEIGHT MODIFICATION
+				else if (gridSplitter.Height == 5)
+				{
+					//* Grid height is equal to the image height
+					if (imageHeight == gridHeight)
 					{
 						var row = GGrid.GetRow(gridSplitter) > GGrid.GetRow(grid) ? GGrid.GetRow(grid) - 1 : GGrid.GetRow(grid) + 1;
-						oppositeGridSplitter = MainGrid.Children.Cast<UIElement>().FirstOrDefault(e =>
+						UIElement oppositeGridSplitter = MainGrid.Children.Cast<UIElement>().FirstOrDefault(e =>
 							GGrid.GetRow(e) == row && GGrid.GetColumn(e) == GGrid.GetColumn(gridSplitter) && e is GridSplitter);
 
-						isWidthMove = false;
+						var posOpposite = oppositeGridSplitter?.TranslatePoint(new Point(0, 0), MainGrid);
+						Vector value = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? (Vector)(newPos - posOpposite) : (Vector)(posOpposite - newPos);
+
+						var scale = Math.Round((value.Y + 5) / image.ActualHeight, 2);
+						scaleTransform.ScaleX = scale;
+						scaleTransform.ScaleY = scale;
 					}
-					else
-						return;
-
-					var posOpposite = oppositeGridSplitter?.TranslatePoint(new Point(0, 0), MainGrid);
-					Vector value = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? (Vector)(newPos - posOpposite) : (Vector)(posOpposite - newPos);
-
-					// if ()
-					// {
-
-					// }
-
-					var scale = isWidthMove ? (value.X - 5) / image.ActualWidth : (value.Y + 5) / image.ActualHeight;
-					scaleTransform.ScaleX = Math.Round(scale, 2);
-					scaleTransform.ScaleY = Math.Round(scale, 2);
+					//* Grid height smaller than image original height and bigger than image actual height
+					else if (imageHeight < ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight)
+					{
+						var scale = grid.ActualHeight / image.ActualHeight;
+						if (image.ActualHeight * scale > ((Rect)image.Tag).Height)
+						{
+							// TODO if OriginWidth > OriginHeight && GridWidth == ImageWidth, return
+							if (((Rect)image.Tag).Width > ((Rect)image.Tag).Height && imageWidth == gridWidth) return;
+							scaleTransform.ScaleX = 1;
+							scaleTransform.ScaleY = 1;
+						}
+						else
+						{
+							scaleTransform.ScaleX = Math.Round(scale, 2);
+							scaleTransform.ScaleY = Math.Round(scale, 2);
+						}
+					}
 				}
 
-
-
-				else if (imageHeight < ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight)
+				//* Grid size is over image original size AND image actual size
+				if (imageHeight >= ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight && imageWidth >= ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
 				{
-					var scale = grid.ActualHeight / image.ActualHeight;
-					if (image.ActualHeight * scale > ((Rect)image.Tag).Height)
+					if (scaleTransform.ScaleX <= 1 && scaleTransform.ScaleY <= 1)
 					{
-						// TODO HERE
 						scaleTransform.ScaleX = 1;
 						scaleTransform.ScaleY = 1;
 					}
-					else
-					{
-						scaleTransform.ScaleX = Math.Round(scale, 2);
-						scaleTransform.ScaleY = Math.Round(scale, 2);
-					}
-				}
-				else if (imageWidth < ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
-				{
-					var scale = grid.ActualWidth / image.ActualWidth;
-					if (image.ActualWidth * scale > ((Rect)image.Tag).Width)
-					{
-						// TODO HERE
-						scaleTransform.ScaleX = 1;
-						scaleTransform.ScaleY = 1;
-					}
-					else
-					{
-						scaleTransform.ScaleX = Math.Round(scale, 2);
-						scaleTransform.ScaleY = Math.Round(scale, 2);
-					}
-				}
-
-				
-				else if (imageHeight > ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight && imageWidth > ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
-				{
-					scaleTransform.ScaleX = 1;
-					scaleTransform.ScaleY = 1;
 				}
 			}
 		}
