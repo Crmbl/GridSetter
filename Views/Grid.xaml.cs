@@ -487,14 +487,15 @@ namespace GridSetter.Views
 						var posOpposite = oppositeGridSplitter?.TranslatePoint(new Point(0, 0), MainGrid);
 						Vector value = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? (Vector)(newPos - posOpposite) : (Vector)(posOpposite - newPos);
 
-						var scale = Math.Round((value.X - 5) / image.ActualWidth, 2);
+						//var scale = Math.Round((value.X - 5) / image.ActualWidth, 2);
+						var scale = Math.Round((value.X - 5), 2) / Math.Round(image.ActualWidth, 2); //! PROBLEME D'ARRONDI !!!!!!!!!!!
 						scaleTransform.ScaleX = scale;
 						scaleTransform.ScaleY = scale;
 					}
 					//* Grid width smaller than image original width and bigger than image actual width
 					else if (imageWidth < ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
 					{
-						var scale = grid.ActualWidth / image.ActualWidth;
+						var scale = Math.Round(grid.ActualWidth / image.ActualWidth, 2);
 						if (image.ActualWidth * scale > ((Rect)image.Tag).Width)
 						{
 							// TODO if OriginHeight > OriginWidth && GridHeight == ImageHeight, return
@@ -529,10 +530,9 @@ namespace GridSetter.Views
 					//* Grid height smaller than image original height and bigger than image actual height
 					else if (imageHeight < ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight)
 					{
-						var scale = grid.ActualHeight / image.ActualHeight;
+						var scale = Math.Round(grid.ActualHeight / image.ActualHeight, 2);
 						if (image.ActualHeight * scale > ((Rect)image.Tag).Height)
 						{
-							// TODO if OriginWidth > OriginHeight && GridWidth == ImageWidth, return
 							if (((Rect)image.Tag).Width > ((Rect)image.Tag).Height && imageWidth == gridWidth) return;
 							scaleTransform.ScaleX = 1;
 							scaleTransform.ScaleY = 1;
