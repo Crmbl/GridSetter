@@ -459,22 +459,24 @@ namespace GridSetter.Views
 						layoutScaleTransform.ScaleX = 1;
 						layoutScaleTransform.ScaleY = 1;
 					}
+
+					//! WHEN DOES THIS HAPPEN YO ?
 					scaleTransform = renderScaleTransform;
 				}
 
 				#endregion // Def scale transform
 				#region Maths rounded values
 
-				var imageHeight = Math.Round(image.ActualHeight * scaleTransform.ScaleY, MidpointRounding.AwayFromZero);
-				var imageWidth = Math.Round(image.ActualWidth * scaleTransform.ScaleX, MidpointRounding.AwayFromZero);
-				var gridHeight = Math.Round(grid.ActualHeight, MidpointRounding.AwayFromZero);
-				var gridWidth = Math.Round(grid.ActualWidth, MidpointRounding.AwayFromZero);
+				var imageHeight = Math.Round(image.ActualHeight * scaleTransform.ScaleY, 2);
+				var imageWidth = Math.Round(image.ActualWidth * scaleTransform.ScaleX, 2);
+				var gridHeight = Math.Round(grid.ActualHeight, 2);
+				var gridWidth = Math.Round(grid.ActualWidth, 2);
 				var newPos = gridSplitter.TranslatePoint(new Point(0, 0), MainGrid);
 				var delta = newPos - OriginGridSplitter;
 
 				#endregion // Maths rounded values
 
-				//* WIDTH MODIFICATION
+				var isNotValid = false;
 				if (gridSplitter.Width == 5)
 				{
 					//* Grid width is equal to the image width
@@ -487,31 +489,25 @@ namespace GridSetter.Views
 						var posOpposite = oppositeGridSplitter?.TranslatePoint(new Point(0, 0), MainGrid);
 						Vector value = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? (Vector)(newPos - posOpposite) : (Vector)(posOpposite - newPos);
 
-						//var scale = Math.Round((value.X - 5) / image.ActualWidth, 2);
-						var scale = Math.Round((value.X - 5), 2) / Math.Round(image.ActualWidth, 2); //! PROBLEME D'ARRONDI !!!!!!!!!!!
+						var scale = Math.Round((value.X - 5) / image.ActualWidth, 2);
 						scaleTransform.ScaleX = scale;
 						scaleTransform.ScaleY = scale;
 					}
 					//* Grid width smaller than image original width and bigger than image actual width
 					else if (imageWidth < ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
 					{
+						if (((Rect)image.Tag).Height > ((Rect)image.Tag).Width && imageHeight == gridHeight) isNotValid = true;
+						if (imageHeight == gridHeight) isNotValid = true;
+
 						var scale = Math.Round(grid.ActualWidth / image.ActualWidth, 2);
-						if (image.ActualWidth * scale > ((Rect)image.Tag).Width)
-						{
-							// TODO if OriginHeight > OriginWidth && GridHeight == ImageHeight, return
-							if (((Rect)image.Tag).Height > ((Rect)image.Tag).Width && imageHeight == gridHeight) return;
-							scaleTransform.ScaleX = 1;
-							scaleTransform.ScaleY = 1;
-						}
-						else
+						if (!isNotValid && image.ActualWidth * scale < ((Rect)image.Tag).Width)
 						{
 							scaleTransform.ScaleX = Math.Round(scale, 2);
 							scaleTransform.ScaleY = Math.Round(scale, 2);
 						}
 					}
 				}
-				//* HEIGHT MODIFICATION
-				else if (gridSplitter.Height == 5)
+				else if (gridSplitter.Height == 5) //* HEIGHT MODIFICATION
 				{
 					//* Grid height is equal to the image height
 					if (imageHeight == gridHeight)
@@ -530,14 +526,11 @@ namespace GridSetter.Views
 					//* Grid height smaller than image original height and bigger than image actual height
 					else if (imageHeight < ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight)
 					{
+						if (((Rect)image.Tag).Width > ((Rect)image.Tag).Height && imageWidth == gridWidth) isNotValid = true;
+						if (imageWidth == gridWidth) isNotValid = true;
+
 						var scale = Math.Round(grid.ActualHeight / image.ActualHeight, 2);
-						if (image.ActualHeight * scale > ((Rect)image.Tag).Height)
-						{
-							if (((Rect)image.Tag).Width > ((Rect)image.Tag).Height && imageWidth == gridWidth) return;
-							scaleTransform.ScaleX = 1;
-							scaleTransform.ScaleY = 1;
-						}
-						else
+						if (!isNotValid && image.ActualHeight * scale < ((Rect)image.Tag).Height)
 						{
 							scaleTransform.ScaleX = Math.Round(scale, 2);
 							scaleTransform.ScaleY = Math.Round(scale, 2);
@@ -545,15 +538,20 @@ namespace GridSetter.Views
 					}
 				}
 
+				// TODO HERE
+				//! PROBLEM with the way I process it, need to rework that, sometimes does not go in any if
+				//? Force center everytime
+
 				//* Grid size is over image original size AND image actual size
-				if (imageHeight >= ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight && imageWidth >= ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
-				{
-					if (scaleTransform.ScaleX <= 1 && scaleTransform.ScaleY <= 1)
-					{
-						scaleTransform.ScaleX = 1;
-						scaleTransform.ScaleY = 1;
-					}
-				}
+				// if (imageHeight >= ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight 
+				// 	&& imageWidth >= ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
+				// {
+				// 	if (scaleTransform.ScaleX <= 1 && scaleTransform.ScaleY <= 1)
+				// 	{
+				// 		scaleTransform.ScaleX = 1;
+				// 		scaleTransform.ScaleY = 1;
+				// 	}
+				// }
 			}
 		}
 
