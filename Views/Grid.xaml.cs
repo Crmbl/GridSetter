@@ -90,11 +90,6 @@ namespace GridSetter.Views
         /// </summary>
         public bool IsLocked { get; set; }
 
-        /// <summary>
-        /// Defines the position before drag start.
-        /// </summary>
-        private Point OriginGridSplitter { get; set; }
-
         #region Static
 
         /// <summary>
@@ -138,6 +133,18 @@ namespace GridSetter.Views
 
         #region Events
 
+	    /// <summary>
+	    /// Toggle lock on shortcut press (ctrl + a).
+	    /// </summary>
+	    /// <param name="sender">Who cares yo ?</param>
+	    /// <param name="e">Same.</param>
+	    private void ShortcutToggleLock(object sender, ExecutedRoutedEventArgs e)
+	    {
+	        // TODO : won't update the LOCK/UNLOCK button label.
+	        IsLocked = !IsLocked;
+	        UserInterfaceTools.ToggleLockControlButtons(MainGrid, IsLocked);
+	    }
+
         #region Setup
 
         /// <summary>
@@ -159,9 +166,9 @@ namespace GridSetter.Views
                 for (var y = 0; y < actualColSpan; y++)
                 {
                     if (y % 2 != 0)
-                        UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Vertical);
+                        UserInterfaceTools.AddGridSplitter(MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Vertical);
                     else if (i % 2 != 0)
-                        UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Horizontal);
+                        UserInterfaceTools.AddGridSplitter(MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Horizontal);
                     else
                     {
                         UserInterfaceTools.AddControlButtons(this, currentRow + i, currentCol + y);
@@ -180,7 +187,7 @@ namespace GridSetter.Views
         /// </summary>
         /// <param name="sender">The button clicked.</param>
         /// <param name="routedEventArgs">The routed args.</param>
-        public void AddLeftColButtonOnClick(object sender, RoutedEventArgs routedEventArgs)
+        public void AddLeftColButton_OnClick(object sender, RoutedEventArgs routedEventArgs)
         {
             var parent = UserInterfaceTools.FindParent((Button)sender);
             var currentCol = GGrid.GetColumn(parent);
@@ -189,14 +196,14 @@ namespace GridSetter.Views
             MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { Width = new GridLength(5, GridUnitType.Pixel) });
             UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Left, currentCol);
             for (var i = 0; i < rowAmount; i++)
-                UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Vertical);
+                UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Vertical);
 
             MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { MinWidth = 195, Width = new GridLength(1, GridUnitType.Star) });
             UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Left, currentCol);
             for (var i = 0; i < rowAmount; i++)
             {
                 if (i % 2 != 0)
-                    UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Horizontal);
+                    UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Horizontal);
                 else
                 {
                     UserInterfaceTools.AddControlButtons(this, i, currentCol);
@@ -212,7 +219,7 @@ namespace GridSetter.Views
         /// </summary>
         /// <param name="sender">The button clicked.</param>
         /// <param name="routedEventArgs">The routed args.</param>
-        public void AddRightColButtonOnClick(object sender, RoutedEventArgs routedEventArgs)
+        public void AddRightColButton_OnClick(object sender, RoutedEventArgs routedEventArgs)
         {
             var parent = UserInterfaceTools.FindParent((Button)sender);
             var currentCol = GGrid.GetColumn(parent) + GGrid.GetColumnSpan(parent);
@@ -223,7 +230,7 @@ namespace GridSetter.Views
             for (var i = 0; i < rowAmount; i++)
             {
                 if (i % 2 != 0)
-                    UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Horizontal);
+                    UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Horizontal);
                 else
                 {
                     UserInterfaceTools.AddControlButtons(this, i, currentCol);
@@ -234,7 +241,7 @@ namespace GridSetter.Views
             MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { Width = new GridLength(5, GridUnitType.Pixel) });
             UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Right, currentCol);
             for (var i = 0; i < rowAmount; i++)
-                UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Vertical);
+                UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Vertical);
 
             UserInterfaceTools.UpdateControlButtons(MainGrid);
         }
@@ -244,7 +251,7 @@ namespace GridSetter.Views
         /// </summary>
         /// <param name="sender">The button clicked.</param>
         /// <param name="routedEventArgs">The routed args.</param>
-        public void AddUpRowButtonOnClick(object sender, RoutedEventArgs routedEventArgs)
+        public void AddUpRowButton_OnClick(object sender, RoutedEventArgs routedEventArgs)
         {
             var parent = UserInterfaceTools.FindParent((Button)sender);
             var currentRow = GGrid.GetRow(parent);
@@ -253,14 +260,14 @@ namespace GridSetter.Views
             MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { Height = new GridLength(5, GridUnitType.Pixel) });
             UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Up, currentRow);
             for (var i = 0; i < colAmount; i++)
-                UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Horizontal);
+                UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Horizontal);
 
             MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { MinHeight = 100, Height = new GridLength(1, GridUnitType.Star) });
             UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Up, currentRow);
             for (var i = 0; i < colAmount; i++)
             {
                 if (i % 2 != 0)
-                    UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Vertical);
+                    UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Vertical);
                 else
                 {
                     UserInterfaceTools.AddControlButtons(this, currentRow, i);
@@ -276,7 +283,7 @@ namespace GridSetter.Views
         /// </summary>
         /// <param name="sender">The button clicked.</param>
         /// <param name="routedEventArgs">The routed args.</param>
-        public void AddDownRowButtonOnClick(object sender, RoutedEventArgs routedEventArgs)
+        public void AddDownRowButton_OnClick(object sender, RoutedEventArgs routedEventArgs)
         {
             var parent = UserInterfaceTools.FindParent((Button)sender);
             var currentRow = GGrid.GetRow(parent) + GGrid.GetRowSpan(parent);
@@ -287,7 +294,7 @@ namespace GridSetter.Views
             for (var i = 0; i < colAmount; i++)
             {
                 if (i % 2 != 0)
-                    UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Vertical);
+                    UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Vertical);
                 else
                 {
                     UserInterfaceTools.AddControlButtons(this, currentRow, i);
@@ -298,7 +305,7 @@ namespace GridSetter.Views
             MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { Height = new GridLength(5, GridUnitType.Pixel) });
             UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Down, currentRow);
             for (var i = 0; i < colAmount; i++)
-                UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Horizontal);
+                UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Horizontal);
 
             UserInterfaceTools.UpdateControlButtons(MainGrid);
         }
@@ -312,7 +319,7 @@ namespace GridSetter.Views
         /// </summary>
         /// <param name="sender">The button clicked.</param>
         /// <param name="mouseButtonEventArgs">The mouse args.</param>
-        public void MergeLeftButtonOnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        public void MergeLeftButton_OnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
             var parent = UserInterfaceTools.FindParent((Image)sender);
             var currentCol = GGrid.GetColumn(parent);
@@ -335,7 +342,7 @@ namespace GridSetter.Views
         /// </summary>
         /// <param name="sender">The button clicked.</param>
         /// <param name="mouseButtonEventArgs">The mouse args.</param>
-        public void MergeRightButtonOnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        public void MergeRightButton_OnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
             var parent = UserInterfaceTools.FindParent((Image)sender);
             var currentCol = GGrid.GetColumn(parent);
@@ -358,7 +365,7 @@ namespace GridSetter.Views
         /// </summary>
         /// <param name="sender">The button clicked.</param>
         /// <param name="mouseButtonEventArgs">The mouse args.</param>
-        public void MergeTopButtonOnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        public void MergeTopButton_OnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
             var parent = UserInterfaceTools.FindParent((Image)sender);
             var currentCol = GGrid.GetColumn(parent);
@@ -381,7 +388,7 @@ namespace GridSetter.Views
         /// </summary>
         /// <param name="sender">The button clicked.</param>
         /// <param name="mouseButtonEventArgs">The mouse args.</param>
-        public void MergeDownButtonOnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        public void MergeDownButton_OnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
             var parent = UserInterfaceTools.FindParent((Image)sender);
             var currentCol = GGrid.GetColumn(parent);
@@ -403,158 +410,6 @@ namespace GridSetter.Views
 
         #endregion // Setup
 
-        /// <summary>
-        /// Triggered when the drag starts.
-        /// </summary>
-        /// <param name="sender">Don't care.</param>
-        /// <param name="args">Don't know.</param>
-        public void GridSplitterDragStart(object sender, DragStartedEventArgs args)
-	    {
-	        if (!(sender is GridSplitter gridSplitter)) return;
-            OriginGridSplitter = gridSplitter.TranslatePoint(new Point(0, 0), MainGrid);
-		}
-
-	    /// <summary>
-        /// Triggered when the drag ends.
-        /// </summary>
-        /// <param name="sender">Don't care.</param>
-        /// <param name="args">Don't know.</param>
-        public void GridSplitterDragEnd(object sender, DragCompletedEventArgs args)
-        {
-			if (!(sender is GridSplitter gridSplitter)) return;
-
-			Func<UIElement, bool> predicate = e => e is GGrid grid && grid.Name == "imageGrid" &&
-				(GGrid.GetRow(gridSplitter) - 1 == GGrid.GetRow(grid) || GGrid.GetRow(gridSplitter) + 1 == GGrid.GetRow(grid) ||
-				GGrid.GetColumn(gridSplitter) - 1 == GGrid.GetColumn(grid) || GGrid.GetColumn(gridSplitter) + 1 == GGrid.GetColumn(grid));
-			var eligibleGrids = MainGrid.Children.Cast<UIElement>().Where(predicate);
-
-			foreach (var child in eligibleGrids)
-			{
-				var grid = child as GGrid;
-				var imageControl = grid.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
-				if (!(imageControl is Image image) || image.Source == null) continue;
-
-				#region Def scale transform
-
-				var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
-				var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
-				ScaleTransform scaleTransform;
-				if (grid.ActualHeight <= ((Rect)image.Tag).Height || grid.ActualWidth <= ((Rect)image.Tag).Width)
-				{
-					if (renderScaleTransform.ScaleX != 1 && renderScaleTransform.ScaleY != 1)
-					{
-						layoutScaleTransform.ScaleX = renderScaleTransform.ScaleX;
-						layoutScaleTransform.ScaleY = renderScaleTransform.ScaleY;
-						renderScaleTransform.ScaleX = 1;
-						renderScaleTransform.ScaleY = 1;
-					}
-					scaleTransform = layoutScaleTransform;
-				}
-				else
-				{
-					if (layoutScaleTransform.ScaleX != 1 && layoutScaleTransform.ScaleY != 1)
-					{
-						renderScaleTransform.ScaleX = layoutScaleTransform.ScaleX;
-						renderScaleTransform.ScaleY = layoutScaleTransform.ScaleY;
-						layoutScaleTransform.ScaleX = 1;
-						layoutScaleTransform.ScaleY = 1;
-					}
-
-					//! WHEN DOES THIS HAPPEN YO ?
-					scaleTransform = renderScaleTransform;
-				}
-
-				#endregion // Def scale transform
-				#region Maths rounded values
-
-				var imageHeight = Math.Round(image.ActualHeight * scaleTransform.ScaleY, 2);
-				var imageWidth = Math.Round(image.ActualWidth * scaleTransform.ScaleX, 2);
-				var gridHeight = Math.Round(grid.ActualHeight, 2);
-				var gridWidth = Math.Round(grid.ActualWidth, 2);
-				var newPos = gridSplitter.TranslatePoint(new Point(0, 0), MainGrid);
-				var delta = newPos - OriginGridSplitter;
-
-				#endregion // Maths rounded values
-
-				var isNotValid = false;
-				if (gridSplitter.Width == 5)
-				{
-					//* Grid width is equal to the image width
-					if (imageWidth == gridWidth)
-					{
-						var column = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? GGrid.GetColumn(grid) - 1 : GGrid.GetColumn(grid) + 1;
-						UIElement oppositeGridSplitter = MainGrid.Children.Cast<UIElement>().FirstOrDefault(e =>
-							GGrid.GetColumn(e) == column && GGrid.GetRow(e) == GGrid.GetRow(gridSplitter) && e is GridSplitter);
-
-						var posOpposite = oppositeGridSplitter?.TranslatePoint(new Point(0, 0), MainGrid);
-						Vector value = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? (Vector)(newPos - posOpposite) : (Vector)(posOpposite - newPos);
-
-						var scale = Math.Round((value.X - 5) / image.ActualWidth, 2);
-						scaleTransform.ScaleX = scale;
-						scaleTransform.ScaleY = scale;
-					}
-					//* Grid width smaller than image original width and bigger than image actual width
-					else if (imageWidth < ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
-					{
-						if (((Rect)image.Tag).Height > ((Rect)image.Tag).Width && imageHeight == gridHeight) isNotValid = true;
-						if (imageHeight == gridHeight) isNotValid = true;
-
-						var scale = Math.Round(grid.ActualWidth / image.ActualWidth, 2);
-						if (!isNotValid && image.ActualWidth * scale < ((Rect)image.Tag).Width)
-						{
-							scaleTransform.ScaleX = Math.Round(scale, 2);
-							scaleTransform.ScaleY = Math.Round(scale, 2);
-						}
-					}
-				}
-				else if (gridSplitter.Height == 5) //* HEIGHT MODIFICATION
-				{
-					//* Grid height is equal to the image height
-					if (imageHeight == gridHeight)
-					{
-						var row = GGrid.GetRow(gridSplitter) > GGrid.GetRow(grid) ? GGrid.GetRow(grid) - 1 : GGrid.GetRow(grid) + 1;
-						UIElement oppositeGridSplitter = MainGrid.Children.Cast<UIElement>().FirstOrDefault(e =>
-							GGrid.GetRow(e) == row && GGrid.GetColumn(e) == GGrid.GetColumn(gridSplitter) && e is GridSplitter);
-
-						var posOpposite = oppositeGridSplitter?.TranslatePoint(new Point(0, 0), MainGrid);
-						Vector value = GGrid.GetColumn(gridSplitter) > GGrid.GetColumn(grid) ? (Vector)(newPos - posOpposite) : (Vector)(posOpposite - newPos);
-
-						var scale = Math.Round((value.Y + 5) / image.ActualHeight, 2);
-						scaleTransform.ScaleX = scale;
-						scaleTransform.ScaleY = scale;
-					}
-					//* Grid height smaller than image original height and bigger than image actual height
-					else if (imageHeight < ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight)
-					{
-						if (((Rect)image.Tag).Width > ((Rect)image.Tag).Height && imageWidth == gridWidth) isNotValid = true;
-						if (imageWidth == gridWidth) isNotValid = true;
-
-						var scale = Math.Round(grid.ActualHeight / image.ActualHeight, 2);
-						if (!isNotValid && image.ActualHeight * scale < ((Rect)image.Tag).Height)
-						{
-							scaleTransform.ScaleX = Math.Round(scale, 2);
-							scaleTransform.ScaleY = Math.Round(scale, 2);
-						}
-					}
-				}
-
-				// TODO HERE
-				//! PROBLEM with the way I process it, need to rework that, sometimes does not go in any if
-				//? Force center everytime
-
-				//* Grid size is over image original size AND image actual size
-				// if (imageHeight >= ((Rect)image.Tag).Height && grid.ActualHeight > imageHeight 
-				// 	&& imageWidth >= ((Rect)image.Tag).Width && grid.ActualWidth > imageWidth)
-				// {
-				// 	if (scaleTransform.ScaleX <= 1 && scaleTransform.ScaleY <= 1)
-				// 	{
-				// 		scaleTransform.ScaleX = 1;
-				// 		scaleTransform.ScaleY = 1;
-				// 	}
-				// }
-			}
-		}
-
         #region Image events
 
         /// <summary>
@@ -562,7 +417,7 @@ namespace GridSetter.Views
         /// </summary>
         /// <param name="sender">The grid impacted, I hope.</param>
         /// <param name="dragEventArgs">Explicit.</param>
-        public void ImageGridOnDrop(object sender, DragEventArgs dragEventArgs)
+        public void ImageCanvas_OnDrop(object sender, DragEventArgs dragEventArgs)
 		{
 			if (dragEventArgs.Data.GetDataPresent(DataFormats.FileDrop))
 				MediaControlTools.ImageDrop(sender, dragEventArgs);
@@ -573,18 +428,11 @@ namespace GridSetter.Views
 		/// </summary>
 		/// <param name="sender">The image hopefully.</param>
 		/// <param name="mouseWheelEventArgs">The mouse wheel events.</param>
-		public void ImageDisplayOnMouseWheel(object sender, MouseWheelEventArgs mouseWheelEventArgs)
+		public void ImageCanvas_OnMouseWheel(object sender, MouseWheelEventArgs mouseWheelEventArgs)
 		{
-			if (sender is Image image)
-				MediaControlTools.ImageZoom(image, mouseWheelEventArgs);
-			else
-			{
-				if (sender is GGrid grid)
-				{
-					image = grid.Children.Cast<Image>().FirstOrDefault(i => i.Name.Equals("image"));
-					MediaControlTools.ImageZoom(image, mouseWheelEventArgs);
-				}
-			}
+		    if (!(sender is Canvas canvas)) return;
+			var image = canvas.Children.Cast<Image>().FirstOrDefault(i => i.Name.Equals("Image"));
+			MediaControlTools.ImageZoom(image, mouseWheelEventArgs);
 		}
 
         /// <summary>
@@ -592,7 +440,7 @@ namespace GridSetter.Views
         /// </summary>
         /// <param name="sender">Dunno.</param>
         /// <param name="args">Dontcare.</param>
-	    public void ImageDisplayMouseDown(object sender, MouseButtonEventArgs args)
+	    public void Image_MouseDown(object sender, MouseButtonEventArgs args)
 	    {
 	        if (!(args.Source is Image image)) return;
 	        if (image.Source == null) return;
@@ -612,24 +460,22 @@ namespace GridSetter.Views
 		/// </summary>
 		/// <param name="sender">The image dragged.</param>
 		/// <param name="e">Events.</param>
-		public void ImageDisplayOnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		public void Image_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 		{
-			if (!(e.Source is Image image))
-				return;
+			if (!(e.Source is Image image)) return;
+		    if (!(UserInterfaceTools.FindParent(image) is Canvas canvas)) return;
 
-			var grid = UserInterfaceTools.FindParent(image);
-		    var scaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
+		    var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
             var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
 			var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
 
-			if (imageWidth <= grid.ActualWidth && imageHeight <= grid.ActualHeight)
-				return;
+			if (imageWidth <= canvas.ActualWidth && imageHeight <= canvas.ActualHeight) return;
 
 			image.Cursor = Cursors.SizeAll;
 			image.CaptureMouse();
 
 			var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-			MousePosition = e.GetPosition(grid);
+			MousePosition = e.GetPosition(canvas);
 			OriginPosition = new Point(Math.Round(translateTransform.X, MidpointRounding.AwayFromZero),
 				Math.Round(translateTransform.Y, MidpointRounding.AwayFromZero));
 
@@ -642,14 +488,12 @@ namespace GridSetter.Views
 		/// </summary>
 		/// <param name="sender">The image dragged.</param>
 		/// <param name="e">Events.</param>
-		public void ImageDisplayOnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+		public void Image_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
 		{
-			if (!(e.Source is Image image))
-				return;
+			if (!(e.Source is Image image)) return;
 
 			image.ReleaseMouseCapture();
 			image.Cursor = Cursors.Arrow;
-
 		    SystemParametersInfo(SPI_SETMOUSESPEED, 0, OriginMouseSpeed, 0);
         }
 
@@ -658,123 +502,111 @@ namespace GridSetter.Views
 		/// </summary>
 		/// <param name="sender">The image dragged.</param>
 		/// <param name="e">Events.</param>
-		public void ImageDisplayOnMouseMove(object sender, MouseEventArgs e)
+		public void Image_OnMouseMove(object sender, MouseEventArgs e)
 		{
-			if (!(e.Source is Image image) || !image.IsMouseCaptured)
-				return;
+			if (!(e.Source is Image image) || !image.IsMouseCaptured) return;
+		    if (!(UserInterfaceTools.FindParent(image) is Canvas canvas)) return;
 
-			var grid = UserInterfaceTools.FindParent(image);
-		    var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
-		    var renderScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
-		    ScaleTransform scaleTransform;
-		    if (renderScaleTransform.ScaleX != 1 || renderScaleTransform.ScaleY != 1)
-		        scaleTransform = renderScaleTransform;
-		    else
-		        scaleTransform = layoutScaleTransform;
-
+		    var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
 		    var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
 		    var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
 
-            Point relativePoint = image.TransformToAncestor(grid).Transform(new Point(0, 0));
-			var mathRelativeY = Math.Round(relativePoint.Y, MidpointRounding.AwayFromZero);
-			var mathRelativeX = Math.Round(relativePoint.X, MidpointRounding.AwayFromZero);
-			var mathMouseY = Math.Round(MousePosition.Y, MidpointRounding.AwayFromZero);
-			var mathMouseX = Math.Round(MousePosition.X, MidpointRounding.AwayFromZero);
+		    Point relativePoint = image.TransformToAncestor(canvas).Transform(new Point(0, 0));
+		    var mathRelativeY = Math.Round(relativePoint.Y, MidpointRounding.AwayFromZero);
+		    var mathRelativeX = Math.Round(relativePoint.X, MidpointRounding.AwayFromZero);
+		    var mathMouseY = Math.Round(MousePosition.Y, MidpointRounding.AwayFromZero);
+		    var mathMouseX = Math.Round(MousePosition.X, MidpointRounding.AwayFromZero);
 
-			Vector vector = new Vector { X = 0, Y = 0 };
-			if (imageHeight >= grid.ActualHeight)
-			{
-				var vectorY = Math.Round(e.GetPosition(grid).Y, MidpointRounding.AwayFromZero) - mathMouseY;
-			    if (mathRelativeY <= 0 && mathRelativeY + vectorY <= 0 && vectorY > 0 ||
-			        mathRelativeY + imageHeight >= grid.ActualHeight && mathRelativeY + imageHeight + vectorY >= grid.ActualHeight && vectorY < 0)
-                    vector.Y = vectorY;
-            }
-            if (imageWidth >= grid.ActualWidth)
-			{
-				var vectorX = Math.Round(e.GetPosition(grid).X, MidpointRounding.AwayFromZero) - mathMouseX;
-			    if (mathRelativeX <= 0 && mathRelativeX + vectorX <= 0 && vectorX > 0 ||
-			        mathRelativeX + imageWidth >= grid.ActualWidth && mathRelativeX + imageWidth + vectorX >= grid.ActualWidth && vectorX < 0)
-			        vector.X = vectorX;
-			}
+		    Vector vector = new Vector { X = 0, Y = 0 };
+		    if (imageHeight >= canvas.ActualHeight)
+		    {
+		        var vectorY = Math.Round(e.GetPosition(canvas).Y, MidpointRounding.AwayFromZero) - mathMouseY;
+		        if (mathRelativeY <= 0 && mathRelativeY + vectorY <= 0 && vectorY > 0 ||
+		            mathRelativeY + imageHeight >= canvas.ActualHeight && mathRelativeY + imageHeight + vectorY >= canvas.ActualHeight && vectorY < 0)
+		            vector.Y = vectorY;
+		    }
+		    if (imageWidth >= canvas.ActualWidth)
+		    {
+		        var vectorX = Math.Round(e.GetPosition(canvas).X, MidpointRounding.AwayFromZero) - mathMouseX;
+		        if (mathRelativeX <= 0 && mathRelativeX + vectorX <= 0 && vectorX > 0 ||
+		            mathRelativeX + imageWidth >= canvas.ActualWidth && mathRelativeX + imageWidth + vectorX >= canvas.ActualWidth && vectorX < 0)
+		            vector.X = vectorX;
+		    }
 
-			var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-			translateTransform.X = OriginPosition.X + vector.X;
-			translateTransform.Y = OriginPosition.Y + vector.Y;
+		    var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+		    translateTransform.X = OriginPosition.X + vector.X;
+		    translateTransform.Y = OriginPosition.Y + vector.Y;
 
-			MousePosition = e.GetPosition(grid);
-			OriginPosition = new Point(Math.Round(translateTransform.X, MidpointRounding.AwayFromZero),
-				Math.Round(translateTransform.Y, MidpointRounding.AwayFromZero));
-		}
+		    MousePosition = e.GetPosition(canvas);
+		    OriginPosition = new Point(Math.Round(translateTransform.X, MidpointRounding.AwayFromZero),
+		        Math.Round(translateTransform.Y, MidpointRounding.AwayFromZero));
+        }
 
 		/// <summary>
 		/// Prevent the image grid to be resized when the image size change.
 		/// </summary>
 		/// <param name="sender">The image grid.</param>
 		/// <param name="args">Events.</param>
-		public void ImageGridSizeChanged(object sender, SizeChangedEventArgs args)
+		public void ImageCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
 		{
-			if (sender is GGrid grid)
-			{
-			    var child = grid.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
-			    var image = child as Image;
-			    if (image?.Source == null)
-			        return;
+		    if (!(sender is Canvas canvas)) return;
+		    var child = canvas.Children.Cast<UIElement>().FirstOrDefault(u => u is Image);
+		    if (!(child is Image image)) return;
 
-			    var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
-			    var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
-                ScaleTransform scaleTransform;
-			    if (renderScaleTransform.ScaleX != 1 || renderScaleTransform.ScaleY != 1)
-			        scaleTransform = renderScaleTransform;
-			    else
-			        scaleTransform = layoutScaleTransform;
+		    var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+		    var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+		    var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
+		    var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
+		    var relativePoint = image.TranslatePoint(new Point(0, 0), canvas);
 
-                var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
-			    var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
-			    var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-			    var relativePoint = image.TranslatePoint(new Point(0, 0), grid);
-			    var mathRelativePositionY = Math.Round(args.NewSize.Height - args.PreviousSize.Height, MidpointRounding.AwayFromZero);
-			    var mathRelativePositionX = Math.Round(args.NewSize.Width - args.PreviousSize.Width, MidpointRounding.AwayFromZero);
-			    var mathTranslateY = Math.Round(translateTransform.Y, MidpointRounding.AwayFromZero);
-			    var mathTranslateX = Math.Round(translateTransform.X, MidpointRounding.AwayFromZero);
+		    var previousHeight = Math.Round(e.PreviousSize.Height, 2);
+		    var previousWidth = Math.Round(e.PreviousSize.Width, 2);
+		    var newHeight = Math.Round(e.NewSize.Height, 2);
+		    var newWidth = Math.Round(e.NewSize.Width, 2);
 
-                if (imageHeight < grid.ActualHeight)
-			        translateTransform.Y = 0;
-			    else if (relativePoint.Y > 0)
-			        translateTransform.Y = mathTranslateY - mathRelativePositionY;
-			    else if (relativePoint.Y + imageHeight < grid.ActualHeight)
-			        translateTransform.Y = mathTranslateY + mathRelativePositionY;
+		    if (e.NewSize.Height > e.PreviousSize.Height)
+		    {
+		        if (imageHeight < canvas.ActualHeight)
+		            translateTransform.Y = 0;
+		        else if (imageHeight >= canvas.ActualHeight)
+		        {
+		            if (relativePoint.Y > 0)
+		                translateTransform.Y -= Math.Round(newHeight - previousHeight, 2);
+		            else if (relativePoint.Y + imageHeight < canvas.ActualHeight)
+		                translateTransform.Y += Math.Round(newHeight - previousHeight, 2);
+		        }
+		    }
 
-			    if (imageWidth < grid.ActualWidth)
-			        translateTransform.X = 0;
-			    else if (relativePoint.X > 0)
-			        translateTransform.X = mathTranslateX - mathRelativePositionX;
-			    else if (relativePoint.X + imageWidth < grid.ActualWidth)
-			        translateTransform.X = mathTranslateX + mathRelativePositionX;
-
-			    var tmp = grid.Children.Cast<UIElement>().FirstOrDefault(e => e is GGrid);
-			    if (!(tmp is GGrid controlImage)) return;
-			    var relativePointControl = controlImage.TranslatePoint(new Point(0, 0), grid);
-			    var translateTransformGrid = (TranslateTransform)((TransformGroup)controlImage.RenderTransform).Children.First(tr => tr is TranslateTransform);
-			    translateTransformGrid.Y -= relativePointControl.Y;
-            }
-		}
+		    if (e.NewSize.Width > e.PreviousSize.Width)
+		    {
+		        if (imageWidth < canvas.ActualWidth)
+		            translateTransform.X = 0;
+		        else if (imageWidth >= canvas.ActualWidth)
+		        {
+		            if (relativePoint.X > 0)
+		                translateTransform.X -= Math.Round(newWidth - previousWidth, 2);
+		            else if (relativePoint.X + imageWidth < canvas.ActualWidth)
+		                translateTransform.X += Math.Round(newWidth - previousWidth, 2);
+		        }
+		    }
+        }
 
         /// <summary>
         /// Force replace the image control buttons.
         /// </summary>
         /// <param name="sender">Fuuu.</param>
         /// <param name="args">Whatever.</param>
-	    public void ImageDisplaySizeChanged(object sender, SizeChangedEventArgs args)
+	    public void Image_SizeChanged(object sender, SizeChangedEventArgs args)
 	    {
-	        if (!(sender is Image image)) return;
+	        //if (!(sender is Image image)) return;
 
-	        var grid = UserInterfaceTools.FindParent(image);
-	        var tmp = grid.Children.Cast<UIElement>().FirstOrDefault(e => e is GGrid);
-	        if (!(tmp is GGrid controlImage)) return;
+	        //var grid = UserInterfaceTools.FindParent(image);
+	        //var tmp = grid.Children.Cast<UIElement>().FirstOrDefault(e => e is GGrid);
+	        //if (!(tmp is GGrid controlImage)) return;
 
-	        var relativePointControl = controlImage.TranslatePoint(new Point(0, 0), grid);
-	        var translateTransformGrid = (TranslateTransform)((TransformGroup)controlImage.RenderTransform).Children.First(tr => tr is TranslateTransform);
-	        translateTransformGrid.Y -= relativePointControl.Y;
+	        //var relativePointControl = controlImage.TranslatePoint(new Point(0, 0), grid);
+	        //var translateTransformGrid = (TranslateTransform)((TransformGroup)controlImage.RenderTransform).Children.First(tr => tr is TranslateTransform);
+	        //translateTransformGrid.Y -= relativePointControl.Y;
 	    }
 
         /// <summary>
@@ -782,18 +614,18 @@ namespace GridSetter.Views
         /// </summary>
         /// <param name="sender">The image control buttons grid.</param>
         /// <param name="args">Who cares?</param>
-        public void ImageControlGridMouseEnter(object sender, MouseEventArgs args)
+        public void ImageButtons_OnMouseEnter(object sender, MouseEventArgs args)
 	    {
 	        if (!(sender is GGrid grid)) return;
-	        if (grid.Name != "imageControlGrid") return;
+	        if (grid.Name != "ImageButtons") return;
+	        if (!(UserInterfaceTools.FindParent(grid) is Canvas parent)) return;
 
-	        var parent = UserInterfaceTools.FindParent(grid);
 	        var image = parent.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
 	        if ((image as Image)?.Source == null) return;
 
-            foreach (var button in grid.Children)
-                if (button is Button)
-                    ((Button)button).Visibility = Visibility.Visible;
+            foreach (var child in grid.Children)
+                if (child is Button button)
+                    button.Visibility = Visibility.Visible;
         }
 
 	    /// <summary>
@@ -801,70 +633,57 @@ namespace GridSetter.Views
         /// </summary>
         /// <param name="sender">The grid where the buttons are.</param>
         /// <param name="args">Who cares?</param>
-	    public void ImageControlGridMouseLeave(object sender, MouseEventArgs args)
+	    public void ImageButtons_OnMouseLeave(object sender, MouseEventArgs args)
 	    {
 	        if (!(sender is GGrid grid)) return;
-	        if (grid.Name != "imageControlGrid") return;
+	        if (grid.Name != "ImageButtons") return;
 
-            foreach (var button in grid.Children)
-                if (button is Button)
-                    ((Button)button).Visibility = Visibility.Hidden;
+            foreach (var child in grid.Children)
+                if (child is Button button)
+                    button.Visibility = Visibility.Hidden;
         }
 
         /// <summary>
-        /// Enlarge the image to make it take the full width of the parent grid.
+        /// Update the size of the image on the click of a button.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
-	    public void ImageControlButtonClick(object sender, RoutedEventArgs args)
+	    public void ImageControl_OnClick(object sender, RoutedEventArgs args)
 	    {
-			if (!(sender is Button child)) return;
+            //if (!(sender is Button child)) return;
 
-		    var parentGrid = UserInterfaceTools.FindParent(child);
-		    var grandParentGrid = UserInterfaceTools.FindParent(parentGrid);
-		    var imageGrid = grandParentGrid.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
-		    if (!(imageGrid is Image image)) return;
+            //   var parentGrid = UserInterfaceTools.FindParent(child);
+            //   var grandParentGrid = UserInterfaceTools.FindParent(parentGrid);
+            //   var imageGrid = grandParentGrid.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
+            //   if (!(imageGrid is Image image)) return;
 
-	        var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
-            var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
-	        ScaleTransform scaleTransform;
-	        if (renderScaleTransform.ScaleX != 1 || renderScaleTransform.ScaleY != 1)
-	            scaleTransform = renderScaleTransform;
-	        else
-	            scaleTransform = layoutScaleTransform;
+            //         var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+            //      ScaleTransform scaleTransform;
+            //      if (renderScaleTransform.ScaleX != 1 || renderScaleTransform.ScaleY != 1)
+            //          scaleTransform = renderScaleTransform;
+            //      else
+            //          scaleTransform = layoutScaleTransform;
 
-            switch (child.Name)
-		    {
-				case "takeHeightButton":
-					var scaleHeight = grandParentGrid.ActualHeight / image.ActualHeight;
-					MediaControlTools.ForceZoom(image, scaleHeight, scaleTransform.ScaleY);
-					break;
+            //         switch (child.Name)
+            //   {
+            //	case "TakeHeightButton":
+            //		var scaleHeight = grandParentGrid.ActualHeight / image.ActualHeight;
+            //		MediaControlTools.ForceZoom(image, scaleHeight, scaleTransform.ScaleY);
+            //		break;
 
-				case "takeWidthButton":
-					var scaleWidth = grandParentGrid.ActualWidth / image.ActualWidth;
-					MediaControlTools.ForceZoom(image, scaleWidth, scaleTransform.ScaleX);
-					break;
+            //	case "TakeWidthButton":
+            //		var scaleWidth = grandParentGrid.ActualWidth / image.ActualWidth;
+	        //		MediaControlTools.ForceZoom(image, scaleWidth, scaleTransform.ScaleX);
+	        //		break;
 
-				case "resizeButton":
-					var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-					scaleTransform.ScaleY = 1;
-					scaleTransform.ScaleX = 1;
-					translateTransform.X = 0;
-					translateTransform.Y = 0;
-					break;
-		    }
-		}
-
-        /// <summary>
-        /// Toggle lock on shortcut press (ctrl + a).
-        /// </summary>
-        /// <param name="sender">Who cares yo ?</param>
-        /// <param name="e">Same.</param>
-	    private void ShortcutToggleLock(object sender, ExecutedRoutedEventArgs e)
-        {
-            // TODO : won't update the LOCK/UNLOCK button label.
-            IsLocked = !IsLocked;
-            UserInterfaceTools.ToggleLockControlButtons(MainGrid, IsLocked);
+	        //	case "ResizeButton":
+            //		var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+            //		scaleTransform.ScaleY = 1;
+            //		scaleTransform.ScaleX = 1;
+            //		translateTransform.X = 0;
+            //		translateTransform.Y = 0;
+            //		break;
+            //   }
         }
 
         #endregion // Image events

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using GridSetter.Controls;
+using GridSetter.Utils.Converters;
 using GridSetter.Utils.Enums;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
@@ -27,12 +29,11 @@ namespace GridSetter.Utils
 		/// <summary>
 		/// Add the gridSplitter between to grids.
 		/// </summary>
-		/// <param name="window">Defines the binding.</param>
 		/// <param name="grid">Defines the grid to attach to button into.</param>
 		/// <param name="rowId">The row where the gridSplitter will be created.</param>
 		/// <param name="colId">The column where the gridSplitter will be created.</param>
 		/// <param name="direction">The direction for the gridSplitter.</param>
-		public static void AddGridSplitter(Views.Grid window, Grid grid, int rowId, int colId, DirectionsEnum direction)
+		public static void AddGridSplitter(Grid grid, int rowId, int colId, DirectionsEnum direction)
 		{
 			GridSplitter gridSplitter;
 			if (direction == DirectionsEnum.Vertical)
@@ -56,9 +57,6 @@ namespace GridSetter.Utils
 					DragIncrement = 0.1
 				};
 
-			gridSplitter.DragStarted += window.GridSplitterDragStart;
-			gridSplitter.DragCompleted += window.GridSplitterDragEnd;
-
 			Grid.SetColumn(gridSplitter, colId);
 			Grid.SetRow(gridSplitter, rowId);
 			Panel.SetZIndex(gridSplitter, 1000);
@@ -75,61 +73,74 @@ namespace GridSetter.Utils
 		/// <param name="rowSpan">Defines the rowSpan.</param>
 		public static void AddImageControl(Views.Grid window, int rowId = 0, int colId = 0, int colSpan = 1, int rowSpan = 1)
 		{
-			Grid imageGrid = new Grid
-			{
-				Name = "imageGrid",
+			Canvas canvas = new Canvas
+            {
+				Name = "ImageCanvas",
 				Visibility = Visibility.Collapsed,
 				AllowDrop = true,
                 ClipToBounds = true,
-				ShowGridLines = true,
                 Background = new SolidColorBrush(Colors.Transparent)
 			};
-			imageGrid.Drop += window.ImageGridOnDrop;
-			imageGrid.MouseWheel += window.ImageDisplayOnMouseWheel;
-			imageGrid.SizeChanged += window.ImageGridSizeChanged;
+		    canvas.Drop += window.ImageCanvas_OnDrop;
+		    canvas.MouseWheel += window.ImageCanvas_OnMouseWheel;
+		    canvas.SizeChanged += window.ImageCanvas_SizeChanged;
 
-		    imageGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            imageGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
-		    imageGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-		    imageGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            imageGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
-		    imageGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-
-            Image imageDisplay = new Image
+            Image image = new Image
 			{
-				Name = "image",
-                ClipToBounds = true
+				Name = "Image",
+                ClipToBounds = true,
+                RenderTransformOrigin = new Point(0.5, 0.5)
 			};
 
-		    var layoutTransformGroup = new TransformGroup();
-			var scaleTransform = new ScaleTransform();
-		    layoutTransformGroup.Children.Add(scaleTransform);
 		    var renderTransformGroup = new TransformGroup();
             var transflateTransform = new TranslateTransform();
-		    var renderScaleTransform = new ScaleTransform();
+		    var scaleTransform = new ScaleTransform();
             renderTransformGroup.Children.Add(transflateTransform);
-		    renderTransformGroup.Children.Add(renderScaleTransform);
+		    renderTransformGroup.Children.Add(scaleTransform);
 
-            imageDisplay.LayoutTransform = layoutTransformGroup;
-			imageDisplay.RenderTransform = renderTransformGroup;
-			imageDisplay.MouseLeftButtonDown += window.ImageDisplayOnMouseLeftButtonDown;
-			imageDisplay.MouseLeftButtonUp += window.ImageDisplayOnMouseLeftButtonUp;
-			imageDisplay.MouseMove += window.ImageDisplayOnMouseMove;
-            imageDisplay.SizeChanged += window.ImageDisplaySizeChanged;
-		    imageDisplay.MouseDown += window.ImageDisplayMouseDown;
+		    image.SetBinding(Canvas.TopProperty, new MultiBinding
+		    {
+		        Converter = new CenterConverter(),
+		        ConverterParameter = "top",
+		        Mode = BindingMode.TwoWay,
+		        Bindings = {
+		            new Binding("ActualWidth") { Source = canvas },
+		            new Binding("ActualHeight") { Source = canvas },
+		            new Binding("ActualWidth") { Source = image },
+		            new Binding("ActualHeight") { Source = image }
+		        }
+		    });
+            image.SetBinding(Canvas.LeftProperty, new MultiBinding
+            {
+                Converter = new CenterConverter(),
+                ConverterParameter = "left",
+                Mode = BindingMode.TwoWay,
+                Bindings = {
+                    new Binding("ActualWidth") { Source = canvas },
+                    new Binding("ActualHeight") { Source = canvas },
+                    new Binding("ActualWidth") { Source = image },
+                    new Binding("ActualHeight") { Source = image }
+                }
+            });
 
-            Grid.SetColumn(imageDisplay, 1);
-			Grid.SetRow(imageDisplay, 1);
-			imageGrid.Children.Add(imageDisplay);
-			Grid.SetColumn(imageGrid, colId);
-			Grid.SetRow(imageGrid, rowId);
-			Grid.SetColumnSpan(imageGrid, colSpan);
-			Grid.SetRowSpan(imageGrid, rowSpan);
-			Panel.SetZIndex(imageGrid, 10);
-			window.MainGrid.Children.Add(imageGrid);
+            image.RenderTransform = renderTransformGroup;
+		    image.MouseLeftButtonDown += window.Image_OnMouseLeftButtonDown;
+		    image.MouseLeftButtonUp += window.Image_OnMouseLeftButtonUp;
+		    image.MouseMove += window.Image_OnMouseMove;
+		    image.MouseDown += window.Image_MouseDown;
+            image.SizeChanged += window.Image_SizeChanged;
 
-			AddImageControlButtons(window, imageGrid, rowSpan, colSpan);
+            Grid.SetColumn(image, 1);
+			Grid.SetRow(image, 1);
+			canvas.Children.Add(image);
+			Grid.SetColumn(canvas, colId);
+			Grid.SetRow(canvas, rowId);
+			Grid.SetColumnSpan(canvas, colSpan);
+			Grid.SetRowSpan(canvas, rowSpan);
+			Panel.SetZIndex(canvas, 10);
+			window.MainGrid.Children.Add(canvas);
+
+			AddImageControlButtons(window, canvas, rowSpan, colSpan);
 		}
 
 		/// <summary>
@@ -139,18 +150,18 @@ namespace GridSetter.Utils
 		/// <param name="grid">The grid to add the buttons into.</param>
 		/// <param name="rowSpan">Defines the rowspan of the parent.</param>
 		/// <param name="colSpan">Defines the colspan of the parent.</param>
-		private static void AddImageControlButtons(Views.Grid window, Grid grid, int rowSpan = 1, int colSpan = 1)
+		private static void AddImageControlButtons(Views.Grid window, Canvas canvas, int rowSpan = 1, int colSpan = 1)
 		{
 			Grid controlGrid = new Grid
 			{
-                Name = "imageControlGrid",
+                Name = "ImageButtons",
 				Background = new SolidColorBrush(Colors.Transparent),
                 ClipToBounds = true,
 				MaxWidth = 195,
                 VerticalAlignment = VerticalAlignment.Top
 			};
-		    controlGrid.MouseEnter += window.ImageControlGridMouseEnter;
-		    controlGrid.MouseLeave += window.ImageControlGridMouseLeave;
+		    controlGrid.MouseEnter += window.ImageButtons_OnMouseEnter;
+		    controlGrid.MouseLeave += window.ImageButtons_OnMouseLeave;
 
             controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 			controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
@@ -167,29 +178,29 @@ namespace GridSetter.Utils
             Button takeWidthButton = new Button
             {
                 Style = Application.Current.Resources["ButtonImageBase"] as Style,
-                Name = "takeWidthButton",
+                Name = "TakeWidthButton",
                 Visibility = Visibility.Hidden,
                 Tag = Application.Current.Resources["EnlargeWidthImage"] as BitmapImage
             };
-		    takeWidthButton.Click += window.ImageControlButtonClick;
+		    takeWidthButton.Click += window.ImageControl_OnClick;
 
             Button takeHeightButton = new Button
 		    {
 		        Style = Application.Current.Resources["ButtonImageBase"] as Style,
-                Name = "takeHeightButton",
+                Name = "TakeHeightButton",
 		        Visibility = Visibility.Hidden,
                 Tag = Application.Current.Resources["EnlargeHeightImage"] as BitmapImage
             };
-		    takeHeightButton.Click += window.ImageControlButtonClick;
+		    takeHeightButton.Click += window.ImageControl_OnClick;
 
 		    Button resizeButton = new Button
 		    {
 		        Style = Application.Current.Resources["ButtonImageBase"] as Style,
-                Name = "resizeButton",
+                Name = "ResizeButton",
 		        Visibility = Visibility.Hidden,
                 Tag = Application.Current.Resources["ResizeImage"] as BitmapImage
             };
-		    resizeButton.Click += window.ImageControlButtonClick;
+		    resizeButton.Click += window.ImageControl_OnClick;
 
             Grid.SetColumn(takeHeightButton, 1);
 			Grid.SetRow(takeHeightButton, 0);
@@ -200,13 +211,25 @@ namespace GridSetter.Utils
 		    controlGrid.Children.Add(takeHeightButton);
 		    controlGrid.Children.Add(takeWidthButton);
 		    controlGrid.Children.Add(resizeButton);
+		    controlGrid.SetBinding(Canvas.LeftProperty, new MultiBinding
+		    {
+		        Converter = new CenterConverter(),
+		        ConverterParameter = "left",
+		        Mode = BindingMode.TwoWay,
+		        Bindings = {
+		            new Binding("ActualWidth") { Source = canvas },
+		            new Binding("ActualHeight") { Source = canvas },
+		            new Binding("ActualWidth") { Source = controlGrid },
+		            new Binding("ActualHeight") { Source = controlGrid }
+		        }
+		    });
 
-            Grid.SetColumn(controlGrid, 1);
-			Grid.SetRow(controlGrid, 1);
-			Grid.SetColumnSpan(controlGrid, colSpan);
-			Grid.SetRowSpan(controlGrid, rowSpan);
+		    Grid.SetColumn(controlGrid, 1);
+		    Grid.SetRow(controlGrid, 1);
+		    Grid.SetColumnSpan(controlGrid, colSpan);
+		    Grid.SetRowSpan(controlGrid, rowSpan);
 
-            grid.Children.Add(controlGrid);
+		    canvas.Children.Add(controlGrid);
         }
 
         /// <summary>
@@ -219,22 +242,22 @@ namespace GridSetter.Utils
         /// <param name="rowSpan">Defines the rowSpan.</param>
         public static void AddControlButtons(Views.Grid window, int rowId = 0, int colId = 0, int colSpan = 1, int rowSpan = 1)
 		{
-			Grid insideGrid = new Grid
+			Grid controlGrid = new Grid
 			{
-				Name = "insideGrid",
+				Name = "SetupGrid",
 				Background = new SolidColorBrush(Colors.Transparent)
 			};
 
 			var splitButton = new Button { Style = Application.Current.Resources["RoundButtonStyle"] as Style, Content = "Split", Name = "splitButton" };
 			splitButton.Click += window.SplitButton_OnClick;
 			var addUpRowButton = new Button { Style = Application.Current.Resources["NoStyleButton"] as Style, Content = "Top" };
-			addUpRowButton.Click += window.AddUpRowButtonOnClick;
+			addUpRowButton.Click += window.AddUpRowButton_OnClick;
 			var addRightColButton = new Button { Style = Application.Current.Resources["NoStyleButton"] as Style, Content = "Right" };
-			addRightColButton.Click += window.AddRightColButtonOnClick;
+			addRightColButton.Click += window.AddRightColButton_OnClick;
 			var addDownRowButton = new Button { Style = Application.Current.Resources["NoStyleButton"] as Style, Content = "Down" };
-			addDownRowButton.Click += window.AddDownRowButtonOnClick;
+			addDownRowButton.Click += window.AddDownRowButton_OnClick;
 			var addLeftColButton = new Button { Style = Application.Current.Resources["NoStyleButton"] as Style, Content = "Left" };
-			addLeftColButton.Click += window.AddLeftColButtonOnClick;
+			addLeftColButton.Click += window.AddLeftColButton_OnClick;
 			var radialPanel = new RadialPanel { Style = Application.Current.Resources["RadialStyle"] as Style };
 
 			radialPanel.Children.Add(addUpRowButton);
@@ -243,32 +266,32 @@ namespace GridSetter.Utils
 			radialPanel.Children.Add(addLeftColButton);
 
 			var mergeTopButton = new Image { Style = Application.Current.Resources["MergeButtonStyle"] as Style, Name = "mergeTopButton", Visibility = Visibility.Collapsed};
-			mergeTopButton.MouseLeftButtonUp += window.MergeTopButtonOnClick;
+			mergeTopButton.MouseLeftButtonUp += window.MergeTopButton_OnClick;
 			var mergeDownButton = new Image { Style = Application.Current.Resources["MergeButtonStyle"] as Style, Name = "mergeDownButton", Visibility = Visibility.Collapsed };
-			mergeDownButton.MouseLeftButtonUp += window.MergeDownButtonOnClick;
+			mergeDownButton.MouseLeftButtonUp += window.MergeDownButton_OnClick;
 			var mergeLeftButton = new Image { Style = Application.Current.Resources["MergeButtonStyle"] as Style, Name = "mergeLeftButton", Visibility = Visibility.Collapsed };
-			mergeLeftButton.MouseLeftButtonUp += window.MergeLeftButtonOnClick;
+			mergeLeftButton.MouseLeftButtonUp += window.MergeLeftButton_OnClick;
 			var mergeRightButton = new Image { Style = Application.Current.Resources["MergeButtonStyle"] as Style, Name = "mergeRightButton", Visibility = Visibility.Collapsed };
-			mergeRightButton.MouseLeftButtonUp += window.MergeRightButtonOnClick;
+			mergeRightButton.MouseLeftButtonUp += window.MergeRightButton_OnClick;
 
-			insideGrid.Children.Add(splitButton);
-			insideGrid.Children.Add(radialPanel);
-			insideGrid.Children.Add(mergeTopButton);
-			insideGrid.Children.Add(mergeDownButton);
-			insideGrid.Children.Add(mergeLeftButton);
-			insideGrid.Children.Add(mergeRightButton);
+		    controlGrid.Children.Add(splitButton);
+		    controlGrid.Children.Add(radialPanel);
+		    controlGrid.Children.Add(mergeTopButton);
+		    controlGrid.Children.Add(mergeDownButton);
+		    controlGrid.Children.Add(mergeLeftButton);
+		    controlGrid.Children.Add(mergeRightButton);
 
-			insideGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
-			insideGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-			insideGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
-			insideGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-			insideGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+		    controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+		    controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+		    controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+		    controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+		    controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
 
-			insideGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
-			insideGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-			insideGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
-			insideGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-			insideGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+		    controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+		    controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+		    controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+		    controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+		    controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
 
 			Grid.SetColumn(splitButton, 2);
 			Grid.SetRow(splitButton, 2);
@@ -285,12 +308,12 @@ namespace GridSetter.Utils
 			Grid.SetColumn(mergeRightButton, 4);
 			Grid.SetRow(mergeRightButton, 2);
 
-			Grid.SetColumn(insideGrid, colId);
-			Grid.SetRow(insideGrid, rowId);
-			Grid.SetColumnSpan(insideGrid, colSpan);
-			Grid.SetRowSpan(insideGrid, rowSpan);
-			Panel.SetZIndex(insideGrid, 100);
-			window.MainGrid.Children.Add(insideGrid);
+			Grid.SetColumn(controlGrid, colId);
+			Grid.SetRow(controlGrid, rowId);
+			Grid.SetColumnSpan(controlGrid, colSpan);
+			Grid.SetRowSpan(controlGrid, rowSpan);
+			Panel.SetZIndex(controlGrid, 100);
+			window.MainGrid.Children.Add(controlGrid);
 		}
 
 		#endregion // Controls
@@ -299,12 +322,10 @@ namespace GridSetter.Utils
 		/// Helps to resolve the parent for a given child.
 		/// </summary>
 		/// <param name="child">The parent to return.</param>
-		public static Grid FindParent(DependencyObject child)
+		public static UIElement FindParent(DependencyObject child)
 		{
 			var result = VisualTreeHelper.GetParent(child);
-			if (result is RadialPanel)
-				return FindParent(result);
-			return result as Grid;
+			return result is RadialPanel ? FindParent(result) : result as UIElement;
 		}
 
 		/// <summary>
@@ -376,7 +397,7 @@ namespace GridSetter.Utils
 				var rowSpan = 0;
 				foreach (var c in cellsToDelete)
 				{
-					if (c is Grid grid && grid.Name.Equals("insideGrid"))
+					if (c is Grid grid && grid.Name.Equals("SetupGrid"))
 					{
 						colSpan = Grid.GetColumnSpan(c);
 						rowSpan = Grid.GetRowSpan(c);
@@ -473,20 +494,19 @@ namespace GridSetter.Utils
 		/// <param name="isLocked">Defines the mode.</param>
 		public static void ToggleLockControlButtons(Grid mainGrid, bool isLocked)
 		{
-			var gridList = mainGrid.Children.Cast<UIElement>().Where(e => e is Grid).ToList();
-			foreach (var uiElement in gridList)
+			var elementList = mainGrid.Children.Cast<UIElement>().Where(e => e is Grid || e is Canvas).ToList();
+			foreach (var uiElement in elementList)
 			{
-				var grid = (Grid)uiElement;
-			    if (grid.Name == "imageGrid")
+			    if (uiElement is Canvas canvas && canvas.Name == "ImageCanvas")
 			    {
-			        var imageControl = grid.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
+			        var imageControl = canvas.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
 			        if (imageControl is Image image && image.Source != null)
-			            grid.Opacity = grid.Opacity < 1 ? 1 : 0.3;
+			            canvas.Opacity = canvas.Opacity < 1 ? 1 : 0.3;
 			        else
-			            grid.Visibility = grid.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
+			            canvas.Visibility = canvas.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
                 }
                 else
-			        grid.Visibility = grid.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
+			        uiElement.Visibility = uiElement.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
             }
 
 			if (!isLocked)
@@ -532,19 +552,16 @@ namespace GridSetter.Utils
 		{
 			if (isMain)
 			{
-				foreach (var item in grid.Children.Cast<UIElement>().Where(e => e is Grid && e.Visibility == Visibility.Visible).ToList())
+				foreach (var item in grid.Children.Cast<UIElement>().Where(e => e is Canvas && e.Visibility == Visibility.Visible).ToList())
 				{
-					var itemGrid = item as Grid;
-					var image = itemGrid?.Children.Cast<UIElement>().FirstOrDefault(e => e is Image && e.Visibility == Visibility.Visible);
+					var canvas = item as Canvas;
+					var image = canvas?.Children.Cast<UIElement>().FirstOrDefault(e => e is Image && e.Visibility == Visibility.Visible);
 
 					if (image == null)
 						continue;
 
-                    var layoutScaleTransform = (ScaleTransform)((TransformGroup)((Image)image).LayoutTransform).Children.First(tr => tr is ScaleTransform);
 				    var renderScaleTransform = (ScaleTransform)((TransformGroup)((Image)image).RenderTransform).Children.First(tr => tr is ScaleTransform);
 				    var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-                    layoutScaleTransform.ScaleX = 1;
-				    layoutScaleTransform.ScaleY = 1;
 				    renderScaleTransform.ScaleX = 1;
 				    renderScaleTransform.ScaleY = 1;
 				    translateTransform.X = 0;
@@ -555,22 +572,22 @@ namespace GridSetter.Utils
 			}
 			else
 			{
-				foreach (var item in grid.Children)
-				{
-					if (item is Button)
-						continue;
+				//foreach (var item in grid.Children)
+				//{
+				//	if (item is Button)
+				//		continue;
 
-					if (item is Image)
-					{
-						var image = item as Image;
-						image.Source = null;
-						image.Visibility = Visibility.Hidden;
-					}
-					else if (item is VideoDrawing)
-					{
-						throw new NotImplementedException();
-					}
-				}
+				//	if (item is Image)
+				//	{
+				//		var image = item as Image;
+				//		image.Source = null;
+				//		image.Visibility = Visibility.Hidden;
+				//	}
+				//	else if (item is VideoDrawing)
+				//	{
+				//		throw new NotImplementedException();
+				//	}
+				//}
 			}
 		}
 

@@ -41,138 +41,110 @@ namespace GridSetter.Utils
 		/// <param name="args">The delta to zoom.</param>
 		public static void ImageZoom(Image image, MouseWheelEventArgs args)
 		{
-			image.RenderTransformOrigin = new Point(0.5, 0.5);
-			var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
-		    var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+		    // Tentative de zoom sur la position de la souris. Problèmes en tout genre.
+		    //var mousePosition = args.GetPosition(image);
+		    //image.RenderTransformOrigin = new Point(Math.Round(mousePosition.X / image.ActualWidth, 3), Math.Round(mousePosition.Y / image.ActualHeight, 3));
+
+            var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
             var zoom = args.Delta > 0 ? ZoomRatio : -ZoomRatio;
 
-		    var grid = UserInterfaceTools.FindParent(image);
-		    var relativePointCache = image.TranslatePoint(new Point(0, 0), grid);
-            grid.Height = grid.ActualHeight;
-		    grid.Width = grid.ActualWidth;
+		    if (!(VisualTreeHelper.GetParent(image) is Canvas canvas)) return;
+		    var relativePointCache = image.TranslatePoint(new Point(0, 0), canvas);
 
-            ScaleTransform scaleTransform;
-		    if (zoom < 0 && (grid.ActualHeight <= ((Rect)image.Tag).Height || grid.ActualWidth <= ((Rect)image.Tag).Width))
+		    if (scaleTransform.ScaleX + zoom > 0.1 && scaleTransform.ScaleX + zoom < 6.5 && scaleTransform.ScaleY + zoom > 0.1 && scaleTransform.ScaleY + zoom < 6.5)
 		    {
-		        if (renderScaleTransform.ScaleX != 1 && renderScaleTransform.ScaleY != 1)
-		        {
-		            layoutScaleTransform.ScaleX = renderScaleTransform.ScaleX;
-		            layoutScaleTransform.ScaleY = renderScaleTransform.ScaleY;
-		            renderScaleTransform.ScaleX = 1;
-		            renderScaleTransform.ScaleY = 1;
-		        }
-		        scaleTransform = layoutScaleTransform;
+		        scaleTransform.ScaleX += zoom;
+		        scaleTransform.ScaleY += zoom;
 		    }
-		    else
-		    {
-		        if (layoutScaleTransform.ScaleX != 1 && layoutScaleTransform.ScaleY != 1)
-		        {
-		            renderScaleTransform.ScaleX = layoutScaleTransform.ScaleX;
-		            renderScaleTransform.ScaleY = layoutScaleTransform.ScaleY;
-		            layoutScaleTransform.ScaleX = 1;
-		            layoutScaleTransform.ScaleY = 1;
-		        }
-		        scaleTransform = renderScaleTransform;
-            }
 
-            if (scaleTransform.ScaleX + zoom > ZoomMinTreshold && scaleTransform.ScaleX + zoom < ZoomMaxTreshold
-				&& scaleTransform.ScaleY + zoom > ZoomMinTreshold && scaleTransform.ScaleY + zoom < ZoomMaxTreshold)
-			{
-				scaleTransform.ScaleX += zoom;
-				scaleTransform.ScaleY += zoom;
-			}
+		    if (zoom > 0)
+		        return;
 
-			grid.Height = Double.NaN;
-		    grid.Width = Double.NaN;
+		    var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
+		    var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
+		    var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+		    var relativePoint = image.TranslatePoint(new Point(0, 0), canvas);
+		    var mathRelativePositionY = Math.Round(relativePoint.Y - relativePointCache.Y, MidpointRounding.AwayFromZero);
+		    var mathRelativePositionX = Math.Round(relativePoint.X - relativePointCache.X, MidpointRounding.AwayFromZero);
+		    var mathTranslateY = Math.Round(translateTransform.Y, MidpointRounding.AwayFromZero);
+		    var mathTranslateX = Math.Round(translateTransform.X, MidpointRounding.AwayFromZero);
 
-            if (zoom > 0)
-				return;
+		    if (imageHeight < canvas.ActualHeight)
+		        translateTransform.Y = 0;
+		    else if (relativePoint.Y > 0)
+		        translateTransform.Y = mathTranslateY - mathRelativePositionY;
+		    else if (relativePoint.Y + imageHeight < canvas.ActualHeight)
+		        translateTransform.Y = mathTranslateY + mathRelativePositionY;
 
-			var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
-			var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
-			var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-			var relativePoint = image.TranslatePoint(new Point(0, 0), grid);
-			var mathRelativePositionY = Math.Round(relativePoint.Y - relativePointCache.Y, MidpointRounding.AwayFromZero);
-			var mathRelativePositionX = Math.Round(relativePoint.X - relativePointCache.X, MidpointRounding.AwayFromZero);
-			var mathTranslateY = Math.Round(translateTransform.Y, MidpointRounding.AwayFromZero);
-			var mathTranslateX = Math.Round(translateTransform.X, MidpointRounding.AwayFromZero);
-
-			if (imageHeight < grid.ActualHeight)
-				translateTransform.Y = 0;
-			else if (relativePoint.Y > 0)
-				translateTransform.Y = mathTranslateY - mathRelativePositionY;
-			else if (relativePoint.Y + imageHeight < grid.ActualHeight)
-				translateTransform.Y = mathTranslateY + mathRelativePositionY;
-
-			if (imageWidth < grid.ActualWidth)
-				translateTransform.X = 0;
-			else if (relativePoint.X > 0)
-				translateTransform.X = mathTranslateX - mathRelativePositionX;
-			else if (relativePoint.X + imageWidth < grid.ActualWidth)
-				translateTransform.X = mathTranslateX + mathRelativePositionX;
-		}
+		    if (imageWidth < canvas.ActualWidth)
+		        translateTransform.X = 0;
+		    else if (relativePoint.X > 0)
+		        translateTransform.X = mathTranslateX - mathRelativePositionX;
+		    else if (relativePoint.X + imageWidth < canvas.ActualWidth)
+		        translateTransform.X = mathTranslateX + mathRelativePositionX;
+        }
 
 		public static void ForceZoom(Image image, double zoom, double previous)
 		{
-			image.RenderTransformOrigin = new Point(0.5, 0.5);
-		    var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
-		    var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+			//image.RenderTransformOrigin = new Point(0.5, 0.5);
+		 //   var layoutScaleTransform = (ScaleTransform)((TransformGroup)image.LayoutTransform).Children.First(tr => tr is ScaleTransform);
+		 //   var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
 
-            var grid = UserInterfaceTools.FindParent(image);
-			grid.Height = grid.ActualHeight;
-			grid.Width = grid.ActualWidth;
+   //         var grid = UserInterfaceTools.FindParent(image);
+			//grid.Height = grid.ActualHeight;
+			//grid.Width = grid.ActualWidth;
 
-		    ScaleTransform scaleTransform;
-		    if (zoom < previous && (grid.ActualHeight <= ((Rect)image.Tag).Height || grid.ActualWidth <= ((Rect)image.Tag).Width))
-		    {
-		        if (renderScaleTransform.ScaleX != 1 && renderScaleTransform.ScaleY != 1)
-		        {
-		            layoutScaleTransform.ScaleX = renderScaleTransform.ScaleX;
-		            layoutScaleTransform.ScaleY = renderScaleTransform.ScaleY;
-		            renderScaleTransform.ScaleX = 1;
-		            renderScaleTransform.ScaleY = 1;
-		        }
-		        scaleTransform = layoutScaleTransform;
-		    }
-		    else
-		    {
-		        if (layoutScaleTransform.ScaleX != 1 && layoutScaleTransform.ScaleY != 1)
-		        {
-		            renderScaleTransform.ScaleX = layoutScaleTransform.ScaleX;
-		            renderScaleTransform.ScaleY = layoutScaleTransform.ScaleY;
-		            layoutScaleTransform.ScaleX = 1;
-		            layoutScaleTransform.ScaleY = 1;
-		        }
-		        scaleTransform = renderScaleTransform;
-		    }
+		 //   ScaleTransform scaleTransform;
+		 //   if (zoom < previous && (grid.ActualHeight <= ((Rect)image.Tag).Height || grid.ActualWidth <= ((Rect)image.Tag).Width))
+		 //   {
+		 //       if (renderScaleTransform.ScaleX != 1 && renderScaleTransform.ScaleY != 1)
+		 //       {
+		 //           layoutScaleTransform.ScaleX = renderScaleTransform.ScaleX;
+		 //           layoutScaleTransform.ScaleY = renderScaleTransform.ScaleY;
+		 //           renderScaleTransform.ScaleX = 1;
+		 //           renderScaleTransform.ScaleY = 1;
+		 //       }
+		 //       scaleTransform = layoutScaleTransform;
+		 //   }
+		 //   else
+		 //   {
+		 //       if (layoutScaleTransform.ScaleX != 1 && layoutScaleTransform.ScaleY != 1)
+		 //       {
+		 //           renderScaleTransform.ScaleX = layoutScaleTransform.ScaleX;
+		 //           renderScaleTransform.ScaleY = layoutScaleTransform.ScaleY;
+		 //           layoutScaleTransform.ScaleX = 1;
+		 //           layoutScaleTransform.ScaleY = 1;
+		 //       }
+		 //       scaleTransform = renderScaleTransform;
+		 //   }
 
-            scaleTransform.ScaleX = zoom;
-			scaleTransform.ScaleY = zoom;
+   //         scaleTransform.ScaleX = zoom;
+			//scaleTransform.ScaleY = zoom;
 
-			grid.Height = Double.NaN;
-			grid.Width = Double.NaN;
+			//grid.Height = Double.NaN;
+			//grid.Width = Double.NaN;
 
-			if (zoom > previous)
-				return;
+			//if (zoom > previous)
+			//	return;
 
-			var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
-			var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
-			var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-			var relativePoint = image.TranslatePoint(new Point(0, 0), grid);
+			//var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
+			//var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
+			//var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+			//var relativePoint = image.TranslatePoint(new Point(0, 0), grid);
 
-			if (imageHeight < grid.ActualHeight || relativePoint.Y > 0 || relativePoint.Y + imageHeight < grid.ActualHeight)
-				translateTransform.Y = 0;
-			else if (imageHeight > grid.ActualHeight)
-			{
-				// ???
-			}
+			//if (imageHeight < grid.ActualHeight || relativePoint.Y > 0 || relativePoint.Y + imageHeight < grid.ActualHeight)
+			//	translateTransform.Y = 0;
+			//else if (imageHeight > grid.ActualHeight)
+			//{
+			//	// ???
+			//}
 
-			if (imageWidth < grid.ActualWidth || relativePoint.X > 0 || relativePoint.X + imageWidth < grid.ActualWidth)
-				translateTransform.X = 0;
-			else if (imageWidth > grid.ActualWidth)
-			{
-				// ???
-			}
+			//if (imageWidth < grid.ActualWidth || relativePoint.X > 0 || relativePoint.X + imageWidth < grid.ActualWidth)
+			//	translateTransform.X = 0;
+			//else if (imageWidth > grid.ActualWidth)
+			//{
+			//	// ???
+			//}
 		}
 
 		/// <summary>
@@ -181,30 +153,22 @@ namespace GridSetter.Utils
 		public static void ImageDrop(object sender, DragEventArgs dragEventArgs)
 		{
 			var files = (string[])dragEventArgs.Data.GetData(DataFormats.FileDrop);
-			if (files == null || files.Length > 1)
-				return;
+			if (files == null || files.Length > 1) return;
+			if (!(sender is Canvas canvas)) return;
 
-			if (!(sender is Grid))
-				return;
-
-			var currentGrid = (Grid)sender;
 			if (files.First().Contains(".gif") || files.First().Contains(".jpg") || files.First().Contains(".png") || files.First().Contains(".jpeg"))
 			{
-				var imageControl = currentGrid.Children.Cast<UIElement>().FirstOrDefault(c => c is Image);
-				if (!(imageControl is Image))
+				var imageControl = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is Image);
+				if (!(imageControl is Image image))
 					return;
 
-			    Image control = imageControl as Image;
-			    control.Stretch = Stretch.None;
-			    control.ClipToBounds = true;
-				control.HorizontalAlignment = HorizontalAlignment.Center;
-				control.VerticalAlignment = VerticalAlignment.Center;
+			    image.Stretch = Stretch.None;
+			    image.ClipToBounds = true;
+			    image.HorizontalAlignment = HorizontalAlignment.Center;
+			    image.VerticalAlignment = VerticalAlignment.Center;
 
-			    var layoutScaleTransform = (ScaleTransform)((TransformGroup)control.LayoutTransform).Children.First(tr => tr is ScaleTransform);
-			    var renderScaleTransform = (ScaleTransform)((TransformGroup)control.RenderTransform).Children.First(tr => tr is ScaleTransform);
-			    var translateTransform = (TranslateTransform)((TransformGroup)control.RenderTransform).Children.First(tr => tr is TranslateTransform);
-			    layoutScaleTransform.ScaleX = 1;
-			    layoutScaleTransform.ScaleY = 1;
+			    var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+			    var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
 			    renderScaleTransform.ScaleX = 1;
 			    renderScaleTransform.ScaleY = 1;
 			    translateTransform.Y = 0;
@@ -215,15 +179,15 @@ namespace GridSetter.Utils
 			    imageToDrop.UriSource = new Uri(files.First());
 			    imageToDrop.EndInit();
 
-				control.Width = imageToDrop.Width;
-				control.Height = imageToDrop.Height;
-			    control.Tag = new Rect
+			    image.Width = imageToDrop.Width;
+			    image.Height = imageToDrop.Height;
+			    image.Tag = new Rect
 			    {
-			        Height = control.Height,
-			        Width = control.Width
+			        Height = image.Height,
+			        Width = image.Width
 			    };
 
-				ImageBehavior.SetAnimatedSource(control, imageToDrop);
+				ImageBehavior.SetAnimatedSource(image, imageToDrop);
             }
 			else if (files.First().Contains(".avi") || files.First().Contains(".mp4") || files.First().Contains(".wmv") || files.First().Contains("webm"))
 			{
