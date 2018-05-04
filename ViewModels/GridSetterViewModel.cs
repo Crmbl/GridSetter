@@ -121,6 +121,11 @@ namespace GridSetter.ViewModels
 		/// </summary>
 		public event EventHandler NewCreatedEvent;
 
+        /// <summary>
+        /// Event when the toggle state changed.
+        /// </summary>
+	    public event EventHandler ToggleStateChangedEvent;
+
 		#endregion // Properties
 
 		#region Constructors
@@ -155,8 +160,7 @@ namespace GridSetter.ViewModels
 		/// </summary>
 		public virtual void OnGridCreatedEvent(EventArgs e)
 		{
-			EventHandler handler = NewCreatedEvent;
-			handler?.Invoke(this, e);
+		    NewCreatedEvent?.Invoke(this, e);
 		}
 
 		#endregion // Events
@@ -171,14 +175,14 @@ namespace GridSetter.ViewModels
 			if (ResetNewLabel.Equals("New"))
 			{
 				ResetNewLabel = "Reset";
-				CurrentGrid = new Grid();
+				CurrentGrid = new Grid(this);
 				CurrentGrid.Show();
 			}
 			else if (ResetNewLabel.Equals("Reset"))
 			{
 				ToggleLockLabel = "Lock";
 				CurrentGrid.Close();
-				CurrentGrid = new Grid();
+				CurrentGrid = new Grid(this);
 				CurrentGrid.Show();
 			}
 
@@ -186,7 +190,7 @@ namespace GridSetter.ViewModels
 		}
 
 		/// <summary>
-		/// Toggle on/off the lock of the grd.
+		/// Toggle on/off the lock of the grid.
 		/// </summary>
 		public void ToggleLockGrid()
 		{
@@ -197,15 +201,15 @@ namespace GridSetter.ViewModels
 			{
 				UserInterfaceTools.ToggleLockControlButtons(CurrentGrid.MainGrid, true);
 				ToggleLockLabel = "Unlock";
-			    CurrentGrid.IsLocked = true;
 			}
 			else if (ToggleLockLabel.Equals("Unlock"))
 			{
 				UserInterfaceTools.ToggleLockControlButtons(CurrentGrid.MainGrid, false);
 				ToggleLockLabel = "Lock";
-			    CurrentGrid.IsLocked = false;
 			}
-		}
+
+		    ToggleStateChangedEvent?.Invoke(this, EventArgs.Empty);
+        }
 
 		/// <summary>
 		/// Remove content from every cell on click.
@@ -215,7 +219,7 @@ namespace GridSetter.ViewModels
 			if (ResetNewLabel.Equals("New"))
 				return;
 
-			UserInterfaceTools.RemoveContentFromGrid(CurrentGrid.MainGrid, true);
+			UserInterfaceTools.RemoveContentFromGrid(CurrentGrid.MainGrid);
 		}
 
 		#endregion // Methods

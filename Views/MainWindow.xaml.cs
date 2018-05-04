@@ -40,6 +40,7 @@ namespace GridSetter.Views
 			InitializeComponent();
 			ViewModel = new GridSetterViewModel();
 			ViewModel.NewCreatedEvent += (sender, args) => SetNotifyIconMenuItems();
+		    ViewModel.ToggleStateChangedEvent += (sender, args) => SetNotifyIconMenuItems();
 
 			DataContext = ViewModel;
 
@@ -86,7 +87,7 @@ namespace GridSetter.Views
 		/// </summary>
 		private void ToggleLockClick(object sender, RoutedEventArgs e)
 		{
-			SetNotifyIconMenuItems();
+		//	SetNotifyIconMenuItems();
 		}
 
 		/// <summary>
@@ -107,7 +108,6 @@ namespace GridSetter.Views
 		private void WindowMouseUp(object sender, MouseButtonEventArgs e)
 		{
 			((MainWindow)sender).Cursor = Cursors.Arrow;
-			//Mouse.OverrideCursor = Cursors.Arrow;
 		}
 
 		/// <summary>
@@ -116,7 +116,6 @@ namespace GridSetter.Views
 		private void WindowMouseEnter(object sender, MouseEventArgs e)
 		{
 			((MainWindow)sender).Cursor = Cursors.Arrow;
-			//Mouse.OverrideCursor = Cursors.Arrow;
 		}
 
 		/// <summary>
@@ -125,7 +124,6 @@ namespace GridSetter.Views
 		private void WindowMouseLeave(object sender, MouseEventArgs e)
 		{
 			((MainWindow)sender).Cursor = Cursors.Arrow;
-			//Mouse.OverrideCursor = Cursors.Arrow;
 		}
 
 		/// <summary>

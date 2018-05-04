@@ -3,12 +3,12 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using GridSetter.Utils;
 using GridSetter.Utils.Enums;
+using GridSetter.ViewModels;
 using WpfAnimatedGif;
 using Button = System.Windows.Controls.Button;
 using Cursors = System.Windows.Input.Cursors;
@@ -20,17 +20,9 @@ using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 // ReSharper disable PossibleInvalidOperationException
 
 /* TODO : 
- *
  * Autre
  * {
- *  Si on lock/unlock avec le shortcut, le libellé ce met pas à jour
- *  Changer la gueule du curseur en fonction des éléments
  *  Améliorer la préhension des boutons left/right/top/bottom
- * }
- *
- * Gestion VIDEOS
- * {
- *  Tout à faire
  * }
  */
 
@@ -53,7 +45,7 @@ namespace GridSetter.Views
 	    /// <summary>
 	    /// Defines the mouse speed when dragging.
 	    /// </summary>
-	    private const UInt32 SlowerMouseSpeed = 4;
+	    private const UInt32 SlowerMouseSpeed = 3;
 
 	    /// <summary>
 	    /// Constant to set the mouse speed.
@@ -86,9 +78,9 @@ namespace GridSetter.Views
         private UInt32 OriginMouseSpeed { get; set; }
 
         /// <summary>
-        /// Determines the state of the grid.
+        /// Keep a ref of the GridSetterViewModel.
         /// </summary>
-        public bool IsLocked { get; set; }
+	    private GridSetterViewModel GridSetterRef { get; }
 
         #region Static
 
@@ -106,10 +98,11 @@ namespace GridSetter.Views
         /// <summary>
         /// Default parameterless constructor.
         /// </summary>
-        public Grid()
+        public Grid(GridSetterViewModel parentRef)
 		{
 			InitializeComponent();
 
+		    GridSetterRef = parentRef;
 			WindowStyle = WindowStyle.None;
 			ResizeMode = ResizeMode.NoResize;
 			Left = 0;
@@ -140,9 +133,7 @@ namespace GridSetter.Views
 	    /// <param name="e">Same.</param>
 	    private void ShortcutToggleLock(object sender, ExecutedRoutedEventArgs e)
 	    {
-	        // TODO : won't update the LOCK/UNLOCK button label.
-	        IsLocked = !IsLocked;
-	        UserInterfaceTools.ToggleLockControlButtons(MainGrid, IsLocked);
+	        GridSetterRef.ToggleLockGrid();
 	    }
 
         #region Setup
@@ -546,7 +537,7 @@ namespace GridSetter.Views
 		/// Prevent the image grid to be resized when the image size change.
 		/// </summary>
 		/// <param name="sender">The image grid.</param>
-		/// <param name="args">Events.</param>
+		/// <param name="e">Events.</param>
 		public void ImageCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
 		{
 		    if (!(sender is Canvas canvas)) return;
@@ -592,24 +583,6 @@ namespace GridSetter.Views
         }
 
         /// <summary>
-        /// Force replace the image control buttons.
-        /// </summary>
-        /// <param name="sender">Fuuu.</param>
-        /// <param name="args">Whatever.</param>
-	    public void Image_SizeChanged(object sender, SizeChangedEventArgs args)
-	    {
-	        //if (!(sender is Image image)) return;
-
-	        //var grid = UserInterfaceTools.FindParent(image);
-	        //var tmp = grid.Children.Cast<UIElement>().FirstOrDefault(e => e is GGrid);
-	        //if (!(tmp is GGrid controlImage)) return;
-
-	        //var relativePointControl = controlImage.TranslatePoint(new Point(0, 0), grid);
-	        //var translateTransformGrid = (TranslateTransform)((TransformGroup)controlImage.RenderTransform).Children.First(tr => tr is TranslateTransform);
-	        //translateTransformGrid.Y -= relativePointControl.Y;
-	    }
-
-        /// <summary>
         /// Show the image control buttons on enter.
         /// </summary>
         /// <param name="sender">The image control buttons grid.</param>
@@ -650,40 +623,36 @@ namespace GridSetter.Views
         /// <param name="args"></param>
 	    public void ImageControl_OnClick(object sender, RoutedEventArgs args)
 	    {
-            //if (!(sender is Button child)) return;
+            if (!(sender is Button child)) return;
 
-            //   var parentGrid = UserInterfaceTools.FindParent(child);
-            //   var grandParentGrid = UserInterfaceTools.FindParent(parentGrid);
-            //   var imageGrid = grandParentGrid.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
-            //   if (!(imageGrid is Image image)) return;
+            var parentGrid = UserInterfaceTools.FindParent(child);
+            var parentCanvas = UserInterfaceTools.FindParent(parentGrid) as Canvas;
+            var imageGrid = parentCanvas?.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
+            if (!(imageGrid is Image image)) return;
 
-            //         var renderScaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
-            //      ScaleTransform scaleTransform;
-            //      if (renderScaleTransform.ScaleX != 1 || renderScaleTransform.ScaleY != 1)
-            //          scaleTransform = renderScaleTransform;
-            //      else
-            //          scaleTransform = layoutScaleTransform;
+            var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+	        var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+            translateTransform.X = 0;
+	        translateTransform.Y = 0;
+            switch (child.Name)
+            {
+                case "TakeHeightButton":
+                    var scaleHeight = Math.Round(parentCanvas.ActualHeight / image.ActualHeight, 2);
+                    scaleTransform.ScaleY = scaleHeight;
+                    scaleTransform.ScaleX = scaleHeight;
+                    break;
 
-            //         switch (child.Name)
-            //   {
-            //	case "TakeHeightButton":
-            //		var scaleHeight = grandParentGrid.ActualHeight / image.ActualHeight;
-            //		MediaControlTools.ForceZoom(image, scaleHeight, scaleTransform.ScaleY);
-            //		break;
+                case "TakeWidthButton":
+                    var scaleWidth = Math.Round(parentCanvas.ActualWidth / image.ActualWidth, 2);
+                    scaleTransform.ScaleY = scaleWidth;
+                    scaleTransform.ScaleX = scaleWidth;
+                    break;
 
-            //	case "TakeWidthButton":
-            //		var scaleWidth = grandParentGrid.ActualWidth / image.ActualWidth;
-	        //		MediaControlTools.ForceZoom(image, scaleWidth, scaleTransform.ScaleX);
-	        //		break;
-
-	        //	case "ResizeButton":
-            //		var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-            //		scaleTransform.ScaleY = 1;
-            //		scaleTransform.ScaleX = 1;
-            //		translateTransform.X = 0;
-            //		translateTransform.Y = 0;
-            //		break;
-            //   }
+                case "ResizeButton":
+                    scaleTransform.ScaleY = 1;
+                    scaleTransform.ScaleX = 1;
+                    break;
+            }
         }
 
         #endregion // Image events

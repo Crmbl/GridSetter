@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -128,7 +127,6 @@ namespace GridSetter.Utils
 		    image.MouseLeftButtonUp += window.Image_OnMouseLeftButtonUp;
 		    image.MouseMove += window.Image_OnMouseMove;
 		    image.MouseDown += window.Image_MouseDown;
-            image.SizeChanged += window.Image_SizeChanged;
 
             Grid.SetColumn(image, 1);
 			Grid.SetRow(image, 1);
@@ -147,7 +145,7 @@ namespace GridSetter.Utils
 		/// Add the buttons to control the image.
 		/// </summary>
 		/// <param name="window">Used to bind to the methods.</param>
-		/// <param name="grid">The grid to add the buttons into.</param>
+		/// <param name="canvas">The canvas to add the buttons into.</param>
 		/// <param name="rowSpan">Defines the rowspan of the parent.</param>
 		/// <param name="colSpan">Defines the colspan of the parent.</param>
 		private static void AddImageControlButtons(Views.Grid window, Canvas canvas, int rowSpan = 1, int colSpan = 1)
@@ -316,13 +314,15 @@ namespace GridSetter.Utils
 			window.MainGrid.Children.Add(controlGrid);
 		}
 
-		#endregion // Controls
+        #endregion // Controls
 
-		/// <summary>
-		/// Helps to resolve the parent for a given child.
-		/// </summary>
-		/// <param name="child">The parent to return.</param>
-		public static UIElement FindParent(DependencyObject child)
+        #region Tools
+
+        /// <summary>
+        /// Helps to resolve the parent for a given child.
+        /// </summary>
+        /// <param name="child">The parent to return.</param>
+        public static UIElement FindParent(DependencyObject child)
 		{
 			var result = VisualTreeHelper.GetParent(child);
 			return result is RadialPanel ? FindParent(result) : result as UIElement;
@@ -547,49 +547,28 @@ namespace GridSetter.Utils
 		/// Remove the content of a grid, picture/movie...
 		/// </summary>
 		/// <param name="grid">The grid where we want to delete the content.</param>
-		/// <param name="isMain">Tells if this is the main grid.</param>
-		public static void RemoveContentFromGrid(Grid grid, bool isMain)
+		public static void RemoveContentFromGrid(Grid grid)
 		{
-			if (isMain)
-			{
-				foreach (var item in grid.Children.Cast<UIElement>().Where(e => e is Canvas && e.Visibility == Visibility.Visible).ToList())
-				{
-					var canvas = item as Canvas;
-					var image = canvas?.Children.Cast<UIElement>().FirstOrDefault(e => e is Image && e.Visibility == Visibility.Visible);
+		    foreach (var item in grid.Children.Cast<UIElement>().Where(e => e is Canvas && e.Visibility == Visibility.Visible).ToList())
+		    {
+		        var canvas = item as Canvas;
+		        var image = canvas?.Children.Cast<UIElement>().FirstOrDefault(e => e is Image && e.Visibility == Visibility.Visible);
 
-					if (image == null)
-						continue;
+		        if (image == null)
+		            continue;
 
-				    var renderScaleTransform = (ScaleTransform)((TransformGroup)((Image)image).RenderTransform).Children.First(tr => tr is ScaleTransform);
-				    var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-				    renderScaleTransform.ScaleX = 1;
-				    renderScaleTransform.ScaleY = 1;
-				    translateTransform.X = 0;
-				    translateTransform.Y = 0;
-                    ((Image)image).Source = null;
-                    ((Image)image).Visibility = Visibility.Hidden;
-				}
-			}
-			else
-			{
-				//foreach (var item in grid.Children)
-				//{
-				//	if (item is Button)
-				//		continue;
-
-				//	if (item is Image)
-				//	{
-				//		var image = item as Image;
-				//		image.Source = null;
-				//		image.Visibility = Visibility.Hidden;
-				//	}
-				//	else if (item is VideoDrawing)
-				//	{
-				//		throw new NotImplementedException();
-				//	}
-				//}
-			}
+		        var renderScaleTransform = (ScaleTransform)((TransformGroup)((Image)image).RenderTransform).Children.First(tr => tr is ScaleTransform);
+		        var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+		        renderScaleTransform.ScaleX = 1;
+		        renderScaleTransform.ScaleY = 1;
+		        translateTransform.X = 0;
+		        translateTransform.Y = 0;
+		        ((Image)image).Source = null;
+		        ((Image)image).Visibility = Visibility.Hidden;
+		    }
 		}
+
+        #endregion // Tools
 
         #endregion // Public methods
     }
