@@ -35,21 +35,21 @@ namespace GridSetter.Utils
 		#endregion // Properties
 
 		/// <summary>
-		/// Allows to zoom in or out on the given image.
+		/// Allows to zoom in or out on the given media element.
 		/// </summary>
-		/// <param name="image">The image to zoom.</param>
+		/// <param name="fElement">The media to zoom.</param>
 		/// <param name="args">The delta to zoom.</param>
-		public static void ImageZoom(Image image, MouseWheelEventArgs args)
+		public static void MediaZoom(FrameworkElement fElement, MouseWheelEventArgs args)
 		{
 		    // Tentative de zoom sur la position de la souris. Problèmes en tout genre.
 		    //var mousePosition = args.GetPosition(image);
 		    //image.RenderTransformOrigin = new Point(Math.Round(mousePosition.X / image.ActualWidth, 3), Math.Round(mousePosition.Y / image.ActualHeight, 3));
 
-            var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+            var scaleTransform = (ScaleTransform)((TransformGroup)fElement.RenderTransform).Children.First(tr => tr is ScaleTransform);
             var zoom = args.Delta > 0 ? ZoomRatio : -ZoomRatio;
 
-		    if (!(VisualTreeHelper.GetParent(image) is Canvas canvas)) return;
-		    var relativePointCache = image.TranslatePoint(new Point(0, 0), canvas);
+		    if (!(VisualTreeHelper.GetParent(fElement) is Canvas canvas)) return;
+		    var relativePointCache = fElement.TranslatePoint(new Point(0, 0), canvas);
 
 		    if (scaleTransform.ScaleX + zoom > ZoomMinTreshold && scaleTransform.ScaleX + zoom < ZoomMaxTreshold && 
 		        scaleTransform.ScaleY + zoom > ZoomMinTreshold && scaleTransform.ScaleY + zoom < ZoomMaxTreshold)
@@ -61,10 +61,10 @@ namespace GridSetter.Utils
 		    if (zoom > 0)
 		        return;
 
-		    var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
-		    var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
-		    var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-		    var relativePoint = image.TranslatePoint(new Point(0, 0), canvas);
+		    var imageHeight = fElement.ActualHeight * scaleTransform.ScaleY;
+		    var imageWidth = fElement.ActualWidth * scaleTransform.ScaleX;
+		    var translateTransform = (TranslateTransform)((TransformGroup)fElement.RenderTransform).Children.First(tr => tr is TranslateTransform);
+		    var relativePoint = fElement.TranslatePoint(new Point(0, 0), canvas);
 		    var mathRelativePositionY = Math.Round(relativePoint.Y - relativePointCache.Y, MidpointRounding.AwayFromZero);
 		    var mathRelativePositionX = Math.Round(relativePoint.X - relativePointCache.X, MidpointRounding.AwayFromZero);
 		    var mathTranslateY = Math.Round(translateTransform.Y, MidpointRounding.AwayFromZero);
@@ -88,7 +88,7 @@ namespace GridSetter.Utils
         /// <summary>
         /// The drop actions method.
         /// </summary>
-        public static void ImageDrop(object sender, DragEventArgs dragEventArgs)
+        public static void MediaDrop(object sender, DragEventArgs dragEventArgs)
 		{
 			var files = (string[])dragEventArgs.Data.GetData(DataFormats.FileDrop);
 			if (files == null || files.Length > 1) return;
@@ -97,10 +97,13 @@ namespace GridSetter.Utils
 			if (files.First().Contains(".gif") || files.First().Contains(".jpg") || files.First().Contains(".png") || files.First().Contains(".jpeg"))
 			{
 				var imageControl = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is Image);
-				if (!(imageControl is Image image))
-					return;
+				if (!(imageControl is Image image)) return;
 
-			    image.Stretch = Stretch.None;
+				var videoControl = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is MediaElement);
+				if (!(videoControl is MediaElement video)) return;
+				video.Visibility = Visibility.Hidden;
+
+				image.Stretch = Stretch.None;
 			    image.ClipToBounds = true;
 			    image.Visibility = Visibility.Visible;
 			    image.HorizontalAlignment = HorizontalAlignment.Center;
@@ -128,9 +131,34 @@ namespace GridSetter.Utils
 
 				ImageBehavior.SetAnimatedSource(image, imageToDrop);
             }
-			else if (files.First().Contains(".avi") || files.First().Contains(".mp4") || files.First().Contains(".wmv") || files.First().Contains("webm"))
+			else if (files.First().Contains(".avi") || files.First().Contains(".mp4") || files.First().Contains(".wmv") || files.First().Contains(".webm") || files.First().Contains(".mpg"))
 			{
-				throw new NotImplementedException();
+				var videoControl = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is MediaElement);
+				if (!(videoControl is MediaElement video)) return;
+
+				var imageControl = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is Image);
+				if (!(imageControl is Image image)) return;
+				image.Visibility = Visibility.Hidden;
+
+				video.Stretch = Stretch.None;
+				video.ClipToBounds = true;
+				video.Visibility = Visibility.Visible;
+				video.HorizontalAlignment = HorizontalAlignment.Center;
+				video.VerticalAlignment = VerticalAlignment.Center;
+				video.LoadedBehavior = MediaState.Manual;
+
+				var renderScaleTransform = (ScaleTransform)((TransformGroup)video.RenderTransform).Children.First(tr => tr is ScaleTransform);
+				var translateTransform = (TranslateTransform)((TransformGroup)video.RenderTransform).Children.First(tr => tr is TranslateTransform);
+				renderScaleTransform.ScaleX = 1;
+				renderScaleTransform.ScaleY = 1;
+				translateTransform.Y = 0;
+				translateTransform.X = 0;
+
+				video.BeginInit();
+				video.Source = new Uri(files.First());
+				video.EndInit();
+
+				video.Play();
 			}
 		}
 	}

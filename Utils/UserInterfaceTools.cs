@@ -70,67 +70,122 @@ namespace GridSetter.Utils
 		/// <param name="colId">Defines where to add the grid.</param>
 		/// <param name="colSpan">Defines the colSpan.</param>s
 		/// <param name="rowSpan">Defines the rowSpan.</param>
-		public static void AddImageControl(Views.Grid window, int rowId = 0, int colId = 0, int colSpan = 1, int rowSpan = 1)
+		public static void AddMediaCanvas(Views.Grid window, int rowId = 0, int colId = 0, int colSpan = 1, int rowSpan = 1)
 		{
 			Canvas canvas = new Canvas
             {
-				Name = "ImageCanvas",
+				Name = "MediaCanvas",
 				Visibility = Visibility.Collapsed,
 				AllowDrop = true,
                 ClipToBounds = true,
                 Background = new SolidColorBrush(Colors.Transparent)
 			};
-		    canvas.Drop += window.ImageCanvas_OnDrop;
-		    canvas.MouseWheel += window.ImageCanvas_OnMouseWheel;
-		    canvas.SizeChanged += window.ImageCanvas_SizeChanged;
+		    canvas.Drop += window.MediaCanvas_OnDrop;
+		    canvas.MouseWheel += window.MediaCanvas_OnMouseWheel;
+		    canvas.SizeChanged += window.MediaCanvas_SizeChanged;
 
-            Image image = new Image
+			#region Image
+
+			Image image = new Image
 			{
 				Name = "Image",
                 ClipToBounds = true,
                 RenderTransformOrigin = new Point(0.5, 0.5)
 			};
 
-		    var renderTransformGroup = new TransformGroup();
-            var transflateTransform = new TranslateTransform();
-		    var scaleTransform = new ScaleTransform();
-            renderTransformGroup.Children.Add(transflateTransform);
-		    renderTransformGroup.Children.Add(scaleTransform);
+			image.SetBinding(Canvas.TopProperty, new MultiBinding
+			{
+				Converter = new CenterConverter(),
+				ConverterParameter = "top",
+				Mode = BindingMode.TwoWay,
+				Bindings = {
+					new Binding("ActualWidth") { Source = canvas },
+					new Binding("ActualHeight") { Source = canvas },
+					new Binding("ActualWidth") { Source = image },
+					new Binding("ActualHeight") { Source = image }
+				}
+			});
+			image.SetBinding(Canvas.LeftProperty, new MultiBinding
+			{
+				Converter = new CenterConverter(),
+				ConverterParameter = "left",
+				Mode = BindingMode.TwoWay,
+				Bindings = {
+					new Binding("ActualWidth") { Source = canvas },
+					new Binding("ActualHeight") { Source = canvas },
+					new Binding("ActualWidth") { Source = image },
+					new Binding("ActualHeight") { Source = image }
+				}
+			});
 
-		    image.SetBinding(Canvas.TopProperty, new MultiBinding
-		    {
-		        Converter = new CenterConverter(),
-		        ConverterParameter = "top",
-		        Mode = BindingMode.TwoWay,
-		        Bindings = {
-		            new Binding("ActualWidth") { Source = canvas },
-		            new Binding("ActualHeight") { Source = canvas },
-		            new Binding("ActualWidth") { Source = image },
-		            new Binding("ActualHeight") { Source = image }
-		        }
-		    });
-            image.SetBinding(Canvas.LeftProperty, new MultiBinding
-            {
-                Converter = new CenterConverter(),
-                ConverterParameter = "left",
-                Mode = BindingMode.TwoWay,
-                Bindings = {
-                    new Binding("ActualWidth") { Source = canvas },
-                    new Binding("ActualHeight") { Source = canvas },
-                    new Binding("ActualWidth") { Source = image },
-                    new Binding("ActualHeight") { Source = image }
-                }
-            });
+			image.RenderTransform = new TransformGroup
+			{
+				Children = new TransformCollection
+				{
+					new TranslateTransform(),
+					new ScaleTransform()
+				}
+			};
+			image.MouseLeftButtonDown += window.Media_OnMouseLeftButtonDown;
+			image.MouseLeftButtonUp += window.Media_OnMouseLeftButtonUp;
+			image.MouseMove += window.Media_OnMouseMove;
+			image.MouseDown += window.Media_MouseDown;
 
-            image.RenderTransform = renderTransformGroup;
-		    image.MouseLeftButtonDown += window.Image_OnMouseLeftButtonDown;
-		    image.MouseLeftButtonUp += window.Image_OnMouseLeftButtonUp;
-		    image.MouseMove += window.Image_OnMouseMove;
-		    image.MouseDown += window.Image_MouseDown;
+			#endregion // Image
 
-            Grid.SetColumn(image, 1);
-			Grid.SetRow(image, 1);
+			#region Video
+
+			MediaElement video = new MediaElement
+			{
+				Name = "Video",
+				ClipToBounds = true,
+				RenderTransformOrigin = new Point(0.5, 0.5)
+			};
+
+			video.SetBinding(Canvas.TopProperty, new MultiBinding
+			{
+				Converter = new CenterConverter(),
+				ConverterParameter = "top",
+				Mode = BindingMode.TwoWay,
+				Bindings = {
+					new Binding("ActualWidth") { Source = canvas },
+					new Binding("ActualHeight") { Source = canvas },
+					new Binding("ActualWidth") { Source = video },
+					new Binding("ActualHeight") { Source = video }
+				}
+			});
+			video.SetBinding(Canvas.LeftProperty, new MultiBinding
+			{
+				Converter = new CenterConverter(),
+				ConverterParameter = "left",
+				Mode = BindingMode.TwoWay,
+				Bindings = {
+					new Binding("ActualWidth") { Source = canvas },
+					new Binding("ActualHeight") { Source = canvas },
+					new Binding("ActualWidth") { Source = video },
+					new Binding("ActualHeight") { Source = video }
+				}
+			});
+
+			video.RenderTransform = new TransformGroup
+			{
+				Children = new TransformCollection
+				{
+					new TranslateTransform(),
+					new ScaleTransform()
+				}
+			};
+			video.MouseLeftButtonDown += window.Media_OnMouseLeftButtonDown;
+			video.MouseLeftButtonUp += window.Media_OnMouseLeftButtonUp;
+			video.MouseMove += window.Media_OnMouseMove;
+			video.MouseDown += window.Media_MouseDown;
+			video.MediaEnded += window.Video_OnMediaEnded;
+			video.Tag = true;
+
+			#endregion // Video
+
 			canvas.Children.Add(image);
+			canvas.Children.Add(video);
 			Grid.SetColumn(canvas, colId);
 			Grid.SetRow(canvas, rowId);
 			Grid.SetColumnSpan(canvas, colSpan);
@@ -138,7 +193,8 @@ namespace GridSetter.Utils
 			Panel.SetZIndex(canvas, 10);
 			window.MainGrid.Children.Add(canvas);
 
-			AddImageControlButtons(window, canvas, rowSpan, colSpan);
+			AddImageButtons(window, canvas, rowSpan, colSpan);
+			AddVideoButtons(window, canvas, rowSpan, colSpan);
 		}
 
 		/// <summary>
@@ -148,7 +204,7 @@ namespace GridSetter.Utils
 		/// <param name="canvas">The canvas to add the buttons into.</param>
 		/// <param name="rowSpan">Defines the rowspan of the parent.</param>
 		/// <param name="colSpan">Defines the colspan of the parent.</param>
-		private static void AddImageControlButtons(Views.Grid window, Canvas canvas, int rowSpan = 1, int colSpan = 1)
+		private static void AddImageButtons(Views.Grid window, Canvas canvas, int rowSpan = 1, int colSpan = 1)
 		{
 			Grid controlGrid = new Grid
 			{
@@ -158,8 +214,8 @@ namespace GridSetter.Utils
 				MaxWidth = 195,
                 VerticalAlignment = VerticalAlignment.Top
 			};
-		    controlGrid.MouseEnter += window.ImageButtons_OnMouseEnter;
-		    controlGrid.MouseLeave += window.ImageButtons_OnMouseLeave;
+		    controlGrid.MouseEnter += window.MediaButtons_OnMouseEnter;
+		    controlGrid.MouseLeave += window.MediaButtons_OnMouseLeave;
 
             controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 			controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
@@ -230,6 +286,95 @@ namespace GridSetter.Utils
 		    canvas.Children.Add(controlGrid);
         }
 
+		/// <summary>
+		/// Add the buttons to control the video.
+		/// </summary>
+		/// <param name="window">Used to bind to the methods.</param>
+		/// <param name="canvas">The canvas to add the buttons into.</param>
+		/// <param name="rowSpan">Defines the rowspan of the parent.</param>
+		/// <param name="colSpan">Defines the colspan of the parent.</param>
+		private static void AddVideoButtons(Views.Grid window, Canvas canvas, int rowSpan = 1, int colSpan = 1)
+		{
+			//Grid controlGrid = new Grid
+			//{
+			//	Name = "ImageButtons",
+			//	Background = new SolidColorBrush(Colors.Transparent),
+			//	ClipToBounds = true,
+			//	MaxWidth = 195,
+			//	VerticalAlignment = VerticalAlignment.Top
+			//};
+			//controlGrid.MouseEnter += window.ImageButtons_OnMouseEnter;
+			//controlGrid.MouseLeave += window.ImageButtons_OnMouseLeave;
+
+			//controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+			//controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+			//controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+			//controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+			//controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+			//controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+
+			//var transformGroup = new TransformGroup();
+			//var transflateTransform = new TranslateTransform();
+			//transformGroup.Children.Add(transflateTransform);
+			//controlGrid.RenderTransform = transformGroup;
+
+			//Button takeWidthButton = new Button
+			//{
+			//	Style = Application.Current.Resources["ButtonImageBase"] as Style,
+			//	Name = "TakeWidthButton",
+			//	Visibility = Visibility.Hidden,
+			//	Tag = Application.Current.Resources["EnlargeWidthImage"] as BitmapImage
+			//};
+			//takeWidthButton.Click += window.ImageControl_OnClick;
+
+			//Button takeHeightButton = new Button
+			//{
+			//	Style = Application.Current.Resources["ButtonImageBase"] as Style,
+			//	Name = "TakeHeightButton",
+			//	Visibility = Visibility.Hidden,
+			//	Tag = Application.Current.Resources["EnlargeHeightImage"] as BitmapImage
+			//};
+			//takeHeightButton.Click += window.ImageControl_OnClick;
+
+			//Button resizeButton = new Button
+			//{
+			//	Style = Application.Current.Resources["ButtonImageBase"] as Style,
+			//	Name = "ResizeButton",
+			//	Visibility = Visibility.Hidden,
+			//	Tag = Application.Current.Resources["ResizeImage"] as BitmapImage
+			//};
+			//resizeButton.Click += window.ImageControl_OnClick;
+
+			//Grid.SetColumn(takeHeightButton, 1);
+			//Grid.SetRow(takeHeightButton, 0);
+			//Grid.SetColumn(takeWidthButton, 2);
+			//Grid.SetRow(takeWidthButton, 0);
+			//Grid.SetColumn(resizeButton, 3);
+			//Grid.SetRow(resizeButton, 0);
+			//controlGrid.Children.Add(takeHeightButton);
+			//controlGrid.Children.Add(takeWidthButton);
+			//controlGrid.Children.Add(resizeButton);
+			//controlGrid.SetBinding(Canvas.LeftProperty, new MultiBinding
+			//{
+			//	Converter = new CenterConverter(),
+			//	ConverterParameter = "left",
+			//	Mode = BindingMode.TwoWay,
+			//	Bindings = {
+			//		new Binding("ActualWidth") { Source = canvas },
+			//		new Binding("ActualHeight") { Source = canvas },
+			//		new Binding("ActualWidth") { Source = controlGrid },
+			//		new Binding("ActualHeight") { Source = controlGrid }
+			//	}
+			//});
+
+			//Grid.SetColumn(controlGrid, 1);
+			//Grid.SetRow(controlGrid, 1);
+			//Grid.SetColumnSpan(controlGrid, colSpan);
+			//Grid.SetRowSpan(controlGrid, rowSpan);
+
+			//canvas.Children.Add(controlGrid);
+		}
+
         /// <summary>
         /// Add the control buttons for each new col/row defined.
         /// </summary>
@@ -238,7 +383,7 @@ namespace GridSetter.Utils
         /// <param name="colId">The col number on which to create the control buttons.</param>
         /// <param name="colSpan">Defines the colSpan.</param>s
         /// <param name="rowSpan">Defines the rowSpan.</param>
-        public static void AddControlButtons(Views.Grid window, int rowId = 0, int colId = 0, int colSpan = 1, int rowSpan = 1)
+        public static void AddGridButtons(Views.Grid window, int rowId = 0, int colId = 0, int colSpan = 1, int rowSpan = 1)
 		{
 			Grid controlGrid = new Grid
 			{
@@ -322,10 +467,10 @@ namespace GridSetter.Utils
         /// Helps to resolve the parent for a given child.
         /// </summary>
         /// <param name="child">The parent to return.</param>
-        public static UIElement FindParent(DependencyObject child)
+        public static FrameworkElement FindParent(DependencyObject child)
 		{
 			var result = VisualTreeHelper.GetParent(child);
-			return result is RadialPanel ? FindParent(result) : result as UIElement;
+			return result is RadialPanel ? FindParent(result) : result as FrameworkElement;
 		}
 
 		/// <summary>
@@ -436,11 +581,9 @@ namespace GridSetter.Utils
 
 					potentielNeighbor = mainGrid.Children.Cast<UIElement>().FirstOrDefault(
 						e => Grid.GetRow(e) == currentRow && Grid.GetColumn(e) == currentCol - Grid.GetColumnSpan(e) - 1);
-					if (potentielNeighbor is Grid)
-					{
-						if (Grid.GetRowSpan(potentielNeighbor) == currentRowSpan)
-							return true;
-					}
+
+					if (potentielNeighbor is Grid && Grid.GetRowSpan(potentielNeighbor) == currentRowSpan)
+						return true;
 					return false;
 
 				case DirectionsEnum.Right:
@@ -449,11 +592,9 @@ namespace GridSetter.Utils
 
 					potentielNeighbor = mainGrid.Children.Cast<UIElement>().FirstOrDefault(
 						e => Grid.GetRow(e) == currentRow && Grid.GetColumn(e) == currentCol + currentColSpan + 1);
-					if (potentielNeighbor is Grid)
-					{
-						if (Grid.GetRowSpan(potentielNeighbor) == currentRowSpan)
-							return true;
-					}
+
+					if (potentielNeighbor is Grid && Grid.GetRowSpan(potentielNeighbor) == currentRowSpan)
+						return true;
 					return false;
 
 				case DirectionsEnum.Up:
@@ -462,11 +603,8 @@ namespace GridSetter.Utils
 
 					potentielNeighbor = mainGrid.Children.Cast<UIElement>().FirstOrDefault(
 						e => Grid.GetRow(e) == currentRow - Grid.GetRowSpan(e) - 1 && Grid.GetColumn(e) == currentCol);
-					if (potentielNeighbor is Grid)
-					{
-						if (Grid.GetColumnSpan(potentielNeighbor) == currentColSpan)
-							return true;
-					}
+					if (potentielNeighbor is Grid && Grid.GetColumnSpan(potentielNeighbor) == currentColSpan)
+						return true;
 					return false;
 
 				case DirectionsEnum.Down:
@@ -475,11 +613,8 @@ namespace GridSetter.Utils
 
 					potentielNeighbor = mainGrid.Children.Cast<UIElement>().FirstOrDefault(
 						e => Grid.GetRow(e) == currentRow + currentRowSpan + 1 && Grid.GetColumn(e) == currentCol);
-					if (potentielNeighbor is Grid)
-					{
-						if (Grid.GetColumnSpan(potentielNeighbor) == currentColSpan)
-							return true;
-					}
+					if (potentielNeighbor is Grid && Grid.GetColumnSpan(potentielNeighbor) == currentColSpan)
+						return true;
 					return false;
 
 				default:
@@ -497,12 +632,12 @@ namespace GridSetter.Utils
 			var elementList = mainGrid.Children.Cast<UIElement>().Where(e => e is Grid || e is Canvas).ToList();
 			foreach (var uiElement in elementList)
 			{
-			    if (uiElement is Canvas canvas && canvas.Name == "ImageCanvas")
+			    if (uiElement is Canvas canvas && canvas.Name == "MediaCanvas")
 			    {
-			        var imageControl = canvas.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
-			        if (imageControl is Image image && image.Source != null)
+				    var fElement = canvas.Children.Cast<UIElement>().FirstOrDefault(e => e is FrameworkElement);
+			        if (fElement is Image image && image.Source != null || fElement is MediaElement video && video.Source != null)
 			            canvas.Opacity = canvas.Opacity < 1 ? 1 : 0.3;
-			        else
+					else
 			            canvas.Visibility = canvas.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
                 }
                 else
@@ -552,19 +687,32 @@ namespace GridSetter.Utils
 		    foreach (var item in grid.Children.Cast<UIElement>().Where(e => e is Canvas && e.Visibility == Visibility.Visible).ToList())
 		    {
 		        var canvas = item as Canvas;
-		        var image = canvas?.Children.Cast<UIElement>().FirstOrDefault(e => e is Image && e.Visibility == Visibility.Visible);
+		        var image = canvas?.Children.Cast<UIElement>().FirstOrDefault(e => e is Image && e.Visibility == Visibility.Visible) as Image;
+			    var video = canvas?.Children.Cast<UIElement>().FirstOrDefault(e => e is MediaElement && e.Visibility == Visibility.Visible) as MediaElement;
 
-		        if (image == null)
-		            continue;
+				if (image != null)
+			    {
+				    var renderScaleTransform = (ScaleTransform) ((TransformGroup) image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+				    var translateTransform = (TranslateTransform) ((TransformGroup) image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+				    renderScaleTransform.ScaleX = 1;
+				    renderScaleTransform.ScaleY = 1;
+				    translateTransform.X = 0;
+				    translateTransform.Y = 0;
+				    image.Source = null;
+				    image.Visibility = Visibility.Hidden;
+			    }
 
-		        var renderScaleTransform = (ScaleTransform)((TransformGroup)((Image)image).RenderTransform).Children.First(tr => tr is ScaleTransform);
-		        var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-		        renderScaleTransform.ScaleX = 1;
-		        renderScaleTransform.ScaleY = 1;
-		        translateTransform.X = 0;
-		        translateTransform.Y = 0;
-		        ((Image)image).Source = null;
-		        ((Image)image).Visibility = Visibility.Hidden;
+			    if (video != null)
+			    {
+				    var renderScaleTransform = (ScaleTransform)((TransformGroup) video.RenderTransform).Children.First(tr => tr is ScaleTransform);
+				    var translateTransform = (TranslateTransform)((TransformGroup) video.RenderTransform).Children.First(tr => tr is TranslateTransform);
+				    renderScaleTransform.ScaleX = 1;
+				    renderScaleTransform.ScaleY = 1;
+				    translateTransform.X = 0;
+				    translateTransform.Y = 0;
+				    video.Source = null;
+				    video.Visibility = Visibility.Hidden;
+				}
 		    }
 		}
 

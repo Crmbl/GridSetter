@@ -19,13 +19,6 @@ using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 // ReSharper disable CompareOfFloatsByEqualityOperator
 // ReSharper disable PossibleInvalidOperationException
 
-/* TODO : 
- * Autre
- * {
- *  Améliorer la préhension des boutons left/right/top/bottom
- * }
- */
-
 namespace GridSetter.Views
 {
 	/// <summary>
@@ -115,8 +108,8 @@ namespace GridSetter.Views
 			MainGrid.RowDefinitions.Add(new RowDefinition { MinHeight = 100, Height = new GridLength(1, GridUnitType.Star) });
 
 			AddChild(MainGrid);
-			UserInterfaceTools.AddControlButtons(this);
-			UserInterfaceTools.AddImageControl(this);
+			UserInterfaceTools.AddGridButtons(this);
+			UserInterfaceTools.AddMediaCanvas(this);
 			UserInterfaceTools.UpdateControlButtons(MainGrid);
 
 		    ToggleLockCommand.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
@@ -162,8 +155,8 @@ namespace GridSetter.Views
                         UserInterfaceTools.AddGridSplitter(MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Horizontal);
                     else
                     {
-                        UserInterfaceTools.AddControlButtons(this, currentRow + i, currentCol + y);
-                        UserInterfaceTools.AddImageControl(this, currentRow + i, currentCol + y);
+                        UserInterfaceTools.AddGridButtons(this, currentRow + i, currentCol + y);
+                        UserInterfaceTools.AddMediaCanvas(this, currentRow + i, currentCol + y);
                     }
                 }
             }
@@ -197,8 +190,8 @@ namespace GridSetter.Views
                     UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Horizontal);
                 else
                 {
-                    UserInterfaceTools.AddControlButtons(this, i, currentCol);
-                    UserInterfaceTools.AddImageControl(this, i, currentCol);
+                    UserInterfaceTools.AddGridButtons(this, i, currentCol);
+                    UserInterfaceTools.AddMediaCanvas(this, i, currentCol);
                 }
             }
 
@@ -224,8 +217,8 @@ namespace GridSetter.Views
                     UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Horizontal);
                 else
                 {
-                    UserInterfaceTools.AddControlButtons(this, i, currentCol);
-                    UserInterfaceTools.AddImageControl(this, i, currentCol);
+                    UserInterfaceTools.AddGridButtons(this, i, currentCol);
+                    UserInterfaceTools.AddMediaCanvas(this, i, currentCol);
                 }
             }
 
@@ -261,8 +254,8 @@ namespace GridSetter.Views
                     UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Vertical);
                 else
                 {
-                    UserInterfaceTools.AddControlButtons(this, currentRow, i);
-                    UserInterfaceTools.AddImageControl(this, currentRow, i);
+                    UserInterfaceTools.AddGridButtons(this, currentRow, i);
+                    UserInterfaceTools.AddMediaCanvas(this, currentRow, i);
                 }
             }
 
@@ -288,8 +281,8 @@ namespace GridSetter.Views
                     UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Vertical);
                 else
                 {
-                    UserInterfaceTools.AddControlButtons(this, currentRow, i);
-                    UserInterfaceTools.AddImageControl(this, currentRow, i);
+                    UserInterfaceTools.AddGridButtons(this, currentRow, i);
+                    UserInterfaceTools.AddMediaCanvas(this, currentRow, i);
                 }
             }
 
@@ -323,8 +316,8 @@ namespace GridSetter.Views
                 UserInterfaceTools.DeleteContent(MainGrid, currentRow + i, currentCol - 1, DirectionsEnum.Left);
             UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Left);
 
-            UserInterfaceTools.AddControlButtons(this, currentRow, currentCol - dicSpan["colSpan"] - 1, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
-            UserInterfaceTools.AddImageControl(this, currentRow, currentCol - dicSpan["colSpan"] - 1, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
+            UserInterfaceTools.AddGridButtons(this, currentRow, currentCol - dicSpan["colSpan"] - 1, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
+            UserInterfaceTools.AddMediaCanvas(this, currentRow, currentCol - dicSpan["colSpan"] - 1, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
             UserInterfaceTools.UpdateControlButtons(MainGrid);
         }
 
@@ -346,8 +339,8 @@ namespace GridSetter.Views
                 UserInterfaceTools.DeleteContent(MainGrid, currentRow + i, currentCol + currentColSpan, DirectionsEnum.Right);
             var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol + currentColSpan + 1, DirectionsEnum.Right);
 
-            UserInterfaceTools.AddControlButtons(this, currentRow, currentCol, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
-            UserInterfaceTools.AddImageControl(this, currentRow, currentCol, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
+            UserInterfaceTools.AddGridButtons(this, currentRow, currentCol, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
+            UserInterfaceTools.AddMediaCanvas(this, currentRow, currentCol, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
             UserInterfaceTools.UpdateControlButtons(MainGrid);
         }
 
@@ -369,8 +362,8 @@ namespace GridSetter.Views
                 UserInterfaceTools.DeleteContent(MainGrid, currentRow - 1, currentCol + i, DirectionsEnum.Up);
             UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Up);
 
-            UserInterfaceTools.AddControlButtons(this, currentRow - dicSpan["rowSpan"] - 1, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
-            UserInterfaceTools.AddImageControl(this, currentRow - dicSpan["rowSpan"] - 1, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
+            UserInterfaceTools.AddGridButtons(this, currentRow - dicSpan["rowSpan"] - 1, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
+            UserInterfaceTools.AddMediaCanvas(this, currentRow - dicSpan["rowSpan"] - 1, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
             UserInterfaceTools.UpdateControlButtons(MainGrid);
         }
 
@@ -392,8 +385,8 @@ namespace GridSetter.Views
                 UserInterfaceTools.DeleteContent(MainGrid, currentRow + currentRowSpan, currentCol + i, DirectionsEnum.Down);
             var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow + currentRowSpan + 1, currentCol, DirectionsEnum.Down);
 
-            UserInterfaceTools.AddControlButtons(this, currentRow, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
-            UserInterfaceTools.AddImageControl(this, currentRow, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
+            UserInterfaceTools.AddGridButtons(this, currentRow, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
+            UserInterfaceTools.AddMediaCanvas(this, currentRow, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
             UserInterfaceTools.UpdateControlButtons(MainGrid);
         }
 
@@ -401,71 +394,90 @@ namespace GridSetter.Views
 
         #endregion // Setup
 
-        #region Image events
+        #region Media events
 
         /// <summary>
         /// Event when something is dropped on a grid.
         /// </summary>
-        /// <param name="sender">The grid impacted, I hope.</param>
+        /// <param name="sender">The canvas impacted, I hope.</param>
         /// <param name="dragEventArgs">Explicit.</param>
-        public void ImageCanvas_OnDrop(object sender, DragEventArgs dragEventArgs)
+        public void MediaCanvas_OnDrop(object sender, DragEventArgs dragEventArgs)
 		{
 			if (dragEventArgs.Data.GetDataPresent(DataFormats.FileDrop))
-				MediaControlTools.ImageDrop(sender, dragEventArgs);
+				MediaControlTools.MediaDrop(sender, dragEventArgs);
 		}
 
 		/// <summary>
-		/// Event raised on mouse wheel changed on every ImageControl.
+		/// Event raised on mouse wheel changed on every media elements.
 		/// </summary>
-		/// <param name="sender">The image hopefully.</param>
+		/// <param name="sender">The media hopefully.</param>
 		/// <param name="mouseWheelEventArgs">The mouse wheel events.</param>
-		public void ImageCanvas_OnMouseWheel(object sender, MouseWheelEventArgs mouseWheelEventArgs)
+		public void MediaCanvas_OnMouseWheel(object sender, MouseWheelEventArgs mouseWheelEventArgs)
 		{
 		    if (!(sender is Canvas canvas)) return;
-			var image = canvas.Children.Cast<Image>().FirstOrDefault(i => i.Name.Equals("Image"));
-			MediaControlTools.ImageZoom(image, mouseWheelEventArgs);
+			var fElements = canvas.Children.Cast<FrameworkElement>().Where(i => i.Name.Equals("Image") || i.Name.Equals("Video"));
+			foreach (var fElement in fElements)
+			{
+				if (fElement.Visibility != Visibility.Visible) continue;
+				MediaControlTools.MediaZoom(fElement, mouseWheelEventArgs);
+				return;
+			}
 		}
 
-        /// <summary>
-        /// Pause or play the gif on double click.
-        /// </summary>
-        /// <param name="sender">Dunno.</param>
-        /// <param name="args">Dontcare.</param>
-	    public void Image_MouseDown(object sender, MouseButtonEventArgs args)
-	    {
-	        if (!(args.Source is Image image)) return;
-	        if (image.Source == null) return;
-	        if (args.ChangedButton != MouseButton.Left || args.ClickCount != 2) return;
+		/// <summary>
+		/// Pause or play the gif/video on double click.
+		/// </summary>
+		/// <param name="sender">Dunno.</param>
+		/// <param name="args">Dontcare.</param>
+		public void Media_MouseDown(object sender, MouseButtonEventArgs args)
+        {
+	        switch (args.Source)
+	        {
+		        case Image image:
+			        if (image.Source == null) return;
+			        if (args.ChangedButton != MouseButton.Left || args.ClickCount != 2) return;
 
-	        var controller = ImageBehavior.GetAnimationController(image);
-            if (controller == null) return;
+			        var controller = ImageBehavior.GetAnimationController(image);
+			        if (controller.IsPaused)
+				        controller.Play();
+			        else
+				        controller.Pause();
+			        break;
+		        case MediaElement video:
+			        if (video.Source == null) return;
+			        if (args.ChangedButton != MouseButton.Left || args.ClickCount != 2) return;
 
-	        if (controller.IsPaused)
-	            controller.Play();
-	        else
-	            controller.Pause();
-	    }
+			        if ((bool) video.Tag)
+				        video.Pause();
+			        else
+				        video.Play();
+
+			        video.Tag = !(bool) video.Tag;
+					break;
+	        }
+        }
 
 		/// <summary>
-		/// Defines the image to drag.
+		/// Defines the media element to drag.
 		/// </summary>
-		/// <param name="sender">The image dragged.</param>
+		/// <param name="sender">The media dragged.</param>
 		/// <param name="e">Events.</param>
-		public void Image_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		public void Media_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 		{
-			if (!(e.Source is Image image)) return;
-		    if (!(UserInterfaceTools.FindParent(image) is Canvas canvas)) return;
+			if (!(e.Source is Image) && !(e.Source is MediaElement)) return;
+			var fElement = (FrameworkElement) e.Source;
+			if (!(UserInterfaceTools.FindParent(fElement) is Canvas canvas)) return;
 
-		    var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
-            var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
-			var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
+		    var scaleTransform = (ScaleTransform)((TransformGroup)fElement.RenderTransform).Children.First(tr => tr is ScaleTransform);
+            var elementHeight = fElement.ActualHeight * scaleTransform.ScaleY;
+			var elementWidth = fElement.ActualWidth * scaleTransform.ScaleX;
 
-			if (imageWidth <= canvas.ActualWidth && imageHeight <= canvas.ActualHeight) return;
+			if (elementWidth <= canvas.ActualWidth && elementHeight <= canvas.ActualHeight) return;
 
-			image.Cursor = Cursors.SizeAll;
-			image.CaptureMouse();
+			fElement.Cursor = Cursors.SizeAll;
+			fElement.CaptureMouse();
 
-			var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+			var translateTransform = (TranslateTransform)((TransformGroup)fElement.RenderTransform).Children.First(tr => tr is TranslateTransform);
 			MousePosition = e.GetPosition(canvas);
 			OriginPosition = new Point(Math.Round(translateTransform.X, MidpointRounding.AwayFromZero),
 				Math.Round(translateTransform.Y, MidpointRounding.AwayFromZero));
@@ -475,56 +487,57 @@ namespace GridSetter.Views
 		}
 
 		/// <summary>
-		/// Release the dragged image.
+		/// Release the dragged media element.
 		/// </summary>
-		/// <param name="sender">The image dragged.</param>
+		/// <param name="sender">The media dragged.</param>
 		/// <param name="e">Events.</param>
-		public void Image_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+		public void Media_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
 		{
-			if (!(e.Source is Image image)) return;
+			if (!(e.Source is Image) && !(e.Source is MediaElement)) return;
+			var fElement = (FrameworkElement) e.Source;
 
-			image.ReleaseMouseCapture();
-			image.Cursor = Cursors.Arrow;
+			fElement.ReleaseMouseCapture();
+			fElement.Cursor = Cursors.Arrow;
 		    SystemParametersInfo(SPI_SETMOUSESPEED, 0, OriginMouseSpeed, 0);
         }
 
 		/// <summary>
-		/// Move the image with the mouse.
+		/// Move the media element with the mouse.
 		/// </summary>
-		/// <param name="sender">The image dragged.</param>
+		/// <param name="sender">The element dragged.</param>
 		/// <param name="e">Events.</param>
-		public void Image_OnMouseMove(object sender, MouseEventArgs e)
+		public void Media_OnMouseMove(object sender, MouseEventArgs e)
 		{
-			if (!(e.Source is Image image) || !image.IsMouseCaptured) return;
-		    if (!(UserInterfaceTools.FindParent(image) is Canvas canvas)) return;
+			if (!(e.Source is FrameworkElement fElement) || !fElement.IsMouseCaptured) return;
+			if (!(UserInterfaceTools.FindParent(fElement) is Canvas canvas)) return;
 
-		    var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
-		    var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
-		    var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
+		    var scaleTransform = (ScaleTransform)((TransformGroup)fElement.RenderTransform).Children.First(tr => tr is ScaleTransform);
+		    var controlHeight = fElement.ActualHeight * scaleTransform.ScaleY;
+		    var controlWidth = fElement.ActualWidth * scaleTransform.ScaleX;
 
-		    Point relativePoint = image.TransformToAncestor(canvas).Transform(new Point(0, 0));
+		    Point relativePoint = fElement.TransformToAncestor(canvas).Transform(new Point(0, 0));
 		    var mathRelativeY = Math.Round(relativePoint.Y, MidpointRounding.AwayFromZero);
 		    var mathRelativeX = Math.Round(relativePoint.X, MidpointRounding.AwayFromZero);
 		    var mathMouseY = Math.Round(MousePosition.Y, MidpointRounding.AwayFromZero);
 		    var mathMouseX = Math.Round(MousePosition.X, MidpointRounding.AwayFromZero);
 
 		    Vector vector = new Vector { X = 0, Y = 0 };
-		    if (imageHeight >= canvas.ActualHeight)
+		    if (controlHeight >= canvas.ActualHeight)
 		    {
 		        var vectorY = Math.Round(e.GetPosition(canvas).Y, MidpointRounding.AwayFromZero) - mathMouseY;
 		        if (mathRelativeY <= 0 && mathRelativeY + vectorY <= 0 && vectorY > 0 ||
-		            mathRelativeY + imageHeight >= canvas.ActualHeight && mathRelativeY + imageHeight + vectorY >= canvas.ActualHeight && vectorY < 0)
+		            mathRelativeY + controlHeight >= canvas.ActualHeight && mathRelativeY + controlHeight + vectorY >= canvas.ActualHeight && vectorY < 0)
 		            vector.Y = vectorY;
 		    }
-		    if (imageWidth >= canvas.ActualWidth)
+		    if (controlWidth >= canvas.ActualWidth)
 		    {
 		        var vectorX = Math.Round(e.GetPosition(canvas).X, MidpointRounding.AwayFromZero) - mathMouseX;
 		        if (mathRelativeX <= 0 && mathRelativeX + vectorX <= 0 && vectorX > 0 ||
-		            mathRelativeX + imageWidth >= canvas.ActualWidth && mathRelativeX + imageWidth + vectorX >= canvas.ActualWidth && vectorX < 0)
+		            mathRelativeX + controlWidth >= canvas.ActualWidth && mathRelativeX + controlWidth + vectorX >= canvas.ActualWidth && vectorX < 0)
 		            vector.X = vectorX;
 		    }
 
-		    var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+		    var translateTransform = (TranslateTransform)((TransformGroup)fElement.RenderTransform).Children.First(tr => tr is TranslateTransform);
 		    translateTransform.X = OriginPosition.X + vector.X;
 		    translateTransform.Y = OriginPosition.Y + vector.Y;
 
@@ -534,21 +547,20 @@ namespace GridSetter.Views
         }
 
 		/// <summary>
-		/// Prevent the image grid to be resized when the image size change.
+		/// Translate the media content on canvas resized.
 		/// </summary>
-		/// <param name="sender">The image grid.</param>
+		/// <param name="sender">The canvas.</param>
 		/// <param name="e">Events.</param>
-		public void ImageCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+		public void MediaCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
 		{
 		    if (!(sender is Canvas canvas)) return;
-		    var child = canvas.Children.Cast<UIElement>().FirstOrDefault(u => u is Image);
-		    if (!(child is Image image)) return;
+			if (!(canvas.Children.Cast<UIElement>().FirstOrDefault(u => u is FrameworkElement) is FrameworkElement fElement)) return;
 
-		    var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
-		    var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-		    var imageHeight = image.ActualHeight * scaleTransform.ScaleY;
-		    var imageWidth = image.ActualWidth * scaleTransform.ScaleX;
-		    var relativePoint = image.TranslatePoint(new Point(0, 0), canvas);
+		    var scaleTransform = (ScaleTransform)((TransformGroup)fElement.RenderTransform).Children.First(tr => tr is ScaleTransform);
+		    var translateTransform = (TranslateTransform)((TransformGroup)fElement.RenderTransform).Children.First(tr => tr is TranslateTransform);
+		    var imageHeight = fElement.ActualHeight * scaleTransform.ScaleY;
+		    var imageWidth = fElement.ActualWidth * scaleTransform.ScaleX;
+		    var relativePoint = fElement.TranslatePoint(new Point(0, 0), canvas);
 
 		    var previousHeight = Math.Round(e.PreviousSize.Height, 2);
 		    var previousWidth = Math.Round(e.PreviousSize.Width, 2);
@@ -583,18 +595,19 @@ namespace GridSetter.Views
         }
 
         /// <summary>
-        /// Show the image control buttons on enter.
+        /// Show the media control buttons on enter.
         /// </summary>
-        /// <param name="sender">The image control buttons grid.</param>
+        /// <param name="sender">The media control buttons grid.</param>
         /// <param name="args">Who cares?</param>
-        public void ImageButtons_OnMouseEnter(object sender, MouseEventArgs args)
+        public void MediaButtons_OnMouseEnter(object sender, MouseEventArgs args)
 	    {
 	        if (!(sender is GGrid grid)) return;
-	        if (grid.Name != "ImageButtons") return;
+	        if (grid.Name != "ImageButtons" && grid.Name != "VideoButtons") return;
 	        if (!(UserInterfaceTools.FindParent(grid) is Canvas parent)) return;
 
 	        var image = parent.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
-	        if ((image as Image)?.Source == null) return;
+	        var video = parent.Children.Cast<UIElement>().FirstOrDefault(e => e is MediaElement);
+			if ((image as Image)?.Source == null && (video as MediaElement)?.Source == null) return;
 
             foreach (var child in grid.Children)
                 if (child is Button button)
@@ -602,61 +615,80 @@ namespace GridSetter.Views
         }
 
 	    /// <summary>
-        /// Hide the image control buttons on leave.
+        /// Hide the media control buttons on leave.
         /// </summary>
         /// <param name="sender">The grid where the buttons are.</param>
         /// <param name="args">Who cares?</param>
-	    public void ImageButtons_OnMouseLeave(object sender, MouseEventArgs args)
+	    public void MediaButtons_OnMouseLeave(object sender, MouseEventArgs args)
 	    {
 	        if (!(sender is GGrid grid)) return;
-	        if (grid.Name != "ImageButtons") return;
+	        if (grid.Name != "ImageButtons" && grid.Name != "VideoButtons") return;
 
             foreach (var child in grid.Children)
                 if (child is Button button)
                     button.Visibility = Visibility.Hidden;
         }
 
-        /// <summary>
-        /// Update the size of the image on the click of a button.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-	    public void ImageControl_OnClick(object sender, RoutedEventArgs args)
-	    {
-            if (!(sender is Button child)) return;
+		#region Image events
 
-            var parentGrid = UserInterfaceTools.FindParent(child);
-            var parentCanvas = UserInterfaceTools.FindParent(parentGrid) as Canvas;
-            var imageGrid = parentCanvas?.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
-            if (!(imageGrid is Image image)) return;
+		/// <summary>
+		/// Update the size of the image on the click of a button.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		public void ImageControl_OnClick(object sender, RoutedEventArgs args)
+		{
+			if (!(sender is Button child)) return;
 
-            var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
-	        var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
-            translateTransform.X = 0;
-	        translateTransform.Y = 0;
-            switch (child.Name)
-            {
-                case "TakeHeightButton":
-                    var scaleHeight = Math.Round(parentCanvas.ActualHeight / image.ActualHeight, 2);
-                    scaleTransform.ScaleY = scaleHeight;
-                    scaleTransform.ScaleX = scaleHeight;
-                    break;
+			var parentGrid = UserInterfaceTools.FindParent(child);
+			var parentCanvas = UserInterfaceTools.FindParent(parentGrid) as Canvas;
+			var imageGrid = parentCanvas?.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
+			if (!(imageGrid is Image image)) return;
 
-                case "TakeWidthButton":
-                    var scaleWidth = Math.Round(parentCanvas.ActualWidth / image.ActualWidth, 2);
-                    scaleTransform.ScaleY = scaleWidth;
-                    scaleTransform.ScaleX = scaleWidth;
-                    break;
+			var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
+			var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+			translateTransform.X = 0;
+			translateTransform.Y = 0;
+			switch (child.Name)
+			{
+				case "TakeHeightButton":
+					var scaleHeight = Math.Round(parentCanvas.ActualHeight / image.ActualHeight, 2);
+					scaleTransform.ScaleY = scaleHeight;
+					scaleTransform.ScaleX = scaleHeight;
+					break;
 
-                case "ResizeButton":
-                    scaleTransform.ScaleY = 1;
-                    scaleTransform.ScaleX = 1;
-                    break;
-            }
-        }
+				case "TakeWidthButton":
+					var scaleWidth = Math.Round(parentCanvas.ActualWidth / image.ActualWidth, 2);
+					scaleTransform.ScaleY = scaleWidth;
+					scaleTransform.ScaleX = scaleWidth;
+					break;
 
-        #endregion // Image events
+				case "ResizeButton":
+					scaleTransform.ScaleY = 1;
+					scaleTransform.ScaleX = 1;
+					break;
+			}
+		}
 
-        #endregion // Events
-    }
+		#endregion // Image events
+
+		#region Video events
+
+		/// <summary>
+		/// Replay video on end.
+		/// </summary>
+		/// <param name="sender">Blabla.</param>
+		/// <param name="routedEventArgs">Bla.</param>
+		public void Video_OnMediaEnded(object sender, RoutedEventArgs routedEventArgs)
+		{
+			if (!(sender is MediaElement video)) return;
+			video.Position = TimeSpan.FromMilliseconds(1);
+		}
+
+		#endregion // Video events
+
+		#endregion // Media events
+
+		#endregion // Events
+	}
 }
