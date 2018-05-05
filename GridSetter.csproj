@@ -108,6 +108,7 @@
     </ApplicationDefinition>
     <Compile Include="Controls\RadialPanel.cs" />
     <Compile Include="Utils\Converters\CenterConverter.cs" />
+    <Compile Include="Utils\Converters\RightConverter.cs" />
     <Compile Include="Utils\MediaControlTools.cs" />
     <Compile Include="Utils\ActionCommand.cs" />
     <Compile Include="Utils\AnimationTools.cs" />

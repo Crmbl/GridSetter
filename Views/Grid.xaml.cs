@@ -671,6 +671,10 @@ namespace GridSetter.Views
 					scaleTransform.ScaleY = 1;
 					scaleTransform.ScaleX = 1;
 					break;
+
+				case "MuteButton":
+
+					break;
 			}
 		}
 

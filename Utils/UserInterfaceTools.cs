@@ -194,6 +194,7 @@ namespace GridSetter.Utils
 			window.MainGrid.Children.Add(canvas);
 
 			AddMediaButtons(window, canvas, rowSpan, colSpan);
+			AddVideoVolumeSlider(window, canvas, rowSpan, colSpan);
 		}
 
 		/// <summary>
@@ -222,11 +223,6 @@ namespace GridSetter.Utils
 			controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
 			controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 			controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
-
-		    var transformGroup = new TransformGroup();
-		    var transflateTransform = new TranslateTransform();
-		    transformGroup.Children.Add(transflateTransform);
-		    controlGrid.RenderTransform = transformGroup;
 
             Button takeWidthButton = new Button
             {
@@ -294,7 +290,68 @@ namespace GridSetter.Utils
 		/// <param name="colSpan">Defines the colspan of the parent.</param>
 		private static void AddVideoVolumeSlider(Views.Grid window, Canvas canvas, int rowSpan = 1, int colSpan = 1)
 		{
-			
+			Grid controlGrid = new Grid
+			{
+				Name = "VideoButtons",
+				Background = new SolidColorBrush(Colors.Transparent),
+				ClipToBounds = true,
+				MaxHeight = 195,
+				Width = 45,
+				VerticalAlignment = VerticalAlignment.Center
+			};
+			controlGrid.MouseEnter += window.MediaButtons_OnMouseEnter;
+			controlGrid.MouseLeave += window.MediaButtons_OnMouseLeave;
+
+			controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+			controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+			controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+			Slider volumeSlider = new Slider
+			{
+				//Style = Application.Current.Resources["ButtonImageBase"] as Style,
+				Name = "VolumeSlider",
+				Visibility = Visibility.Hidden,
+				Width = 10,
+				Height = 120,
+				Orientation = Orientation.Vertical
+				//Tag = Application.Current.Resources["EnlargeHeightImage"] as BitmapImage
+			};
+			//volumeSlider.DragEn
+
+			Button muteButton = new Button
+			{
+				Style = Application.Current.Resources["ButtonImageSide"] as Style,
+				Name = "MuteButton",
+				Visibility = Visibility.Hidden,
+				Tag = Application.Current.Resources["MuteImage"] as BitmapImage
+			};
+			muteButton.Click += window.MediaControl_OnClick;
+
+			Grid.SetColumn(volumeSlider, 5);
+			Grid.SetRow(volumeSlider, 1);
+			Grid.SetColumn(muteButton, 5);
+			Grid.SetRow(muteButton, 2);
+			controlGrid.Children.Add(volumeSlider);
+			controlGrid.Children.Add(muteButton);
+			controlGrid.SetBinding(Canvas.LeftProperty, new MultiBinding
+			{
+				Converter = new RightrConverter(),
+				ConverterParameter = "left",
+				Mode = BindingMode.TwoWay,
+				Bindings = {
+					new Binding("ActualWidth") { Source = canvas },
+					new Binding("ActualHeight") { Source = canvas },
+					new Binding("ActualWidth") { Source = controlGrid },
+					new Binding("ActualHeight") { Source = controlGrid }
+				}
+			});
+
+			Grid.SetColumn(controlGrid, 1);
+			Grid.SetRow(controlGrid, 1);
+			Grid.SetColumnSpan(controlGrid, colSpan);
+			Grid.SetRowSpan(controlGrid, rowSpan);
+
+			canvas.Children.Add(controlGrid);
 		}
 
         /// <summary>
