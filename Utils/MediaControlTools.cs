@@ -102,6 +102,7 @@ namespace GridSetter.Utils
 				var videoControl = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is MediaElement);
 				if (!(videoControl is MediaElement video)) return;
 				video.Visibility = Visibility.Hidden;
+				video.Source = null;
 
 				image.Stretch = Stretch.None;
 			    image.ClipToBounds = true;
@@ -139,6 +140,7 @@ namespace GridSetter.Utils
 				var imageControl = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is Image);
 				if (!(imageControl is Image image)) return;
 				image.Visibility = Visibility.Hidden;
+				image.Source = null;
 
 				video.Stretch = Stretch.None;
 				video.ClipToBounds = true;
@@ -159,6 +161,7 @@ namespace GridSetter.Utils
 				video.EndInit();
 
 				video.Play();
+				video.Volume = 0;
 			}
 		}
 	}

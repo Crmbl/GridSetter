@@ -602,7 +602,7 @@ namespace GridSetter.Views
         public void MediaButtons_OnMouseEnter(object sender, MouseEventArgs args)
 	    {
 	        if (!(sender is GGrid grid)) return;
-	        if (grid.Name != "ImageButtons" && grid.Name != "VideoButtons") return;
+	        if (grid.Name != "MediaButtons") return;
 	        if (!(UserInterfaceTools.FindParent(grid) is Canvas parent)) return;
 
 	        var image = parent.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
@@ -622,43 +622,47 @@ namespace GridSetter.Views
 	    public void MediaButtons_OnMouseLeave(object sender, MouseEventArgs args)
 	    {
 	        if (!(sender is GGrid grid)) return;
-	        if (grid.Name != "ImageButtons" && grid.Name != "VideoButtons") return;
+	        if (grid.Name != "MediaButtons") return;
 
             foreach (var child in grid.Children)
                 if (child is Button button)
                     button.Visibility = Visibility.Hidden;
         }
 
-		#region Image events
-
 		/// <summary>
-		/// Update the size of the image on the click of a button.
+		/// Update the size of the media control on the click of a button.
 		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="args"></param>
-		public void ImageControl_OnClick(object sender, RoutedEventArgs args)
+		/// <param name="sender">.</param>
+		/// <param name="args">!</param>
+		public void MediaControl_OnClick(object sender, RoutedEventArgs args)
 		{
 			if (!(sender is Button child)) return;
 
-			var parentGrid = UserInterfaceTools.FindParent(child);
-			var parentCanvas = UserInterfaceTools.FindParent(parentGrid) as Canvas;
-			var imageGrid = parentCanvas?.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
-			if (!(imageGrid is Image image)) return;
+			var grid = UserInterfaceTools.FindParent(child);
+			var canvas = UserInterfaceTools.FindParent(grid);
+			var image = ((Canvas)canvas).Children.Cast<UIElement>().FirstOrDefault(e => e is Image) as Image;
+			var video = ((Canvas)canvas).Children.Cast<UIElement>().FirstOrDefault(e => e is MediaElement) as MediaElement;
 
-			var scaleTransform = (ScaleTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is ScaleTransform);
-			var translateTransform = (TranslateTransform)((TransformGroup)image.RenderTransform).Children.First(tr => tr is TranslateTransform);
+			FrameworkElement fElement;
+			if (image?.Source == null && video?.Source != null)
+				fElement = video;
+			else
+				fElement = image;
+
+			var scaleTransform = (ScaleTransform)((TransformGroup)fElement.RenderTransform).Children.First(tr => tr is ScaleTransform);
+			var translateTransform = (TranslateTransform)((TransformGroup)fElement.RenderTransform).Children.First(tr => tr is TranslateTransform);
 			translateTransform.X = 0;
 			translateTransform.Y = 0;
 			switch (child.Name)
 			{
 				case "TakeHeightButton":
-					var scaleHeight = Math.Round(parentCanvas.ActualHeight / image.ActualHeight, 2);
+					var scaleHeight = Math.Round(canvas.ActualHeight / fElement.ActualHeight, 2);
 					scaleTransform.ScaleY = scaleHeight;
 					scaleTransform.ScaleX = scaleHeight;
 					break;
 
 				case "TakeWidthButton":
-					var scaleWidth = Math.Round(parentCanvas.ActualWidth / image.ActualWidth, 2);
+					var scaleWidth = Math.Round(canvas.ActualWidth / fElement.ActualWidth, 2);
 					scaleTransform.ScaleY = scaleWidth;
 					scaleTransform.ScaleX = scaleWidth;
 					break;
@@ -669,8 +673,6 @@ namespace GridSetter.Views
 					break;
 			}
 		}
-
-		#endregion // Image events
 
 		#region Video events
 

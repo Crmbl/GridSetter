@@ -193,8 +193,7 @@ namespace GridSetter.Utils
 			Panel.SetZIndex(canvas, 10);
 			window.MainGrid.Children.Add(canvas);
 
-			AddImageButtons(window, canvas, rowSpan, colSpan);
-			AddVideoButtons(window, canvas, rowSpan, colSpan);
+			AddMediaButtons(window, canvas, rowSpan, colSpan);
 		}
 
 		/// <summary>
@@ -204,11 +203,11 @@ namespace GridSetter.Utils
 		/// <param name="canvas">The canvas to add the buttons into.</param>
 		/// <param name="rowSpan">Defines the rowspan of the parent.</param>
 		/// <param name="colSpan">Defines the colspan of the parent.</param>
-		private static void AddImageButtons(Views.Grid window, Canvas canvas, int rowSpan = 1, int colSpan = 1)
+		private static void AddMediaButtons(Views.Grid window, Canvas canvas, int rowSpan = 1, int colSpan = 1)
 		{
 			Grid controlGrid = new Grid
 			{
-                Name = "ImageButtons",
+                Name = "MediaButtons",
 				Background = new SolidColorBrush(Colors.Transparent),
                 ClipToBounds = true,
 				MaxWidth = 195,
@@ -236,7 +235,7 @@ namespace GridSetter.Utils
                 Visibility = Visibility.Hidden,
                 Tag = Application.Current.Resources["EnlargeWidthImage"] as BitmapImage
             };
-		    takeWidthButton.Click += window.ImageControl_OnClick;
+		    takeWidthButton.Click += window.MediaControl_OnClick;
 
             Button takeHeightButton = new Button
 		    {
@@ -245,7 +244,7 @@ namespace GridSetter.Utils
 		        Visibility = Visibility.Hidden,
                 Tag = Application.Current.Resources["EnlargeHeightImage"] as BitmapImage
             };
-		    takeHeightButton.Click += window.ImageControl_OnClick;
+		    takeHeightButton.Click += window.MediaControl_OnClick;
 
 		    Button resizeButton = new Button
 		    {
@@ -254,7 +253,7 @@ namespace GridSetter.Utils
 		        Visibility = Visibility.Hidden,
                 Tag = Application.Current.Resources["ResizeImage"] as BitmapImage
             };
-		    resizeButton.Click += window.ImageControl_OnClick;
+		    resizeButton.Click += window.MediaControl_OnClick;
 
             Grid.SetColumn(takeHeightButton, 1);
 			Grid.SetRow(takeHeightButton, 0);
@@ -287,92 +286,15 @@ namespace GridSetter.Utils
         }
 
 		/// <summary>
-		/// Add the buttons to control the video.
+		/// Add the buttons to control the volume of the video.
 		/// </summary>
 		/// <param name="window">Used to bind to the methods.</param>
 		/// <param name="canvas">The canvas to add the buttons into.</param>
 		/// <param name="rowSpan">Defines the rowspan of the parent.</param>
 		/// <param name="colSpan">Defines the colspan of the parent.</param>
-		private static void AddVideoButtons(Views.Grid window, Canvas canvas, int rowSpan = 1, int colSpan = 1)
+		private static void AddVideoVolumeSlider(Views.Grid window, Canvas canvas, int rowSpan = 1, int colSpan = 1)
 		{
-			//Grid controlGrid = new Grid
-			//{
-			//	Name = "ImageButtons",
-			//	Background = new SolidColorBrush(Colors.Transparent),
-			//	ClipToBounds = true,
-			//	MaxWidth = 195,
-			//	VerticalAlignment = VerticalAlignment.Top
-			//};
-			//controlGrid.MouseEnter += window.ImageButtons_OnMouseEnter;
-			//controlGrid.MouseLeave += window.ImageButtons_OnMouseLeave;
-
-			//controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-			//controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
-			//controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
-			//controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
-			//controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-			//controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
-
-			//var transformGroup = new TransformGroup();
-			//var transflateTransform = new TranslateTransform();
-			//transformGroup.Children.Add(transflateTransform);
-			//controlGrid.RenderTransform = transformGroup;
-
-			//Button takeWidthButton = new Button
-			//{
-			//	Style = Application.Current.Resources["ButtonImageBase"] as Style,
-			//	Name = "TakeWidthButton",
-			//	Visibility = Visibility.Hidden,
-			//	Tag = Application.Current.Resources["EnlargeWidthImage"] as BitmapImage
-			//};
-			//takeWidthButton.Click += window.ImageControl_OnClick;
-
-			//Button takeHeightButton = new Button
-			//{
-			//	Style = Application.Current.Resources["ButtonImageBase"] as Style,
-			//	Name = "TakeHeightButton",
-			//	Visibility = Visibility.Hidden,
-			//	Tag = Application.Current.Resources["EnlargeHeightImage"] as BitmapImage
-			//};
-			//takeHeightButton.Click += window.ImageControl_OnClick;
-
-			//Button resizeButton = new Button
-			//{
-			//	Style = Application.Current.Resources["ButtonImageBase"] as Style,
-			//	Name = "ResizeButton",
-			//	Visibility = Visibility.Hidden,
-			//	Tag = Application.Current.Resources["ResizeImage"] as BitmapImage
-			//};
-			//resizeButton.Click += window.ImageControl_OnClick;
-
-			//Grid.SetColumn(takeHeightButton, 1);
-			//Grid.SetRow(takeHeightButton, 0);
-			//Grid.SetColumn(takeWidthButton, 2);
-			//Grid.SetRow(takeWidthButton, 0);
-			//Grid.SetColumn(resizeButton, 3);
-			//Grid.SetRow(resizeButton, 0);
-			//controlGrid.Children.Add(takeHeightButton);
-			//controlGrid.Children.Add(takeWidthButton);
-			//controlGrid.Children.Add(resizeButton);
-			//controlGrid.SetBinding(Canvas.LeftProperty, new MultiBinding
-			//{
-			//	Converter = new CenterConverter(),
-			//	ConverterParameter = "left",
-			//	Mode = BindingMode.TwoWay,
-			//	Bindings = {
-			//		new Binding("ActualWidth") { Source = canvas },
-			//		new Binding("ActualHeight") { Source = canvas },
-			//		new Binding("ActualWidth") { Source = controlGrid },
-			//		new Binding("ActualHeight") { Source = controlGrid }
-			//	}
-			//});
-
-			//Grid.SetColumn(controlGrid, 1);
-			//Grid.SetRow(controlGrid, 1);
-			//Grid.SetColumnSpan(controlGrid, colSpan);
-			//Grid.SetRowSpan(controlGrid, rowSpan);
-
-			//canvas.Children.Add(controlGrid);
+			
 		}
 
         /// <summary>
@@ -634,11 +556,13 @@ namespace GridSetter.Utils
 			{
 			    if (uiElement is Canvas canvas && canvas.Name == "MediaCanvas")
 			    {
-				    var fElement = canvas.Children.Cast<UIElement>().FirstOrDefault(e => e is FrameworkElement);
-			        if (fElement is Image image && image.Source != null || fElement is MediaElement video && video.Source != null)
-			            canvas.Opacity = canvas.Opacity < 1 ? 1 : 0.3;
-					else
-			            canvas.Visibility = canvas.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
+				    foreach (var item in ((Canvas) uiElement).Children.Cast<UIElement>().Where(e => e is FrameworkElement))
+				    {
+					    if (item is Image image && image.Source != null || item is MediaElement video && video.Source != null)
+						    canvas.Opacity = canvas.Opacity < 1 ? 1 : 0.3;
+					    else
+						    canvas.Visibility = canvas.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
+					}
                 }
                 else
 			        uiElement.Visibility = uiElement.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
