@@ -132,8 +132,10 @@ namespace GridSetter.Utils
 
 				ImageBehavior.SetAnimatedSource(image, imageToDrop);
             }
-			else if (files.First().Contains(".avi") || files.First().Contains(".mp4") || files.First().Contains(".wmv") || files.First().Contains(".webm") || files.First().Contains(".mpg"))
+			else if (files.First().Contains(".avi") || files.First().Contains(".mp4") || files.First().Contains(".wmv") || files.First().Contains(".webm") || files.First().Contains(".mpg") || files.First().Contains(".mov"))
 			{
+                // TODO IMPROVE THE FORMAT !!!! will use library.
+
 				var videoControl = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is MediaElement);
 				if (!(videoControl is MediaElement video)) return;
 
