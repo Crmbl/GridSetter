@@ -193,18 +193,16 @@ namespace GridSetter.Utils
 			Panel.SetZIndex(canvas, 10);
 			window.MainGrid.Children.Add(canvas);
 
-			AddMediaButtons(window, canvas, rowSpan, colSpan);
-			AddVideoVolumeSlider(window, canvas, rowSpan, colSpan);
-		}
+		    AddMediaButtons(window, canvas);
+            AddVideoVolumeSlider(window, canvas);
+        }
 
-		/// <summary>
-		/// Add the buttons to control the image.
-		/// </summary>
-		/// <param name="window">Used to bind to the methods.</param>
-		/// <param name="canvas">The canvas to add the buttons into.</param>
-		/// <param name="rowSpan">Defines the rowspan of the parent.</param>
-		/// <param name="colSpan">Defines the colspan of the parent.</param>
-		private static void AddMediaButtons(Views.Grid window, Canvas canvas, int rowSpan = 1, int colSpan = 1)
+        /// <summary>
+        /// Add the buttons to control the image.
+        /// </summary>
+        /// <param name="window">Used to bind to the methods.</param>
+        /// <param name="canvas">The canvas to add the buttons into.</param>
+        private static void AddMediaButtons(Views.Grid window, Canvas canvas)
 		{
 			Grid controlGrid = new Grid
 			{
@@ -217,12 +215,9 @@ namespace GridSetter.Utils
 		    controlGrid.MouseEnter += window.MediaButtons_OnMouseEnter;
 		    controlGrid.MouseLeave += window.MediaButtons_OnMouseLeave;
 
-            controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 			controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
 			controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
 			controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
-			controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-			controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
 
             Button takeWidthButton = new Button
             {
@@ -251,32 +246,24 @@ namespace GridSetter.Utils
             };
 		    resizeButton.Click += window.MediaControl_OnClick;
 
-            Grid.SetColumn(takeHeightButton, 1);
-			Grid.SetRow(takeHeightButton, 0);
-			Grid.SetColumn(takeWidthButton, 2);
-			Grid.SetRow(takeWidthButton, 0);
-			Grid.SetColumn(resizeButton, 3);
-			Grid.SetRow(resizeButton, 0);
+            Grid.SetColumn(takeHeightButton, 0);
+			Grid.SetColumn(takeWidthButton, 1);
+			Grid.SetColumn(resizeButton, 2);
 		    controlGrid.Children.Add(takeHeightButton);
 		    controlGrid.Children.Add(takeWidthButton);
 		    controlGrid.Children.Add(resizeButton);
-		    controlGrid.SetBinding(Canvas.LeftProperty, new MultiBinding
-		    {
-		        Converter = new CenterConverter(),
-		        ConverterParameter = "left",
-		        Mode = BindingMode.TwoWay,
-		        Bindings = {
-		            new Binding("ActualWidth") { Source = canvas },
-		            new Binding("ActualHeight") { Source = canvas },
-		            new Binding("ActualWidth") { Source = controlGrid },
-		            new Binding("ActualHeight") { Source = controlGrid }
-		        }
-		    });
-
-		    Grid.SetColumn(controlGrid, 1);
-		    Grid.SetRow(controlGrid, 1);
-		    Grid.SetColumnSpan(controlGrid, colSpan);
-		    Grid.SetRowSpan(controlGrid, rowSpan);
+            controlGrid.SetBinding(Canvas.LeftProperty, new MultiBinding
+            {
+                Converter = new CenterConverter(),
+                ConverterParameter = "left",
+                Mode = BindingMode.TwoWay,
+                Bindings = {
+                    new Binding("ActualWidth") { Source = canvas },
+                    new Binding("ActualHeight") { Source = canvas },
+                    new Binding("ActualWidth") { Source = controlGrid },
+                    new Binding("ActualHeight") { Source = controlGrid }
+                }
+            });
 
 		    canvas.Children.Add(controlGrid);
         }
@@ -286,16 +273,13 @@ namespace GridSetter.Utils
 		/// </summary>
 		/// <param name="window">Used to bind to the methods.</param>
 		/// <param name="canvas">The canvas to add the buttons into.</param>
-		/// <param name="rowSpan">Defines the rowspan of the parent.</param>
-		/// <param name="colSpan">Defines the colspan of the parent.</param>
-		private static void AddVideoVolumeSlider(Views.Grid window, Canvas canvas, int rowSpan = 1, int colSpan = 1)
+		private static void AddVideoVolumeSlider(Views.Grid window, Canvas canvas)
 		{
 			Grid controlGrid = new Grid
 			{
 				Name = "VideoButtons",
-				Background = new SolidColorBrush(Colors.Transparent),
-				ClipToBounds = true,
-				MaxHeight = 195,
+                Background = new SolidColorBrush(Colors.Transparent),
+                MaxHeight = 195,
 				Width = 45,
 				VerticalAlignment = VerticalAlignment.Center
 			};
@@ -304,38 +288,31 @@ namespace GridSetter.Utils
 
 			controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
 			controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
-			controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 
 			Slider volumeSlider = new Slider
 			{
-				//Style = Application.Current.Resources["ButtonImageBase"] as Style,
-				Name = "VolumeSlider",
-				Visibility = Visibility.Hidden,
-				Width = 10,
-				Height = 120,
-				Orientation = Orientation.Vertical
-				//Tag = Application.Current.Resources["EnlargeHeightImage"] as BitmapImage
+                Style = Application.Current.Resources["SliderStyle"] as Style,
+                Name = "VolumeSlider",
+				Visibility = Visibility.Hidden
 			};
-			//volumeSlider.DragEn
+			volumeSlider.ValueChanged += window.VolumeSlider_OnValueChanged;
 
 			Button muteButton = new Button
 			{
 				Style = Application.Current.Resources["ButtonImageSide"] as Style,
-				Name = "MuteButton",
+				Name = "ToggleMuteButton",
 				Visibility = Visibility.Hidden,
 				Tag = Application.Current.Resources["MuteImage"] as BitmapImage
 			};
 			muteButton.Click += window.MediaControl_OnClick;
 
-			Grid.SetColumn(volumeSlider, 5);
-			Grid.SetRow(volumeSlider, 1);
-			Grid.SetColumn(muteButton, 5);
-			Grid.SetRow(muteButton, 2);
+			Grid.SetRow(volumeSlider, 0);
+			Grid.SetRow(muteButton, 1);
 			controlGrid.Children.Add(volumeSlider);
 			controlGrid.Children.Add(muteButton);
 			controlGrid.SetBinding(Canvas.LeftProperty, new MultiBinding
 			{
-				Converter = new RightrConverter(),
+				Converter = new RightConverter(),
 				ConverterParameter = "left",
 				Mode = BindingMode.TwoWay,
 				Bindings = {
@@ -345,16 +322,23 @@ namespace GridSetter.Utils
 					new Binding("ActualHeight") { Source = controlGrid }
 				}
 			});
-
-			Grid.SetColumn(controlGrid, 1);
-			Grid.SetRow(controlGrid, 1);
-			Grid.SetColumnSpan(controlGrid, colSpan);
-			Grid.SetRowSpan(controlGrid, rowSpan);
+		    controlGrid.SetBinding(Canvas.TopProperty, new MultiBinding
+		    {
+		        Converter = new CenterConverter(),
+		        ConverterParameter = "top",
+		        Mode = BindingMode.TwoWay,
+		        Bindings = {
+		            new Binding("ActualWidth") { Source = canvas },
+		            new Binding("ActualHeight") { Source = canvas },
+		            new Binding("ActualWidth") { Source = controlGrid },
+		            new Binding("ActualHeight") { Source = controlGrid }
+		        }
+		    });
 
 			canvas.Children.Add(controlGrid);
 		}
 
-        /// <summary>
+	    /// <summary>
         /// Add the control buttons for each new col/row defined.
         /// </summary>
         /// <param name="window">Keep the grid in memory to bind the methods, not really mvc pattern.</param>
@@ -608,22 +592,22 @@ namespace GridSetter.Utils
 		/// <param name="isLocked">Defines the mode.</param>
 		public static void ToggleLockControlButtons(Grid mainGrid, bool isLocked)
 		{
-			var elementList = mainGrid.Children.Cast<UIElement>().Where(e => e is Grid || e is Canvas).ToList();
+			var elementList = mainGrid.Children.Cast<FrameworkElement>().Where(e => e.Name == "SetupGrid" || e.Name == "MediaCanvas").ToList();
 			foreach (var uiElement in elementList)
 			{
 			    if (uiElement is Canvas canvas && canvas.Name == "MediaCanvas")
 			    {
-				    foreach (var item in ((Canvas) uiElement).Children.Cast<UIElement>().Where(e => e is FrameworkElement))
-				    {
-					    if (item is Image image && image.Source != null || item is MediaElement video && video.Source != null)
-						    canvas.Opacity = canvas.Opacity < 1 ? 1 : 0.3;
-					    else
-						    canvas.Visibility = canvas.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
-					}
+			        var image = (Image) canvas.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
+			        var video = (MediaElement) canvas.Children.Cast<UIElement>().FirstOrDefault(e => e is MediaElement);
+
+                    if (image?.Source != null || video?.Source != null)
+                        canvas.Opacity = canvas.Opacity < 1 ? 1 : 0.3;
+                    else
+                        canvas.Visibility = canvas.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
                 }
                 else
 			        uiElement.Visibility = uiElement.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
-            }
+			}
 
 			if (!isLocked)
 				UpdateControlButtons(mainGrid);

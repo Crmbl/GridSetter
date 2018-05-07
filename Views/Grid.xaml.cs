@@ -6,10 +6,12 @@ using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using GridSetter.Utils;
 using GridSetter.Utils.Enums;
 using GridSetter.ViewModels;
 using WpfAnimatedGif;
+using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
 using Cursors = System.Windows.Input.Cursors;
 using DataFormats = System.Windows.DataFormats;
@@ -602,16 +604,18 @@ namespace GridSetter.Views
         public void MediaButtons_OnMouseEnter(object sender, MouseEventArgs args)
 	    {
 	        if (!(sender is GGrid grid)) return;
-	        if (grid.Name != "MediaButtons") return;
+	        if (grid.Name != "MediaButtons" && grid.Name != "VideoButtons") return;
 	        if (!(UserInterfaceTools.FindParent(grid) is Canvas parent)) return;
 
 	        var image = parent.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
 	        var video = parent.Children.Cast<UIElement>().FirstOrDefault(e => e is MediaElement);
+
+            if (grid.Name == "VideoButtons" && (video as MediaElement)?.Source == null) return;
 			if ((image as Image)?.Source == null && (video as MediaElement)?.Source == null) return;
 
             foreach (var child in grid.Children)
-                if (child is Button button)
-                    button.Visibility = Visibility.Visible;
+                if (child is FrameworkElement fElement)
+                    fElement.Visibility = Visibility.Visible;
         }
 
 	    /// <summary>
@@ -622,11 +626,11 @@ namespace GridSetter.Views
 	    public void MediaButtons_OnMouseLeave(object sender, MouseEventArgs args)
 	    {
 	        if (!(sender is GGrid grid)) return;
-	        if (grid.Name != "MediaButtons") return;
+	        if (grid.Name != "MediaButtons" && grid.Name != "VideoButtons") return;
 
             foreach (var child in grid.Children)
-                if (child is Button button)
-                    button.Visibility = Visibility.Hidden;
+                if (child is FrameworkElement fElement)
+                    fElement.Visibility = Visibility.Hidden;
         }
 
 		/// <summary>
@@ -649,6 +653,7 @@ namespace GridSetter.Views
 			else
 				fElement = image;
 
+		    if (fElement == null) return;
 			var scaleTransform = (ScaleTransform)((TransformGroup)fElement.RenderTransform).Children.First(tr => tr is ScaleTransform);
 			var translateTransform = (TranslateTransform)((TransformGroup)fElement.RenderTransform).Children.First(tr => tr is TranslateTransform);
 			translateTransform.X = 0;
@@ -672,9 +677,28 @@ namespace GridSetter.Views
 					scaleTransform.ScaleX = 1;
 					break;
 
-				case "MuteButton":
+				case "ToggleMuteButton":
+				    if (video == null) return;
 
-					break;
+				    var parentGrid = UserInterfaceTools.FindParent(child);
+				    if (!(parentGrid is GGrid ggrid)) return;
+
+				    var sliderControl = ggrid.Children.Cast<FrameworkElement>().FirstOrDefault(e => e.Name == "VolumeSlider");
+				    if (!(sliderControl is Slider slider)) return;
+
+                    if (video.Volume == 0)
+				    {
+				        child.Tag = Application.Current.Resources["VolumeImage"] as BitmapImage;
+				        video.Volume = 0.5;
+                        slider.Value = 0.5;
+				    }
+				    else
+				    {
+				        child.Tag = Application.Current.Resources["MuteImage"] as BitmapImage;
+				        video.Volume = 0;
+                        slider.Value = 0;
+                    }
+                    break;
 			}
 		}
 
@@ -691,10 +715,26 @@ namespace GridSetter.Views
 			video.Position = TimeSpan.FromMilliseconds(1);
 		}
 
-		#endregion // Video events
+        /// <summary>
+        /// Update the volume of the concerned video.
+        /// </summary>
+        /// <param name="sender">.</param>
+        /// <param name="args">.</param>
+        public void VolumeSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> args)
+        {
+            var parentGrid = UserInterfaceTools.FindParent(sender as Slider);
+            var parentCanvas = UserInterfaceTools.FindParent(parentGrid);
 
-		#endregion // Media events
+            if (!(parentCanvas is Canvas canvas)) return;
+            if (!(canvas.Children.Cast<FrameworkElement>().FirstOrDefault(e => e.Name == "Video") is MediaElement video)) return;
 
-		#endregion // Events
-	}
+            video.Volume = args.NewValue > 1 ? 1 : args.NewValue < 0 ? 0 : args.NewValue;
+        }
+
+        #endregion // Video events
+
+        #endregion // Media events
+
+        #endregion // Events
+    }
 }

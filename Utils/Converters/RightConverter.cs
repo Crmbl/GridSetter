@@ -7,7 +7,7 @@ namespace GridSetter.Utils.Converters
 	/// <summary>
 	/// Allow the children to be pushed to the right inside the canvas.
 	/// </summary>
-	internal sealed class RightrConverter : IMultiValueConverter
+	internal sealed class RightConverter : IMultiValueConverter
 	{
 		/// <summary>
 		/// Convert method.

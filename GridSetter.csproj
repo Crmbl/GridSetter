@@ -184,5 +184,11 @@
     <Resource Include="Resources\Images\resize.png" />
     <Resource Include="Resources\Images\width.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\mute.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\volume.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
