@@ -45,7 +45,7 @@
             <TextBlock Grid.Row="0" Grid.Column="1" x:Name="AppTitle" Text="{Binding AppTitle}" Style="{StaticResource SpeedTextBlockStyle}" />
             <Button Grid.Row="2" Grid.Column="1" Command="{Binding ResetCommand}" Click="ResetNewClick" Content="{Binding ResetNewLabel}" Style="{StaticResource ActionButtonStyle}" />
             <Button Grid.Row="4" Grid.Column="1" Command="{Binding EmptyContentCommand}" Content="Empty all" Style="{StaticResource ActionButtonStyle}" />
-            <Button Grid.Row="6" Grid.Column="1" Command="{Binding ToggleLockCommand}" Click="ToggleLockClick" Content="{Binding ToggleLockLabel}" Style="{StaticResource ActionButtonStyle}" />
+            <Button Grid.Row="6" Grid.Column="1" Command="{Binding ToggleLockCommand}" Content="{Binding ToggleLockLabel}" Style="{StaticResource ActionButtonStyle}" />
             <Button Grid.Row="8" Grid.Column="1" Command="{Binding ExitCommand}" Content="Exit" Style="{StaticResource DefaultButtonStyle}" />
         </Grid>
     </Grid>

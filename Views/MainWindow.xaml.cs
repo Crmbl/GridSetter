@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
-using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -46,16 +47,11 @@ namespace GridSetter.Views
 
 			#region System Tray Icon
 
-			var resourceStream = GetResourceStream(new Uri("pack://application:,,,/Resources/Images/steak.ico"));
-			if (resourceStream == null) return;
-
-			Stream iconStream = resourceStream.Stream;
 			NotifyIcon = new NotifyIcon
 			{
-				Icon = new Icon(iconStream),
+				Icon = GetNumberedIcon(),
 				Visible = false
 			};
-			iconStream.Dispose();
 
 			NotifyIcon.DoubleClick += delegate
 			{
@@ -80,14 +76,6 @@ namespace GridSetter.Views
 		{
 			if (WindowState == WindowState.Normal)
 				WindowState = WindowState.Minimized;
-		}
-
-		/// <summary>
-		/// Event raised on toggle lock click.
-		/// </summary>
-		private void ToggleLockClick(object sender, RoutedEventArgs e)
-		{
-		//	SetNotifyIconMenuItems();
 		}
 
 		/// <summary>
@@ -170,6 +158,37 @@ namespace GridSetter.Views
 			NotifyIcon.ContextMenu.MenuItems.Add("Empty all", (s, e) => { ViewModel.EmptyAllContent(); });
 			NotifyIcon.ContextMenu.MenuItems.Add(ViewModel.ToggleLockLabel == "Lock" ? "Lock" : "Unlock", (s, e) => { ViewModel.ToggleLockGrid(); SetNotifyIconMenuItems(); });
 			NotifyIcon.ContextMenu.MenuItems.Add("Exit", (s, e) => Current.Shutdown());
+		}
+
+		/// <summary>
+		/// Defines the number on the system tray icon and set it.
+		/// </summary>
+		/// <returns></returns>
+		private static Icon GetNumberedIcon()
+		{
+			var resource = GetResourceStream(new Uri("pack://application:,,,/Resources/Images/steak.ico"));
+			if (resource == null) throw new ArgumentNullException($"Resource not found!");
+
+			var bitmap = new Bitmap(32, 32);
+			var count = Process.GetProcesses().Count(p => p.ProcessName == "GridSetter");
+			var icon = new Icon(resource.Stream);
+			var font = new Font("Tahoma", 16, System.Drawing.FontStyle.Bold);
+			var brush = new SolidBrush(Color.White);
+			var graphics = Graphics.FromImage(bitmap);
+
+			graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
+			graphics.DrawIcon(icon, 0, 0);
+			graphics.DrawString(count == 1 ? string.Empty : count.ToString(), font, brush, 15, 8);
+
+			var createdIcon = System.Drawing.Icon.FromHandle(bitmap.GetHicon());
+
+			resource.Stream.Dispose();
+			font.Dispose();
+			brush.Dispose();
+			graphics.Dispose();
+			bitmap.Dispose();
+
+			return createdIcon;
 		}
 
 		#endregion // Methods

@@ -7,11 +7,13 @@
         mc:Ignorable="d"
         Title="Grid"
         WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
         AllowsTransparency="True">
     <Window.Background>
         <SolidColorBrush Color="Azure" Opacity="0.3" />
     </Window.Background>
     <Window.CommandBindings>
         <CommandBinding Command="{x:Static local:Grid.ToggleLockCommand}" Executed="ShortcutToggleLock"/>
+        <CommandBinding Command="{x:Static local:Grid.ToDesktopCommand}" Executed="ShortcutToDesktop"/>
     </Window.CommandBindings>
 </Window>

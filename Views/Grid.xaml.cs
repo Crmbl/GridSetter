@@ -84,6 +84,11 @@ namespace GridSetter.Views
         /// </summary>
         public static readonly RoutedCommand ToggleLockCommand = new RoutedCommand();
 
+		/// <summary>
+		/// The routed command for the shortcut.
+		/// </summary>
+		public static readonly RoutedCommand ToDesktopCommand = new RoutedCommand();
+
         #endregion // Static
 
         #endregion // Properties
@@ -102,8 +107,11 @@ namespace GridSetter.Views
 			ResizeMode = ResizeMode.NoResize;
 			Left = 0;
 			Top = 0;
-		    Width = Screen.FromPoint(new System.Drawing.Point((int)Left, (int)Top)).WorkingArea.Width;
-		    Height = Screen.FromPoint(new System.Drawing.Point((int)Left, (int)Top)).WorkingArea.Height;
+
+			Screen currentScreen = Screen.FromPoint(
+				new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y));
+			Width = currentScreen.WorkingArea.Width;
+		    Height = currentScreen.WorkingArea.Height;
 
             MainGrid = new GGrid { ShowGridLines = false };
 			MainGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = 195, Width = new GridLength(1, GridUnitType.Star) });
@@ -115,6 +123,7 @@ namespace GridSetter.Views
 			UserInterfaceTools.UpdateControlButtons(MainGrid);
 
 		    ToggleLockCommand.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
+			ToDesktopCommand.InputGestures.Add(new KeyGesture(Key.Q, ModifierKeys.Control));
 		}
 
         #endregion // Constructors
@@ -130,6 +139,17 @@ namespace GridSetter.Views
 	    {
 	        GridSetterRef.ToggleLockGrid();
 	    }
+
+		/// <summary>
+		/// To desktop on shortcut press (ctrl + q).
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void ShortcutToDesktop(object sender, ExecutedRoutedEventArgs e)
+		{
+			if (WindowState == WindowState.Normal)
+				WindowState = WindowState.Minimized;
+		}
 
         #region Setup
 
@@ -689,8 +709,8 @@ namespace GridSetter.Views
                     if (video.Volume == 0)
 				    {
 				        child.Tag = Application.Current.Resources["VolumeImage"] as BitmapImage;
-				        video.Volume = 0.5;
-                        slider.Value = 0.5;
+				        video.Volume = 1;
+                        slider.Value = 1;
 				    }
 				    else
 				    {
@@ -722,14 +742,22 @@ namespace GridSetter.Views
         /// <param name="args">.</param>
         public void VolumeSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> args)
         {
-            var parentGrid = UserInterfaceTools.FindParent(sender as Slider);
-            var parentCanvas = UserInterfaceTools.FindParent(parentGrid);
+			var parentGrid = UserInterfaceTools.FindParent(sender as Slider);
+	        var parentCanvas = UserInterfaceTools.FindParent(parentGrid);
 
-            if (!(parentCanvas is Canvas canvas)) return;
-            if (!(canvas.Children.Cast<FrameworkElement>().FirstOrDefault(e => e.Name == "Video") is MediaElement video)) return;
+	        if (!(parentCanvas is Canvas canvas)) return;
+	        if (!(canvas.Children.Cast<FrameworkElement>().FirstOrDefault(e => e.Name == "Video") is MediaElement video)) return;
+	        var volumeGrid = canvas.Children.Cast<FrameworkElement>().FirstOrDefault(e => e is GGrid && e.Name == "VideoButtons") as GGrid;
+	        if (volumeGrid?.Children.Cast<FrameworkElement>().FirstOrDefault(e => e is Button && e.Name == "ToggleMuteButton") is Button volumeButton)
+	        {
+		        if (args.NewValue > 0 && Equals(volumeButton.Tag, Application.Current.Resources["MuteImage"] as BitmapImage))
+			        volumeButton.Tag = Application.Current.Resources["VolumeImage"] as BitmapImage;
+		        else if (args.NewValue == 0)
+			        volumeButton.Tag = Application.Current.Resources["MuteImage"] as BitmapImage;
+	        }
 
-            video.Volume = args.NewValue > 1 ? 1 : args.NewValue < 0 ? 0 : args.NewValue;
-        }
+	        video.Volume = args.NewValue > 1.5 ? 1.5 : args.NewValue < 0 ? 0 : args.NewValue;
+		}
 
         #endregion // Video events
 
