@@ -176,9 +176,6 @@
     <Resource Include="gs.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Images\steak.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Images\lightning.png" />
   </ItemGroup>
   <ItemGroup>
