@@ -166,7 +166,7 @@ namespace GridSetter.Views
 		/// <returns></returns>
 		private static Icon GetNumberedIcon()
 		{
-			var resource = GetResourceStream(new Uri("pack://application:,,,/Resources/Images/steak.ico"));
+			var resource = GetResourceStream(new Uri("pack://application:,,,/Resources/Images/ice-cream.ico"));
 			if (resource == null) throw new ArgumentNullException($"Resource not found!");
 
 			var bitmap = new Bitmap(32, 32);
