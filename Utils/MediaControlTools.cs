@@ -104,7 +104,15 @@ namespace GridSetter.Utils
 				video.Visibility = Visibility.Hidden;
 				video.Source = null;
 
-				image.Stretch = Stretch.None;
+			    var videoButtons = canvas.Children.Cast<FrameworkElement>().FirstOrDefault(e => e is Grid && e.Name == "VideoButtons") as Grid;
+			    var volumeButton = videoButtons?.Children.Cast<FrameworkElement>().FirstOrDefault(e => e is Button) as Button;
+			    var volumeSlider = videoButtons?.Children.Cast<FrameworkElement>().FirstOrDefault(e => e is Slider) as Slider;
+			    if (videoButtons != null && volumeButton != null)
+			        volumeButton.Tag = Application.Current.Resources["MuteImage"] as BitmapImage;
+			    if (videoButtons != null && volumeSlider != null)
+			        volumeSlider.Value = 0;
+
+                image.Stretch = Stretch.None;
 			    image.ClipToBounds = true;
 			    image.Visibility = Visibility.Visible;
 			    image.HorizontalAlignment = HorizontalAlignment.Center;
@@ -142,7 +150,15 @@ namespace GridSetter.Utils
 				image.Visibility = Visibility.Hidden;
 				image.Source = null;
 
-				video.Stretch = Stretch.None;
+			    var videoButtons = canvas.Children.Cast<FrameworkElement>().FirstOrDefault(e => e is Grid && e.Name == "VideoButtons") as Grid;
+			    var volumeButton = videoButtons?.Children.Cast<FrameworkElement>().FirstOrDefault(e => e is Button) as Button;
+			    var volumeSlider = videoButtons?.Children.Cast<FrameworkElement>().FirstOrDefault(e => e is Slider) as Slider;
+			    if (videoButtons != null && volumeButton != null)
+			        volumeButton.Tag = Application.Current.Resources["MuteImage"] as BitmapImage;
+			    if (videoButtons != null && volumeSlider != null)
+			        volumeSlider.Value = 0;
+
+                video.Stretch = Stretch.None;
 				video.ClipToBounds = true;
 				video.Visibility = Visibility.Visible;
 				video.HorizontalAlignment = HorizontalAlignment.Center;
