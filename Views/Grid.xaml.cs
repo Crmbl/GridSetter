@@ -48,6 +48,16 @@ namespace GridSetter.Views
 	    // ReSharper disable once InconsistentNaming
 	    private const UInt32 SPI_SETMOUSESPEED = 0x0071;
 
+        /// <summary>
+        /// Constant for the minimum cell height.
+        /// </summary>
+	    private const int CellMinHeight = 0; // 100
+
+        /// <summary>
+        /// Constant for the minimum cell width.
+        /// </summary>
+	    private const int CellMinWidth = 0; // 195
+
         #endregion // Constants
 
         #region Properties
@@ -114,8 +124,8 @@ namespace GridSetter.Views
 		    Height = currentScreen.WorkingArea.Height;
 
             MainGrid = new GGrid { ShowGridLines = false };
-			MainGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = 195, Width = new GridLength(1, GridUnitType.Star) });
-			MainGrid.RowDefinitions.Add(new RowDefinition { MinHeight = 100, Height = new GridLength(1, GridUnitType.Star) });
+			MainGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = CellMinWidth, Width = new GridLength(1, GridUnitType.Star) });
+			MainGrid.RowDefinitions.Add(new RowDefinition { MinHeight = CellMinHeight, Height = new GridLength(1, GridUnitType.Star) });
 
 			AddChild(MainGrid);
 			UserInterfaceTools.AddGridButtons(this);
@@ -204,7 +214,7 @@ namespace GridSetter.Views
             for (var i = 0; i < rowAmount; i++)
                 UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Vertical);
 
-            MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { MinWidth = 195, Width = new GridLength(1, GridUnitType.Star) });
+            MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { MinWidth = CellMinWidth, Width = new GridLength(1, GridUnitType.Star) });
             UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Left, currentCol);
             for (var i = 0; i < rowAmount; i++)
             {
@@ -231,7 +241,7 @@ namespace GridSetter.Views
             var currentCol = GGrid.GetColumn(parent) + GGrid.GetColumnSpan(parent);
             var rowAmount = MainGrid.RowDefinitions.Count;
 
-            MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { MinWidth = 195, Width = new GridLength(1, GridUnitType.Star) });
+            MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { MinWidth = CellMinWidth, Width = new GridLength(1, GridUnitType.Star) });
             UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Right, currentCol);
             for (var i = 0; i < rowAmount; i++)
             {
@@ -268,7 +278,7 @@ namespace GridSetter.Views
             for (var i = 0; i < colAmount; i++)
                 UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Horizontal);
 
-            MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { MinHeight = 100, Height = new GridLength(1, GridUnitType.Star) });
+            MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { MinHeight = CellMinHeight, Height = new GridLength(1, GridUnitType.Star) });
             UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Up, currentRow);
             for (var i = 0; i < colAmount; i++)
             {
@@ -295,7 +305,7 @@ namespace GridSetter.Views
             var currentRow = GGrid.GetRow(parent) + GGrid.GetRowSpan(parent);
             var colAmount = MainGrid.ColumnDefinitions.Count;
 
-            MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { MinHeight = 100, Height = new GridLength(1, GridUnitType.Star) });
+            MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { MinHeight = CellMinHeight, Height = new GridLength(1, GridUnitType.Star) });
             UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Down, currentRow);
             for (var i = 0; i < colAmount; i++)
             {
