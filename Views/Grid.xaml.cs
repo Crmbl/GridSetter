@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using GridSetter.Utils;
@@ -20,6 +21,8 @@ using GGrid = System.Windows.Controls.Grid;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 // ReSharper disable CompareOfFloatsByEqualityOperator
 // ReSharper disable PossibleInvalidOperationException
+// ReSharper disable InconsistentNaming
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace GridSetter.Views
 {
@@ -33,19 +36,25 @@ namespace GridSetter.Views
 	    [DllImport("User32.dll")]
 	    static extern Boolean SystemParametersInfo(UInt32 uiAction, UInt32 uiParam, UInt32 pvParam, UInt32 fWinIni);
 
+	    [DllImport("User32.dll")]
+	    [return: MarshalAs(UnmanagedType.Bool)]
+	    public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+	    [DllImport("User32.dll")]
+	    public static extern IntPtr FindWindow(string className, string windowTitle);
+
         #endregion // DLL imports
 
         #region Constants
 
-	    /// <summary>
-	    /// Defines the mouse speed when dragging.
-	    /// </summary>
-	    private const UInt32 SlowerMouseSpeed = 3;
+        /// <summary>
+        /// Defines the mouse speed when dragging.
+        /// </summary>
+        private const UInt32 SlowerMouseSpeed = 3;
 
 	    /// <summary>
 	    /// Constant to set the mouse speed.
 	    /// </summary>
-	    // ReSharper disable once InconsistentNaming
 	    private const UInt32 SPI_SETMOUSESPEED = 0x0071;
 
         /// <summary>
@@ -67,10 +76,25 @@ namespace GridSetter.Views
         /// </summary>
         public GGrid MainGrid { get; }
 
-		/// <summary>
-		/// The mouse position.
-		/// </summary>
-		private Point MousePosition { get; set; }
+        /// <summary>
+        /// Defines the handle for the main Grid.
+        /// </summary>
+        private IntPtr GridHandle { get; set; }
+
+	    /// <summary>
+	    /// Defines the handle for the windows Taskbar.
+	    /// </summary>
+	    private IntPtr TaskbarHandle { get; set; }
+
+        /// <summary>
+        /// Tells if this is the primary monitor.
+        /// </summary>
+        private bool IsPrimaryMonitor { get; set; }
+
+        /// <summary>
+        /// The mouse position.
+        /// </summary>
+        private Point MousePosition { get; set; }
 		
 		/// <summary>
 		/// The origin position.
@@ -94,10 +118,15 @@ namespace GridSetter.Views
         /// </summary>
         public static readonly RoutedCommand ToggleLockCommand = new RoutedCommand();
 
-		/// <summary>
-		/// The routed command for the shortcut.
-		/// </summary>
-		public static readonly RoutedCommand ToDesktopCommand = new RoutedCommand();
+        /// <summary>
+        /// The routed command for the shortcut.
+        /// </summary>
+        public static readonly RoutedCommand ToDesktopCommand = new RoutedCommand();
+
+        /// <summary>
+        /// The routed command for the shortcut.
+        /// </summary>
+        public static readonly RoutedCommand ToggleTaskbarCommand = new RoutedCommand();
 
         #endregion // Static
 
@@ -110,19 +139,16 @@ namespace GridSetter.Views
         /// </summary>
         public Grid(GridSetterViewModel parentRef)
 		{
+            //TODO -Ability to change screen ? -To resize ? 
 			InitializeComponent();
 
 		    GridSetterRef = parentRef;
 			WindowStyle = WindowStyle.None;
 			ResizeMode = ResizeMode.NoResize;
-			Left = 0;
+            Left = 0;
 			Top = 0;
 
-			Screen currentScreen = Screen.FromPoint(
-				new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y));
-			Width = currentScreen.WorkingArea.Width;
-		    Height = currentScreen.WorkingArea.Height;
-
+		    IsPrimaryMonitor = Screen.FromPoint(new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y)).Primary;
             MainGrid = new GGrid { ShowGridLines = false };
 			MainGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = CellMinWidth, Width = new GridLength(1, GridUnitType.Star) });
 			MainGrid.RowDefinitions.Add(new RowDefinition { MinHeight = CellMinHeight, Height = new GridLength(1, GridUnitType.Star) });
@@ -134,18 +160,30 @@ namespace GridSetter.Views
 
 		    ToggleLockCommand.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
 			ToDesktopCommand.InputGestures.Add(new KeyGesture(Key.Q, ModifierKeys.Control));
-		}
+		    ToggleTaskbarCommand.InputGestures.Add(new KeyGesture(Key.W, ModifierKeys.Control));
+
+		    Loaded += Grid_Loaded;
+        }
 
         #endregion // Constructors
 
         #region Events
 
-	    /// <summary>
-	    /// Toggle lock on shortcut press (ctrl + a).
-	    /// </summary>
-	    /// <param name="sender">Who cares yo ?</param>
-	    /// <param name="e">Same.</param>
-	    private void ShortcutToggleLock(object sender, ExecutedRoutedEventArgs e)
+	    private void Grid_Loaded(object sender, RoutedEventArgs e)
+	    {
+	        if (sender is Grid senderWindow)
+	            senderWindow.WindowState = WindowState.Maximized;
+
+	        GridHandle = new WindowInteropHelper(this).Handle;
+
+            // TODO DOES NOT WORK, THE SECONDARY TASKBAR JUST GONE ! BIM 
+	        TaskbarHandle = IsPrimaryMonitor ? FindWindow("Shell_TrayWnd", null) : FindWindow("Shell_SecondaryTrayWnd", null);
+	    }
+
+        /// <summary>
+        /// Toggle lock on shortcut press (ctrl + a).
+        /// </summary>
+        private void ShortcutToggleLock(object sender, ExecutedRoutedEventArgs e)
 	    {
 	        GridSetterRef.ToggleLockGrid();
 	    }
@@ -153,13 +191,19 @@ namespace GridSetter.Views
 		/// <summary>
 		/// To desktop on shortcut press (ctrl + q).
 		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
 		private void ShortcutToDesktop(object sender, ExecutedRoutedEventArgs e)
 		{
-			if (WindowState == WindowState.Normal)
-				WindowState = WindowState.Minimized;
+            if (WindowState != WindowState.Minimized)
+                WindowState = WindowState.Minimized;
 		}
+
+        /// <summary>
+        /// Toggle visibility of taskbar on shortcut press (ctrl + w).
+        /// </summary>
+	    private void ShortcutToggleTaskbar(object sender, ExecutedRoutedEventArgs e)
+        {
+            SetWindowPos(TaskbarHandle, GridHandle, 0, 0, 0, 0, 0);
+        }
 
         #region Setup
 

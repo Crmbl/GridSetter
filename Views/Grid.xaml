@@ -15,5 +15,6 @@
     <Window.CommandBindings>
         <CommandBinding Command="{x:Static local:Grid.ToggleLockCommand}" Executed="ShortcutToggleLock"/>
         <CommandBinding Command="{x:Static local:Grid.ToDesktopCommand}" Executed="ShortcutToDesktop"/>
+        <CommandBinding Command="{x:Static local:Grid.ToggleTaskbarCommand}" Executed="ShortcutToggleTaskbar"/>
     </Window.CommandBindings>
 </Window>

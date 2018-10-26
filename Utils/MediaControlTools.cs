@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -31,6 +32,16 @@ namespace GridSetter.Utils
         /// Defines the zoom update ratio.
         /// </summary>
         private const double ZoomRatio = 0.1;
+
+        /// <summary>
+        /// All the image types allowed for the Grid system.
+        /// </summary>
+	    private static readonly IEnumerable<string> ImageTypes = new[] {"gif", "jpg", "png", "jpeg", "bmp"};
+
+        /// <summary>
+        /// All the video types allowed for the Grid system.
+        /// </summary>
+	    private static readonly IEnumerable<string> VideoTypes = new[] {"avi", "mp4", "wmv", "webm", "mpg", "mpeg", "mov"};
 
 		#endregion // Properties
 
@@ -94,8 +105,9 @@ namespace GridSetter.Utils
 			if (files == null || files.Length > 1) return;
 			if (!(sender is Canvas canvas)) return;
 
-			if (files.First().Contains(".gif") || files.First().Contains(".jpg") || files.First().Contains(".png") || files.First().Contains(".jpeg"))
-			{
+		    var fileType = files.First().Split('.').Last();
+		    if (ImageTypes.Any(type => type.ToLower().Equals(fileType)))
+            {
 				var imageControl = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is Image);
 				if (!(imageControl is Image image)) return;
 
@@ -140,7 +152,7 @@ namespace GridSetter.Utils
 
 				ImageBehavior.SetAnimatedSource(image, imageToDrop);
             }
-			else if (files.First().Contains(".avi") || files.First().Contains(".mp4") || files.First().Contains(".wmv") || files.First().Contains(".webm") || files.First().Contains(".mpg") || files.First().Contains(".mov"))
+			else if (VideoTypes.Any(type => type.ToLower().Equals(fileType)))
 			{
 				var videoControl = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is MediaElement);
 				if (!(videoControl is MediaElement video)) return;
