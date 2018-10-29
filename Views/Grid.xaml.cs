@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using GridSetter.Utils;
@@ -163,7 +162,11 @@ namespace GridSetter.Views
             Left = 0;
 			Top = 0;
 
-		    IsPrimaryMonitor = Screen.FromPoint(new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y)).Primary;
+		    Screen currentScreen = Screen.FromPoint(new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y));
+		    Width = currentScreen.Bounds.Width;
+		    Height = currentScreen.Bounds.Height;
+
+            IsPrimaryMonitor = Screen.FromPoint(new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y)).Primary;
             MainGrid = new GGrid { ShowGridLines = false };
 			MainGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = CellMinWidth, Width = new GridLength(1, GridUnitType.Star) });
 			MainGrid.RowDefinitions.Add(new RowDefinition { MinHeight = CellMinHeight, Height = new GridLength(1, GridUnitType.Star) });

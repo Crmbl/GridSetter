@@ -137,9 +137,9 @@ namespace GridSetter.ViewModels
 		{
 			AppTitle = "Grid Setter";
 			#if DEBUG
-			Version = "1.0d";
+			Version = "1.5d";
 			#else
-			Version = "1.0r";
+			Version = "1.5r";
 			#endif
 
 			ToggleLockLabel = "Lock";
