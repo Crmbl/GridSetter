@@ -34,7 +34,7 @@ namespace GridSetter.Views
         #region DLL imports 
 
 	    [DllImport("User32.dll")]
-	    static extern Boolean SystemParametersInfo(UInt32 uiAction, UInt32 uiParam, UInt32 pvParam, UInt32 fWinIni);
+	    public static extern Boolean SystemParametersInfo(UInt32 uiAction, UInt32 uiParam, UInt32 pvParam, UInt32 fWinIni);
 
 	    [DllImport("User32.dll")]
 	    [return: MarshalAs(UnmanagedType.Bool)]
@@ -58,6 +58,26 @@ namespace GridSetter.Views
 	    private const UInt32 SPI_SETMOUSESPEED = 0x0071;
 
         /// <summary>
+        /// Constant for nomove flag.
+        /// </summary>
+	    private const UInt32 SWP_NOMOVE = 0x0002;
+
+        /// <summary>
+        /// Constant for nosize flag.
+        /// </summary>
+	    private const UInt32 SWP_NOSIZE = 0x0001;
+
+        /// <summary>
+        /// Constant for noZorder flag.
+        /// </summary>
+	    private const UInt32 SWP_NOZORDER = 0x0004;
+
+        /// <summary>
+        /// Constant for showwindow flag.
+        /// </summary>
+	    private const UInt32 SWP_SHOWWINDOW = 0x0040;
+
+        /// <summary>
         /// Constant for the minimum cell height.
         /// </summary>
 	    private const int CellMinHeight = 0; // 100
@@ -75,11 +95,6 @@ namespace GridSetter.Views
         /// Defines the main grid of the app.
         /// </summary>
         public GGrid MainGrid { get; }
-
-        /// <summary>
-        /// Defines the handle for the main Grid.
-        /// </summary>
-        private IntPtr GridHandle { get; set; }
 
 	    /// <summary>
 	    /// Defines the handle for the windows Taskbar.
@@ -174,9 +189,6 @@ namespace GridSetter.Views
 	        if (sender is Grid senderWindow)
 	            senderWindow.WindowState = WindowState.Maximized;
 
-	        GridHandle = new WindowInteropHelper(this).Handle;
-
-            // TODO DOES NOT WORK, THE SECONDARY TASKBAR JUST GONE ! BIM 
 	        TaskbarHandle = IsPrimaryMonitor ? FindWindow("Shell_TrayWnd", null) : FindWindow("Shell_SecondaryTrayWnd", null);
 	    }
 
@@ -202,7 +214,7 @@ namespace GridSetter.Views
         /// </summary>
 	    private void ShortcutToggleTaskbar(object sender, ExecutedRoutedEventArgs e)
         {
-            SetWindowPos(TaskbarHandle, GridHandle, 0, 0, 0, 0, 0);
+            SetWindowPos(TaskbarHandle, IntPtr.Zero, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
         }
 
         #region Setup
