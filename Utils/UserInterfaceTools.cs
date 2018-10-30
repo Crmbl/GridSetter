@@ -371,13 +371,13 @@ namespace GridSetter.Utils
 			radialPanel.Children.Add(addDownRowButton);
 			radialPanel.Children.Add(addLeftColButton);
 
-			var mergeTopButton = new Image { Style = Application.Current.Resources["MergeButtonStyle"] as Style, Name = "mergeTopButton", Visibility = Visibility.Collapsed};
+			var mergeTopButton = new Button { Style = Application.Current.Resources["MergeTopButtonStyle"] as Style, Name = "mergeTopButton", Visibility = Visibility.Collapsed};
 			mergeTopButton.MouseLeftButtonUp += window.MergeTopButton_OnClick;
-			var mergeDownButton = new Image { Style = Application.Current.Resources["MergeButtonStyle"] as Style, Name = "mergeDownButton", Visibility = Visibility.Collapsed };
+			var mergeDownButton = new Button { Style = Application.Current.Resources["MergeBottomButtonStyle"] as Style, Name = "mergeDownButton", Visibility = Visibility.Collapsed };
 			mergeDownButton.MouseLeftButtonUp += window.MergeDownButton_OnClick;
-			var mergeLeftButton = new Image { Style = Application.Current.Resources["MergeButtonStyle"] as Style, Name = "mergeLeftButton", Visibility = Visibility.Collapsed };
+			var mergeLeftButton = new Button { Style = Application.Current.Resources["MergeLeftButtonStyle"] as Style, Name = "mergeLeftButton", Visibility = Visibility.Collapsed };
 			mergeLeftButton.MouseLeftButtonUp += window.MergeLeftButton_OnClick;
-			var mergeRightButton = new Image { Style = Application.Current.Resources["MergeButtonStyle"] as Style, Name = "mergeRightButton", Visibility = Visibility.Collapsed };
+			var mergeRightButton = new Button { Style = Application.Current.Resources["MergeRightButtonStyle"] as Style, Name = "mergeRightButton", Visibility = Visibility.Collapsed };
 			mergeRightButton.MouseLeftButtonUp += window.MergeRightButton_OnClick;
 
 		    controlGrid.Children.Add(splitButton);
@@ -405,16 +405,20 @@ namespace GridSetter.Utils
 			Grid.SetColumn(radialPanel, 2);
 			Grid.SetRow(radialPanel, 2);
 
-			Grid.SetColumn(mergeTopButton, 2);
+			Grid.SetColumn(mergeTopButton, 0);
+            Grid.SetColumnSpan(mergeTopButton, 5);
 			Grid.SetRow(mergeTopButton, 0);
-			Grid.SetColumn(mergeDownButton, 2);
-			Grid.SetRow(mergeDownButton, 4);
+			Grid.SetColumn(mergeDownButton, 0);
+		    Grid.SetColumnSpan(mergeDownButton, 5);
+            Grid.SetRow(mergeDownButton, 4);
 			Grid.SetColumn(mergeLeftButton, 0);
-			Grid.SetRow(mergeLeftButton, 2);
-			Grid.SetColumn(mergeRightButton, 4);
-			Grid.SetRow(mergeRightButton, 2);
+			Grid.SetRow(mergeLeftButton, 0);
+		    Grid.SetRowSpan(mergeLeftButton, 5);
+            Grid.SetColumn(mergeRightButton, 4);
+			Grid.SetRow(mergeRightButton, 0);
+		    Grid.SetRowSpan(mergeRightButton, 5);
 
-			Grid.SetColumn(controlGrid, colId);
+            Grid.SetColumn(controlGrid, colId);
 			Grid.SetRow(controlGrid, rowId);
 			Grid.SetColumnSpan(controlGrid, colSpan);
 			Grid.SetRowSpan(controlGrid, rowSpan);
@@ -623,11 +627,11 @@ namespace GridSetter.Utils
 			{
 				var grid = (Grid)uiElement;
 				var buttonsList = grid.Children.Cast<UIElement>().Where(x => x is Button).ToList();
-				var imageButtonsList = grid.Children.Cast<UIElement>().Where(x => x is Image).ToList();
-				var mergeTopButton = imageButtonsList.Cast<Image>().FirstOrDefault(b => b.Name.Equals("mergeTopButton"));
-				var mergeDownButton = imageButtonsList.Cast<Image>().FirstOrDefault(b => b.Name.Equals("mergeDownButton"));
-				var mergeLeftButton = imageButtonsList.Cast<Image>().FirstOrDefault(b => b.Name.Equals("mergeLeftButton"));
-				var mergeRightButton = imageButtonsList.Cast<Image>().FirstOrDefault(b => b.Name.Equals("mergeRightButton"));
+				var mergeButtonsList = grid.Children.Cast<UIElement>().Where(x => x is Button).ToList();
+				var mergeTopButton = mergeButtonsList.Cast<Button>().FirstOrDefault(b => b.Name.Equals("mergeTopButton"));
+				var mergeDownButton = mergeButtonsList.Cast<Button>().FirstOrDefault(b => b.Name.Equals("mergeDownButton"));
+				var mergeLeftButton = mergeButtonsList.Cast<Button>().FirstOrDefault(b => b.Name.Equals("mergeLeftButton"));
+				var mergeRightButton = mergeButtonsList.Cast<Button>().FirstOrDefault(b => b.Name.Equals("mergeRightButton"));
 				var splitButton = buttonsList.Cast<Button>().FirstOrDefault(b => b.Name.Equals("splitButton"));
 
 				if (mergeTopButton != null)
