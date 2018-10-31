@@ -393,10 +393,10 @@ namespace GridSetter.Views
         /// Merge the cell from left with the current one.
         /// </summary>
         /// <param name="sender">The button clicked.</param>
-        /// <param name="mouseButtonEventArgs">The mouse args.</param>
-        public void MergeLeftButton_OnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        /// <param name="buttonEventArgs">The args.</param>
+        public void MergeLeftButton_OnClick(object sender, RoutedEventArgs buttonEventArgs)
         {
-            var parent = UserInterfaceTools.FindParent((Image)sender);
+            var parent = UserInterfaceTools.FindParent((Button)sender);
             var currentCol = GGrid.GetColumn(parent);
             var currentRow = GGrid.GetRow(parent);
             var currentColSpan = GGrid.GetColumnSpan(parent);
@@ -416,10 +416,10 @@ namespace GridSetter.Views
         /// Merge the cell from right with the current one.
         /// </summary>
         /// <param name="sender">The button clicked.</param>
-        /// <param name="mouseButtonEventArgs">The mouse args.</param>
-        public void MergeRightButton_OnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        /// <param name="buttonEventArgs">The args.</param>
+        public void MergeRightButton_OnClick(object sender, RoutedEventArgs buttonEventArgs)
         {
-            var parent = UserInterfaceTools.FindParent((Image)sender);
+            var parent = UserInterfaceTools.FindParent((Button)sender);
             var currentCol = GGrid.GetColumn(parent);
             var currentRow = GGrid.GetRow(parent);
             var currentColSpan = GGrid.GetColumnSpan(parent);
@@ -439,10 +439,10 @@ namespace GridSetter.Views
         /// Merge the cell from top with the current one.
         /// </summary>
         /// <param name="sender">The button clicked.</param>
-        /// <param name="mouseButtonEventArgs">The mouse args.</param>
-        public void MergeTopButton_OnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        /// <param name="buttonEventArgs">The args.</param>
+        public void MergeTopButton_OnClick(object sender, RoutedEventArgs buttonEventArgs)
         {
-            var parent = UserInterfaceTools.FindParent((Image)sender);
+            var parent = UserInterfaceTools.FindParent((Button)sender);
             var currentCol = GGrid.GetColumn(parent);
             var currentRow = GGrid.GetRow(parent);
             var currentRowSpan = GGrid.GetRowSpan(parent);
@@ -462,10 +462,10 @@ namespace GridSetter.Views
         /// Merge the cell from under with the current one.
         /// </summary>
         /// <param name="sender">The button clicked.</param>
-        /// <param name="mouseButtonEventArgs">The mouse args.</param>
-        public void MergeDownButton_OnClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        /// <param name="buttonEventArgs">The args.</param>
+        public void MergeDownButton_OnClick(object sender, RoutedEventArgs buttonEventArgs)
         {
-            var parent = UserInterfaceTools.FindParent((Image)sender);
+            var parent = UserInterfaceTools.FindParent((Button)sender);
             var currentCol = GGrid.GetColumn(parent);
             var currentRow = GGrid.GetRow(parent);
             var currentRowSpan = GGrid.GetRowSpan(parent);

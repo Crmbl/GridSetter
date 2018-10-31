@@ -372,13 +372,13 @@ namespace GridSetter.Utils
 			radialPanel.Children.Add(addLeftColButton);
 
 			var mergeTopButton = new Button { Style = Application.Current.Resources["MergeTopButtonStyle"] as Style, Name = "mergeTopButton", Visibility = Visibility.Collapsed};
-			mergeTopButton.MouseLeftButtonUp += window.MergeTopButton_OnClick;
+			mergeTopButton.Click += window.MergeTopButton_OnClick;
 			var mergeDownButton = new Button { Style = Application.Current.Resources["MergeBottomButtonStyle"] as Style, Name = "mergeDownButton", Visibility = Visibility.Collapsed };
-			mergeDownButton.MouseLeftButtonUp += window.MergeDownButton_OnClick;
+			mergeDownButton.Click += window.MergeDownButton_OnClick;
 			var mergeLeftButton = new Button { Style = Application.Current.Resources["MergeLeftButtonStyle"] as Style, Name = "mergeLeftButton", Visibility = Visibility.Collapsed };
-			mergeLeftButton.MouseLeftButtonUp += window.MergeLeftButton_OnClick;
+			mergeLeftButton.Click += window.MergeLeftButton_OnClick;
 			var mergeRightButton = new Button { Style = Application.Current.Resources["MergeRightButtonStyle"] as Style, Name = "mergeRightButton", Visibility = Visibility.Collapsed };
-			mergeRightButton.MouseLeftButtonUp += window.MergeRightButton_OnClick;
+			mergeRightButton.Click += window.MergeRightButton_OnClick;
 
 		    controlGrid.Children.Add(splitButton);
 		    controlGrid.Children.Add(radialPanel);

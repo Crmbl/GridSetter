@@ -120,20 +120,9 @@
             <Setter Property="Height" Value="25" />
         </Style>
         
-        <!--<Style x:Key="MergeButtonStyle" TargetType="Image">
-            <Setter Property="Source" Value="{DynamicResource Lightning}" />
-            <Setter Property="Width" Value="55" />
-            <Setter Property="ForceCursor" Value="True" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Height" Value="70" />
-        </Style>-->
-
-        <!-- ********************************************************************************************* -->
-        
         <Style x:Key="MergeButtonStyle" TargetType="Button">
             <Setter Property="ForceCursor" Value="True" />
             <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Background" Value="#747d8c" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
@@ -145,60 +134,61 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="true">
-                    <Setter Property="Background" Value="Pink"/>
+                    <Setter Property="Background" Value="#A9A9A9"/>
                 </Trigger>
                 <Trigger Property="Button.IsPressed" Value="true">
-                    <Setter Property="Button.Background" Value="Orange"/>
+                    <Setter Property="Button.Background" Value="#ff4757"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <!--background-image: linear-gradient(to top, #df89b5 0%, #bfd9fe 100%);-->
-        <LinearGradientBrush x:Key="TopOpacityMask" StartPoint="0,0" EndPoint="0,1">
+        <LinearGradientBrush x:Key="TopOpacityMask" StartPoint="0.5,0" EndPoint="0.5,1">
             <GradientStop Color="#dddddddd" Offset="0"/>
-            <GradientStop Color="#0ddddddd" Offset="0.80"/>
+            <GradientStop Color="#dddddddd" Offset="0.35"/>
+            <GradientStop Color="#60dddddd" Offset="0.9"/>
             <GradientStop Color="#00dddddd" Offset="1"/>
         </LinearGradientBrush>
         <Style x:Key="MergeTopButtonStyle" BasedOn="{StaticResource MergeButtonStyle}" TargetType="Button">
-            <Setter Property="Height" Value="35" />
+            <Setter Property="Height" Value="20" />
             <Setter Property="OpacityMask" Value="{StaticResource TopOpacityMask}" />
             <Setter Property="Width" Value="{Binding Path=ActualWidth, ElementName=SetupGrid}" />
         </Style>
 
-        <LinearGradientBrush x:Key="BottomOpacityMask" StartPoint="0,0" EndPoint="0,1">
+        <LinearGradientBrush x:Key="BottomOpacityMask" StartPoint="0.5,0" EndPoint="0.5,1">
             <GradientStop Color="#dddddddd" Offset="1"/>
-            <GradientStop Color="#0ddddddd" Offset="0.20"/>
+            <GradientStop Color="#dddddddd" Offset="0.65"/>
+            <GradientStop Color="#60dddddd" Offset="0.1"/>
             <GradientStop Color="#00dddddd" Offset="0"/>
         </LinearGradientBrush>
         <Style x:Key="MergeBottomButtonStyle" BasedOn="{StaticResource MergeButtonStyle}" TargetType="Button">
-            <Setter Property="Height" Value="35" />
+            <Setter Property="Height" Value="20" />
             <Setter Property="OpacityMask" Value="{StaticResource BottomOpacityMask}" />
             <Setter Property="Width" Value="{Binding Path=ActualWidth, ElementName=SetupGrid}" />
         </Style>
 
-        <LinearGradientBrush x:Key="LeftOpacityMask" StartPoint="0,0" EndPoint="1,0">
+        <LinearGradientBrush x:Key="LeftOpacityMask" StartPoint="0,0.5" EndPoint="1,0.5">
             <GradientStop Color="#dddddddd" Offset="0"/>
-            <GradientStop Color="#0ddddddd" Offset="0.80"/>
+            <GradientStop Color="#dddddddd" Offset="0.35"/>
+            <GradientStop Color="#60dddddd" Offset="0.9"/>
             <GradientStop Color="#00dddddd" Offset="1"/>
         </LinearGradientBrush>
         <Style x:Key="MergeLeftButtonStyle" BasedOn="{StaticResource MergeButtonStyle}" TargetType="Button">
-            <Setter Property="Width" Value="35" />
+            <Setter Property="Width" Value="20" />
             <Setter Property="OpacityMask" Value="{StaticResource LeftOpacityMask}" />
             <Setter Property="Height" Value="{Binding Path=ActualHeight, ElementName=SetupGrid}" />
         </Style>
 
-        <LinearGradientBrush x:Key="RightOpacityMask" StartPoint="0,0" EndPoint="1,0">
+        <LinearGradientBrush x:Key="RightOpacityMask" StartPoint="0,0.5" EndPoint="1,0.5">
             <GradientStop Color="#dddddddd" Offset="1"/>
-            <GradientStop Color="#0ddddddd" Offset="0.20"/>
+            <GradientStop Color="#dddddddd" Offset="0.65"/>
+            <GradientStop Color="#60dddddd" Offset="0.1"/>
             <GradientStop Color="#00dddddd" Offset="0"/>
         </LinearGradientBrush>
         <Style x:Key="MergeRightButtonStyle" BasedOn="{StaticResource MergeButtonStyle}" TargetType="Button">
-            <Setter Property="Width" Value="35" />
+            <Setter Property="Width" Value="20" />
             <Setter Property="OpacityMask" Value="{StaticResource RightOpacityMask}" />
             <Setter Property="Height" Value="{Binding Path=ActualHeight, ElementName=SetupGrid}" />
         </Style>
-
-        <!-- ********************************************************************************************* -->
 
         <Style x:Key="ActionButtonStyle" 
                BasedOn="{StaticResource ButtonStyleBorder}"
