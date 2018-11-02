@@ -137,7 +137,7 @@
                     <Setter Property="Background" Value="#A9A9A9"/>
                 </Trigger>
                 <Trigger Property="Button.IsPressed" Value="true">
-                    <Setter Property="Button.Background" Value="#ff4757"/>
+                    <Setter Property="Button.Background" Value="#FFEDBC"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -289,7 +289,6 @@
         </Style>
 
         <BitmapImage x:Key="Background" UriSource="/Resources/Images/background0.png" />
-        <BitmapImage x:Key="Lightning" UriSource="/Resources/Images/lightning.png" />
         <BitmapImage x:Key="ResizeImage" UriSource="/Resources/Images/resize.png" />
         <BitmapImage x:Key="EnlargeHeightImage" UriSource="/Resources/Images/height.png" />
         <BitmapImage x:Key="EnlargeWidthImage" UriSource="/Resources/Images/width.png" />

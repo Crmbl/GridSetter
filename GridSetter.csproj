@@ -176,9 +176,6 @@
     <Resource Include="gs.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Images\lightning.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Images\height.png" />
     <Resource Include="Resources\Images\resize.png" />
     <Resource Include="Resources\Images\width.png" />
