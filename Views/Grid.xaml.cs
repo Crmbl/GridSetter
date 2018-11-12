@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -7,6 +8,8 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using CustomShapeWpfButton;
+using CustomShapeWpfButton.Enums;
 using GridSetter.Utils;
 using GridSetter.Utils.Enums;
 using GridSetter.ViewModels;
@@ -156,31 +159,42 @@ namespace GridSetter.Views
             //TODO -Ability to change screen ? -To resize ? 
 			InitializeComponent();
 
-		    GridSetterRef = parentRef;
-			WindowStyle = WindowStyle.None;
-			ResizeMode = ResizeMode.NoResize;
-            Left = 0;
-			Top = 0;
+            //var values = new Dictionary<Position, string>
+            //{
+            //    { Position.Right, "Right" },
+            //    { Position.Left, "Left" },
+            //    { Position.Top, "Top" },
+            //    { Position.Bottom, "Bottom" },
+            //    { Position.Center, "Split" }
+            //};
+            //ArcButton arcButton = new ArcButton(300, values);
+            //AddChild(arcButton);
 
-		    Screen currentScreen = Screen.FromPoint(new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y));
-		    Width = currentScreen.Bounds.Width;
-		    Height = currentScreen.Bounds.Height;
+            GridSetterRef = parentRef;
+            WindowStyle = WindowStyle.None;
+            ResizeMode = ResizeMode.NoResize;
+            Left = 0;
+            Top = 0;
+
+            Screen currentScreen = Screen.FromPoint(new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y));
+            Width = currentScreen.Bounds.Width;
+            Height = currentScreen.Bounds.Height;
 
             IsPrimaryMonitor = Screen.FromPoint(new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y)).Primary;
             MainGrid = new GGrid { ShowGridLines = false };
-			MainGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = CellMinWidth, Width = new GridLength(1, GridUnitType.Star) });
-			MainGrid.RowDefinitions.Add(new RowDefinition { MinHeight = CellMinHeight, Height = new GridLength(1, GridUnitType.Star) });
+            MainGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = CellMinWidth, Width = new GridLength(1, GridUnitType.Star) });
+            MainGrid.RowDefinitions.Add(new RowDefinition { MinHeight = CellMinHeight, Height = new GridLength(1, GridUnitType.Star) });
 
-			AddChild(MainGrid);
-			UserInterfaceTools.AddGridButtons(this);
-			UserInterfaceTools.AddMediaCanvas(this);
-			UserInterfaceTools.UpdateControlButtons(MainGrid);
+            AddChild(MainGrid);
+            UserInterfaceTools.AddGridButtons(this);
+            UserInterfaceTools.AddMediaCanvas(this);
+            UserInterfaceTools.UpdateControlButtons(MainGrid);
 
-		    ToggleLockCommand.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
-			ToDesktopCommand.InputGestures.Add(new KeyGesture(Key.Q, ModifierKeys.Control));
-		    ToggleTaskbarCommand.InputGestures.Add(new KeyGesture(Key.W, ModifierKeys.Control));
+            ToggleLockCommand.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
+            ToDesktopCommand.InputGestures.Add(new KeyGesture(Key.Q, ModifierKeys.Control));
+            ToggleTaskbarCommand.InputGestures.Add(new KeyGesture(Key.W, ModifierKeys.Control));
 
-		    Loaded += Grid_Loaded;
+            Loaded += Grid_Loaded;
         }
 
         #endregion // Constructors
