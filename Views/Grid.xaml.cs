@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -705,7 +706,8 @@ namespace GridSetter.Views
             if (bounds != null)
 	        {
 	            var visibleSize = new Size(bounds.Value.Width, bounds.Value.Height);
-                var mergeSize = mergeButton.Height == Double.NaN ? 2 * mergeButton.Width : 2 * mergeButton.Height;
+                //double.NaN working ?
+                var mergeSize = mergeButton.Height == double.NaN ? 2 * mergeButton.Width : 2 * mergeButton.Height;
 
 	            if (visibleSize.Height - mergeSize <= insideGrid.Height)
 	            {
@@ -724,11 +726,23 @@ namespace GridSetter.Views
             }
 	        else
 	        {
-	            scaleTransform.ScaleX = 1;
+                scaleTransform.ScaleX = 1;
 	            scaleTransform.ScaleY = 1;
 	        }
 
             insideGrid.RenderTransform = scaleTransform;
+	    }
+
+	    public void Grid_TargetUpdated(object sender, DataTransferEventArgs args)
+	    {
+	        if (args.Property == ClipProperty)
+	        {
+
+	        }
+	        if (sender is GGrid grid)
+	        {
+
+	        }
 	    }
 
         /// <summary>

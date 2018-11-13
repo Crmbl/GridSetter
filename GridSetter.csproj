@@ -126,7 +126,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Controls\RadialPanel.cs" />
     <Compile Include="Utils\Converters\CenterConverter.cs" />
     <Compile Include="Utils\Converters\RightConverter.cs" />
     <Compile Include="Utils\MediaControlTools.cs" />

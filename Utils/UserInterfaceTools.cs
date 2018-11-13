@@ -2,12 +2,12 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CustomShapeWpfButton;
 using CustomShapeWpfButton.Enums;
-using GridSetter.Controls;
 using GridSetter.Utils.Converters;
 using GridSetter.Utils.Enums;
 using Application = System.Windows.Application;
@@ -354,7 +354,7 @@ namespace GridSetter.Utils
 			{
 				Name = "SetupGrid",
 				Background = new SolidColorBrush(Colors.Transparent)
-			};
+            };
 		    controlGrid.SizeChanged += window.Grid_OnSizeChanged;
 
             var values = new Dictionary<Position, string>
@@ -427,7 +427,23 @@ namespace GridSetter.Utils
 			Grid.SetColumnSpan(controlGrid, colSpan);
 			Grid.SetRowSpan(controlGrid, rowSpan);
 			Panel.SetZIndex(controlGrid, 100);
-			window.MainGrid.Children.Add(controlGrid);
+
+		    //////////////////////////////////////////////////////////////
+		    controlGrid.TargetUpdated += window.Grid_TargetUpdated;
+		    //controlGrid.Clip = LayoutInformation.GetLayoutClip(controlGrid);
+            // TODO FIX THIS!
+		    controlGrid.SetBinding(UIElement.ClipProperty, new Binding
+		    {
+		        Path = new PropertyPath("Width"),
+		        Source = new Size
+		        {
+                    Width = window.MainGrid.ColumnDefinitions[Grid.GetColumn(controlGrid)].ActualWidth,
+                    Height = window.MainGrid.RowDefinitions[Grid.GetRow(controlGrid)].ActualHeight
+                }
+		    });
+		    //////////////////////////////////////////////////////////////
+
+            window.MainGrid.Children.Add(controlGrid);
 		}
 
         #endregion // Controls
@@ -441,7 +457,7 @@ namespace GridSetter.Utils
         public static FrameworkElement FindParent(DependencyObject child)
 		{
 			var result = VisualTreeHelper.GetParent(child);
-			return result is RadialPanel ? FindParent(result) : result as FrameworkElement;
+			return result as FrameworkElement;
 		}
 
 		/// <summary>
