@@ -227,6 +227,50 @@ namespace GridSetter.Views
         #region Setup
 
         /// <summary>
+        /// Adapt the size of the control buttons.
+        /// </summary>
+	    public void Grid_OnSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            // TODO event not fired when it gets interesting...
+            if (!(sender is GGrid grid)) return;
+            var mergeButtons = grid.Children.Cast<UIElement>().Where(x => x is Button).ToList();
+            var mergeButton = mergeButtons.Cast<Button>().FirstOrDefault(b => b.Name.Contains("merge"));
+            var arcButton = grid.Children.Cast<ArcButton>().FirstOrDefault();
+            var insideGrid = arcButton.Content as GGrid;
+
+            Rect? bounds = LayoutInformation.GetLayoutClip(grid)?.Bounds;
+            var scaleTransform = insideGrid.RenderTransform as ScaleTransform;
+            if (bounds != null)
+            {
+                var visibleSize = new Size(bounds.Value.Width, bounds.Value.Height);
+                //double.NaN working ?
+                var mergeSize = mergeButton.Height == double.NaN ? 2 * mergeButton.Width : 2 * mergeButton.Height;
+
+                if (visibleSize.Height - mergeSize <= insideGrid.Height)
+                {
+                    var offset = grid.ActualHeight - visibleSize.Height;
+                    var coeff = MathUtil.Round((visibleSize.Height - offset - mergeSize) / insideGrid.Height);
+                    scaleTransform.ScaleX = MathUtil.Round(scaleTransform.ScaleX * coeff);
+                    scaleTransform.ScaleY = scaleTransform.ScaleX;
+                }
+                else if (visibleSize.Width - mergeSize <= insideGrid.Width)
+                {
+                    var offset = grid.ActualWidth - visibleSize.Width;
+                    var coeff = MathUtil.Round((visibleSize.Width - offset - mergeSize) / insideGrid.Width);
+                    scaleTransform.ScaleX = MathUtil.Round(scaleTransform.ScaleX * coeff);
+                    scaleTransform.ScaleY = scaleTransform.ScaleX;
+                }
+            }
+            else
+            {
+                scaleTransform.ScaleX = 1;
+                scaleTransform.ScaleY = 1;
+            }
+
+            insideGrid.RenderTransform = scaleTransform;
+        }
+
+        /// <summary>
         /// Remove a column on click.
         /// </summary>
         /// <param name="sender">The button clicked.</param>
@@ -688,62 +732,6 @@ namespace GridSetter.Views
 		        }
 		    }
         }
-
-        /// <summary>
-        /// Adapt the size of the control buttons.
-        /// </summary>
-	    public void Grid_OnSizeChanged(object sender, SizeChangedEventArgs e)
-	    {
-            // TODO event not fired when it gets interesting...
-	        if (!(sender is GGrid grid)) return;
-	        var mergeButtons = grid.Children.Cast<UIElement>().Where(x => x is Button).ToList();
-            var mergeButton = mergeButtons.Cast<Button>().FirstOrDefault(b => b.Name.Contains("merge"));
-            var arcButton = grid.Children.Cast<ArcButton>().FirstOrDefault();
-	        var insideGrid = arcButton.Content as GGrid;
-
-	        Rect? bounds = LayoutInformation.GetLayoutClip(grid)?.Bounds;
-	        var scaleTransform = insideGrid.RenderTransform as ScaleTransform;
-            if (bounds != null)
-	        {
-	            var visibleSize = new Size(bounds.Value.Width, bounds.Value.Height);
-                //double.NaN working ?
-                var mergeSize = mergeButton.Height == double.NaN ? 2 * mergeButton.Width : 2 * mergeButton.Height;
-
-	            if (visibleSize.Height - mergeSize <= insideGrid.Height)
-	            {
-	                var offset = grid.ActualHeight - visibleSize.Height;
-                    var coeff = MathUtil.Round((visibleSize.Height - offset - mergeSize) / insideGrid.Height);
-	                scaleTransform.ScaleX = MathUtil.Round(scaleTransform.ScaleX * coeff);
-	                scaleTransform.ScaleY = scaleTransform.ScaleX;
-	            }
-	            else if (visibleSize.Width - mergeSize <= insideGrid.Width)
-	            {
-	                var offset = grid.ActualWidth - visibleSize.Width;
-	                var coeff = MathUtil.Round((visibleSize.Width - offset - mergeSize) / insideGrid.Width);
-	                scaleTransform.ScaleX = MathUtil.Round(scaleTransform.ScaleX * coeff);
-	                scaleTransform.ScaleY = scaleTransform.ScaleX;
-	            }
-            }
-	        else
-	        {
-                scaleTransform.ScaleX = 1;
-	            scaleTransform.ScaleY = 1;
-	        }
-
-            insideGrid.RenderTransform = scaleTransform;
-	    }
-
-	    public void Grid_TargetUpdated(object sender, DataTransferEventArgs args)
-	    {
-	        if (args.Property == ClipProperty)
-	        {
-
-	        }
-	        if (sender is GGrid grid)
-	        {
-
-	        }
-	    }
 
         /// <summary>
         /// Show the media control buttons on enter.

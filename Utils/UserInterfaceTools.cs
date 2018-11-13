@@ -429,18 +429,17 @@ namespace GridSetter.Utils
 			Panel.SetZIndex(controlGrid, 100);
 
 		    //////////////////////////////////////////////////////////////
-		    controlGrid.TargetUpdated += window.Grid_TargetUpdated;
 		    //controlGrid.Clip = LayoutInformation.GetLayoutClip(controlGrid);
             // TODO FIX THIS!
-		    controlGrid.SetBinding(UIElement.ClipProperty, new Binding
-		    {
-		        Path = new PropertyPath("Width"),
-		        Source = new Size
-		        {
-                    Width = window.MainGrid.ColumnDefinitions[Grid.GetColumn(controlGrid)].ActualWidth,
-                    Height = window.MainGrid.RowDefinitions[Grid.GetRow(controlGrid)].ActualHeight
-                }
-		    });
+		    //controlGrid.SetBinding(UIElement.ClipProperty, new Binding
+		    //{
+		    //    Path = new PropertyPath("Width"),
+		    //    Source = new Size
+		    //    {
+      //              Width = window.MainGrid.ColumnDefinitions[Grid.GetColumn(controlGrid)].ActualWidth,
+      //              Height = window.MainGrid.RowDefinitions[Grid.GetRow(controlGrid)].ActualHeight
+      //          }
+		    //});
 		    //////////////////////////////////////////////////////////////
 
             window.MainGrid.Children.Add(controlGrid);
