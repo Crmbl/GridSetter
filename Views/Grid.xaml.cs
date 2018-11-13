@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CustomShapeWpfButton;
-using CustomShapeWpfButton.Enums;
+using CustomShapeWpfButton.Utils;
 using GridSetter.Utils;
 using GridSetter.Utils.Enums;
 using GridSetter.ViewModels;
@@ -159,17 +159,6 @@ namespace GridSetter.Views
             //TODO -Ability to change screen ? -To resize ? 
 			InitializeComponent();
 
-            //var values = new Dictionary<Position, string>
-            //{
-            //    { Position.Right, "Right" },
-            //    { Position.Left, "Left" },
-            //    { Position.Top, "Top" },
-            //    { Position.Bottom, "Bottom" },
-            //    { Position.Center, "Split" }
-            //};
-            //ArcButton arcButton = new ArcButton(300, values);
-            //AddChild(arcButton);
-
             GridSetterRef = parentRef;
             WindowStyle = WindowStyle.None;
             ResizeMode = ResizeMode.NoResize;
@@ -201,7 +190,7 @@ namespace GridSetter.Views
 
         #region Events
 
-	    private void Grid_Loaded(object sender, RoutedEventArgs e)
+        private void Grid_Loaded(object sender, RoutedEventArgs e)
 	    {
 	        if (sender is Grid senderWindow)
 	            senderWindow.WindowState = WindowState.Maximized;
@@ -243,7 +232,7 @@ namespace GridSetter.Views
         /// <param name="e">The routed args.</param>
         public void SplitButton_OnClick(object sender, RoutedEventArgs e)
         {
-            var parent = UserInterfaceTools.FindParent((Button)sender);
+            var parent = UserInterfaceTools.FindParent((ArcButton)sender);
             var currentCol = GGrid.GetColumn(parent);
             var currentRow = GGrid.GetRow(parent);
             var actualColSpan = GGrid.GetColumnSpan(parent);
@@ -278,7 +267,7 @@ namespace GridSetter.Views
         /// <param name="routedEventArgs">The routed args.</param>
         public void AddLeftColButton_OnClick(object sender, RoutedEventArgs routedEventArgs)
         {
-            var parent = UserInterfaceTools.FindParent((Button)sender);
+            var parent = UserInterfaceTools.FindParent((ArcButton)sender);
             var currentCol = GGrid.GetColumn(parent);
             var rowAmount = MainGrid.RowDefinitions.Count;
 
@@ -310,7 +299,7 @@ namespace GridSetter.Views
         /// <param name="routedEventArgs">The routed args.</param>
         public void AddRightColButton_OnClick(object sender, RoutedEventArgs routedEventArgs)
         {
-            var parent = UserInterfaceTools.FindParent((Button)sender);
+            var parent = UserInterfaceTools.FindParent((ArcButton)sender);
             var currentCol = GGrid.GetColumn(parent) + GGrid.GetColumnSpan(parent);
             var rowAmount = MainGrid.RowDefinitions.Count;
 
@@ -342,7 +331,7 @@ namespace GridSetter.Views
         /// <param name="routedEventArgs">The routed args.</param>
         public void AddUpRowButton_OnClick(object sender, RoutedEventArgs routedEventArgs)
         {
-            var parent = UserInterfaceTools.FindParent((Button)sender);
+            var parent = UserInterfaceTools.FindParent((ArcButton)sender);
             var currentRow = GGrid.GetRow(parent);
             var colAmount = MainGrid.ColumnDefinitions.Count;
 
@@ -374,7 +363,7 @@ namespace GridSetter.Views
         /// <param name="routedEventArgs">The routed args.</param>
         public void AddDownRowButton_OnClick(object sender, RoutedEventArgs routedEventArgs)
         {
-            var parent = UserInterfaceTools.FindParent((Button)sender);
+            var parent = UserInterfaceTools.FindParent((ArcButton)sender);
             var currentRow = GGrid.GetRow(parent) + GGrid.GetRowSpan(parent);
             var colAmount = MainGrid.ColumnDefinitions.Count;
 
@@ -698,6 +687,49 @@ namespace GridSetter.Views
 		        }
 		    }
         }
+
+        /// <summary>
+        /// Adapt the size of the control buttons.
+        /// </summary>
+	    public void Grid_OnSizeChanged(object sender, SizeChangedEventArgs e)
+	    {
+            // TODO event not fired when it gets interesting...
+	        if (!(sender is GGrid grid)) return;
+	        var mergeButtons = grid.Children.Cast<UIElement>().Where(x => x is Button).ToList();
+            var mergeButton = mergeButtons.Cast<Button>().FirstOrDefault(b => b.Name.Contains("merge"));
+            var arcButton = grid.Children.Cast<ArcButton>().FirstOrDefault();
+	        var insideGrid = arcButton.Content as GGrid;
+
+	        Rect? bounds = LayoutInformation.GetLayoutClip(grid)?.Bounds;
+	        var scaleTransform = insideGrid.RenderTransform as ScaleTransform;
+            if (bounds != null)
+	        {
+	            var visibleSize = new Size(bounds.Value.Width, bounds.Value.Height);
+                var mergeSize = mergeButton.Height == Double.NaN ? 2 * mergeButton.Width : 2 * mergeButton.Height;
+
+	            if (visibleSize.Height - mergeSize <= insideGrid.Height)
+	            {
+	                var offset = grid.ActualHeight - visibleSize.Height;
+                    var coeff = MathUtil.Round((visibleSize.Height - offset - mergeSize) / insideGrid.Height);
+	                scaleTransform.ScaleX = MathUtil.Round(scaleTransform.ScaleX * coeff);
+	                scaleTransform.ScaleY = scaleTransform.ScaleX;
+	            }
+	            else if (visibleSize.Width - mergeSize <= insideGrid.Width)
+	            {
+	                var offset = grid.ActualWidth - visibleSize.Width;
+	                var coeff = MathUtil.Round((visibleSize.Width - offset - mergeSize) / insideGrid.Width);
+	                scaleTransform.ScaleX = MathUtil.Round(scaleTransform.ScaleX * coeff);
+	                scaleTransform.ScaleY = scaleTransform.ScaleX;
+	            }
+            }
+	        else
+	        {
+	            scaleTransform.ScaleX = 1;
+	            scaleTransform.ScaleY = 1;
+	        }
+
+            insideGrid.RenderTransform = scaleTransform;
+	    }
 
         /// <summary>
         /// Show the media control buttons on enter.

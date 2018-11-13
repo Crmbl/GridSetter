@@ -56,7 +56,7 @@
       <HintPath>packages\Unity.5.8.11\lib\net46\CommonServiceLocator.dll</HintPath>
     </Reference>
     <Reference Include="CustomShapeWpfButton, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\CustomShapeWpfButton.Crmbl.1.0.0\lib\net46\CustomShapeWpfButton.dll</HintPath>
+      <HintPath>packages\CustomShapeWpfButton.Crmbl.1.0.2\lib\net46\CustomShapeWpfButton.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />

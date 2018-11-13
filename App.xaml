@@ -149,7 +149,7 @@
             <GradientStop Color="#00dddddd" Offset="1"/>
         </LinearGradientBrush>
         <Style x:Key="MergeTopButtonStyle" BasedOn="{StaticResource MergeButtonStyle}" TargetType="Button">
-            <Setter Property="Height" Value="20" />
+            <Setter Property="Height" Value="15" />
             <Setter Property="OpacityMask" Value="{StaticResource TopOpacityMask}" />
             <Setter Property="Width" Value="{Binding Path=ActualWidth, ElementName=SetupGrid}" />
         </Style>
@@ -161,7 +161,7 @@
             <GradientStop Color="#00dddddd" Offset="0"/>
         </LinearGradientBrush>
         <Style x:Key="MergeBottomButtonStyle" BasedOn="{StaticResource MergeButtonStyle}" TargetType="Button">
-            <Setter Property="Height" Value="20" />
+            <Setter Property="Height" Value="15" />
             <Setter Property="OpacityMask" Value="{StaticResource BottomOpacityMask}" />
             <Setter Property="Width" Value="{Binding Path=ActualWidth, ElementName=SetupGrid}" />
         </Style>
@@ -173,7 +173,7 @@
             <GradientStop Color="#00dddddd" Offset="1"/>
         </LinearGradientBrush>
         <Style x:Key="MergeLeftButtonStyle" BasedOn="{StaticResource MergeButtonStyle}" TargetType="Button">
-            <Setter Property="Width" Value="20" />
+            <Setter Property="Width" Value="15" />
             <Setter Property="OpacityMask" Value="{StaticResource LeftOpacityMask}" />
             <Setter Property="Height" Value="{Binding Path=ActualHeight, ElementName=SetupGrid}" />
         </Style>
@@ -185,7 +185,7 @@
             <GradientStop Color="#00dddddd" Offset="0"/>
         </LinearGradientBrush>
         <Style x:Key="MergeRightButtonStyle" BasedOn="{StaticResource MergeButtonStyle}" TargetType="Button">
-            <Setter Property="Width" Value="20" />
+            <Setter Property="Width" Value="15" />
             <Setter Property="OpacityMask" Value="{StaticResource RightOpacityMask}" />
             <Setter Property="Height" Value="{Binding Path=ActualHeight, ElementName=SetupGrid}" />
         </Style>
@@ -202,53 +202,6 @@
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="Width" Value="200" />
             <Setter Property="Height" Value="25" />
-        </Style>
-
-        <Style x:Key="NoStyleButton" BasedOn="{StaticResource ButtonStyle}"
-               TargetType="Button">
-            <Setter Property="Width" Value="45" />
-            <Setter Property="Height" Value="20" />
-            <Setter Property="OverridesDefaultStyle" Value="True" />
-            <Setter Property="Background" Value="#dddddd" />
-            <Setter Property="Foreground" Value="#222f3e" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="FontFamily" Value="Consolas" />
-            <Setter Property="ForceCursor" Value="True" />
-            <Setter Property="Cursor" Value="Hand" />
-        </Style>
-
-        <Style x:Key="RadialStyle" TargetType="controls:RadialPanel">
-            <Setter Property="BackgroundOpacity" Value="1" />
-            <Setter Property="BackgroundColor" Value="#dddddd" />
-            <Setter Property="BorderColor" Value="#a29bfe" />
-            <Setter Property="OuterRadius" Value="100" />
-            <Setter Property="InnerRadius" Value="50" />
-            <Setter Property="StartAngle" Value="0" />
-            <Setter Property="Angle" Value="360" />
-            <Setter Property="IsClockwise" Value="True" />
-            <Setter Property="ShowBorder" Value="True" />
-            <Setter Property="ShowPieLines" Value="True" />
-            <Setter Property="Width" Value="45" />
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
-        
-        <Style x:Key="RoundButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="100" />
-            <Setter Property="Height" Value="100" />
-            <Setter Property="Foreground" Value="#222f3e" />
-            <Setter Property="FontFamily" Value="Consolas" />
-            <Setter Property="ForceCursor" Value="True" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Grid>
-                            <Ellipse Stroke="#a29bfe" StrokeThickness="1" Fill="#dddddd" />
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
         </Style>
 
         <Style x:Key="DefaultTextBlockStyle" TargetType="TextBlock">

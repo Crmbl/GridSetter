@@ -5,6 +5,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using CustomShapeWpfButton;
+using CustomShapeWpfButton.Enums;
 using GridSetter.Controls;
 using GridSetter.Utils.Converters;
 using GridSetter.Utils.Enums;
@@ -353,25 +355,30 @@ namespace GridSetter.Utils
 				Name = "SetupGrid",
 				Background = new SolidColorBrush(Colors.Transparent)
 			};
+		    controlGrid.SizeChanged += window.Grid_OnSizeChanged;
 
-			var splitButton = new Button { Style = Application.Current.Resources["RoundButtonStyle"] as Style, Content = "Split", Name = "splitButton" };
-			splitButton.Click += window.SplitButton_OnClick;
-			var addUpRowButton = new Button { Style = Application.Current.Resources["NoStyleButton"] as Style, Content = "Top" };
-			addUpRowButton.Click += window.AddUpRowButton_OnClick;
-			var addRightColButton = new Button { Style = Application.Current.Resources["NoStyleButton"] as Style, Content = "Right" };
-			addRightColButton.Click += window.AddRightColButton_OnClick;
-			var addDownRowButton = new Button { Style = Application.Current.Resources["NoStyleButton"] as Style, Content = "Down" };
-			addDownRowButton.Click += window.AddDownRowButton_OnClick;
-			var addLeftColButton = new Button { Style = Application.Current.Resources["NoStyleButton"] as Style, Content = "Left" };
-			addLeftColButton.Click += window.AddLeftColButton_OnClick;
-			var radialPanel = new RadialPanel { Style = Application.Current.Resources["RadialStyle"] as Style };
+            var values = new Dictionary<Position, string>
+            {
+                { Position.Right, "Right" },
+                { Position.Left, "Left" },
+                { Position.Top, "Top" },
+                { Position.Bottom, "Bottom" },
+                { Position.Center, "Split" }
+            };
+            ArcButton arcButton = new ArcButton(230, values);
+            arcButton.LeftClick += window.AddLeftColButton_OnClick;
+            arcButton.RightClick += window.AddRightColButton_OnClick;
+            arcButton.TopClick += window.AddUpRowButton_OnClick;
+            arcButton.BottomClick += window.AddDownRowButton_OnClick;
+            arcButton.CenterClick += window.SplitButton_OnClick;
 
-			radialPanel.Children.Add(addUpRowButton);
-			radialPanel.Children.Add(addRightColButton);
-			radialPanel.Children.Add(addDownRowButton);
-			radialPanel.Children.Add(addLeftColButton);
+		    if (arcButton.Content is Grid arcButtonGrid)
+		    {
+                arcButtonGrid.RenderTransform = new ScaleTransform();
+		        arcButtonGrid.RenderTransformOrigin = new Point(0.5, 0.5);
+            }
 
-			var mergeTopButton = new Button { Style = Application.Current.Resources["MergeTopButtonStyle"] as Style, Name = "mergeTopButton", Visibility = Visibility.Collapsed};
+            var mergeTopButton = new Button { Style = Application.Current.Resources["MergeTopButtonStyle"] as Style, Name = "mergeTopButton", Visibility = Visibility.Collapsed};
 			mergeTopButton.Click += window.MergeTopButton_OnClick;
 			var mergeDownButton = new Button { Style = Application.Current.Resources["MergeBottomButtonStyle"] as Style, Name = "mergeDownButton", Visibility = Visibility.Collapsed };
 			mergeDownButton.Click += window.MergeDownButton_OnClick;
@@ -380,8 +387,7 @@ namespace GridSetter.Utils
 			var mergeRightButton = new Button { Style = Application.Current.Resources["MergeRightButtonStyle"] as Style, Name = "mergeRightButton", Visibility = Visibility.Collapsed };
 			mergeRightButton.Click += window.MergeRightButton_OnClick;
 
-		    controlGrid.Children.Add(splitButton);
-		    controlGrid.Children.Add(radialPanel);
+		    controlGrid.Children.Add(arcButton);
 		    controlGrid.Children.Add(mergeTopButton);
 		    controlGrid.Children.Add(mergeDownButton);
 		    controlGrid.Children.Add(mergeLeftButton);
@@ -399,11 +405,9 @@ namespace GridSetter.Utils
 		    controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 		    controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
 
-			Grid.SetColumn(splitButton, 2);
-			Grid.SetRow(splitButton, 2);
-			Panel.SetZIndex(splitButton, 110);
-			Grid.SetColumn(radialPanel, 2);
-			Grid.SetRow(radialPanel, 2);
+		    Grid.SetColumn(arcButton, 2);
+		    Grid.SetRow(arcButton, 2);
+            Panel.SetZIndex(arcButton, 110);
 
 			Grid.SetColumn(mergeTopButton, 0);
             Grid.SetColumnSpan(mergeTopButton, 5);
@@ -626,13 +630,13 @@ namespace GridSetter.Utils
 			foreach (var uiElement in gridList)
 			{
 				var grid = (Grid)uiElement;
-				var buttonsList = grid.Children.Cast<UIElement>().Where(x => x is Button).ToList();
+				var buttonsList = grid.Children.Cast<UIElement>().Where(x => x is Button || x is ArcButton).ToList();
 				var mergeButtonsList = grid.Children.Cast<UIElement>().Where(x => x is Button).ToList();
 				var mergeTopButton = mergeButtonsList.Cast<Button>().FirstOrDefault(b => b.Name.Equals("mergeTopButton"));
 				var mergeDownButton = mergeButtonsList.Cast<Button>().FirstOrDefault(b => b.Name.Equals("mergeDownButton"));
 				var mergeLeftButton = mergeButtonsList.Cast<Button>().FirstOrDefault(b => b.Name.Equals("mergeLeftButton"));
 				var mergeRightButton = mergeButtonsList.Cast<Button>().FirstOrDefault(b => b.Name.Equals("mergeRightButton"));
-				var splitButton = buttonsList.Cast<Button>().FirstOrDefault(b => b.Name.Equals("splitButton"));
+				var splitButton = buttonsList.Cast<ArcButton>().FirstOrDefault();
 
 				if (mergeTopButton != null)
 					mergeTopButton.Visibility = NeighborChecker(mainGrid, grid, DirectionsEnum.Up) ? Visibility.Visible : Visibility.Hidden;
@@ -642,8 +646,11 @@ namespace GridSetter.Utils
 					mergeLeftButton.Visibility = NeighborChecker(mainGrid, grid, DirectionsEnum.Left) ? Visibility.Visible : Visibility.Hidden;
 				if (mergeRightButton != null)
 					mergeRightButton.Visibility = NeighborChecker(mainGrid, grid, DirectionsEnum.Right) ? Visibility.Visible : Visibility.Hidden;
-				if (splitButton != null)
-					splitButton.Visibility = Grid.GetColumnSpan(grid) > 1 || Grid.GetRowSpan(grid) > 1 ? Visibility.Visible : Visibility.Hidden;
+			    if (splitButton == null) continue;
+			    if (Grid.GetColumnSpan(grid) > 1 || Grid.GetRowSpan(grid) > 1)
+			        splitButton.UpdateButtonProperty(Position.Center, "Visibility", true);
+			    else
+			        splitButton.UpdateButtonProperty(Position.Center, "Visibility", false);
 			}
 		}
 
