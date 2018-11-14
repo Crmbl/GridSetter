@@ -34,29 +34,35 @@ namespace GridSetter.Utils
 		/// <param name="rowId">The row where the gridSplitter will be created.</param>
 		/// <param name="colId">The column where the gridSplitter will be created.</param>
 		/// <param name="direction">The direction for the gridSplitter.</param>
-		public static void AddGridSplitter(Grid grid, int rowId, int colId, DirectionsEnum direction)
+		public static void AddGridSplitter(Views.Grid window, Grid grid, int rowId, int colId, DirectionsEnum direction)
 		{
 			GridSplitter gridSplitter;
-			if (direction == DirectionsEnum.Vertical)
-				gridSplitter = new GridSplitter
-				{
-					Width = 5,
-					Cursor = Cursors.SizeWE,
-					Background = new SolidColorBrush(Colors.DarkGray),
-					HorizontalAlignment = HorizontalAlignment.Stretch,
-					ForceCursor = true,
-					DragIncrement = 0.1
-				};
-			else
-				gridSplitter = new GridSplitter
-				{
-					Height = 5,
-					Cursor = Cursors.SizeNS,
-					Background = new SolidColorBrush(Colors.DarkGray),
-					HorizontalAlignment = HorizontalAlignment.Stretch,
-					ForceCursor = true,
-					DragIncrement = 0.1
-				};
+		    if (direction == DirectionsEnum.Vertical)
+		    {
+		        gridSplitter = new GridSplitter
+		        {
+		            Width = 5,
+		            Cursor = Cursors.SizeWE,
+		            Background = new SolidColorBrush(Colors.DarkGray),
+		            HorizontalAlignment = HorizontalAlignment.Stretch,
+		            ForceCursor = true,
+		            DragIncrement = 0.1
+		        };
+		        gridSplitter.DragDelta += window.GridSplitter_DragDeltaUpdated;
+		    }
+		    else
+		    {
+		        gridSplitter = new GridSplitter
+		        {
+		            Height = 5,
+		            Cursor = Cursors.SizeNS,
+		            Background = new SolidColorBrush(Colors.DarkGray),
+		            HorizontalAlignment = HorizontalAlignment.Stretch,
+		            ForceCursor = true,
+		            DragIncrement = 0.1
+		        };
+		        gridSplitter.DragDelta += window.GridSplitter_DragDeltaUpdated;
+            }
 
 			Grid.SetColumn(gridSplitter, colId);
 			Grid.SetRow(gridSplitter, rowId);
@@ -350,12 +356,11 @@ namespace GridSetter.Utils
         /// <param name="rowSpan">Defines the rowSpan.</param>
         public static void AddGridButtons(Views.Grid window, int rowId = 0, int colId = 0, int colSpan = 1, int rowSpan = 1)
 		{
-			Grid controlGrid = new Grid
-			{
+			var controlGrid = new Grid
+            {
 				Name = "SetupGrid",
 				Background = new SolidColorBrush(Colors.Transparent)
             };
-		    controlGrid.SizeChanged += window.Grid_OnSizeChanged;
 
             var values = new Dictionary<Position, string>
             {
@@ -374,7 +379,8 @@ namespace GridSetter.Utils
 
 		    if (arcButton.Content is Grid arcButtonGrid)
 		    {
-                arcButtonGrid.RenderTransform = new ScaleTransform();
+                arcButtonGrid.LayoutTransform = new ScaleTransform();
+                //arcButtonGrid.RenderTransform = new ScaleTransform();
 		        arcButtonGrid.RenderTransformOrigin = new Point(0.5, 0.5);
             }
 
@@ -427,21 +433,6 @@ namespace GridSetter.Utils
 			Grid.SetColumnSpan(controlGrid, colSpan);
 			Grid.SetRowSpan(controlGrid, rowSpan);
 			Panel.SetZIndex(controlGrid, 100);
-
-		    //////////////////////////////////////////////////////////////
-		    controlGrid.TargetUpdated += window.Grid_TargetUpdated;
-		    //controlGrid.Clip = LayoutInformation.GetLayoutClip(controlGrid);
-            // TODO FIX THIS!
-		    controlGrid.SetBinding(UIElement.ClipProperty, new Binding
-		    {
-		        Path = new PropertyPath("Width"),
-		        Source = new Size
-		        {
-                    Width = window.MainGrid.ColumnDefinitions[Grid.GetColumn(controlGrid)].ActualWidth,
-                    Height = window.MainGrid.RowDefinitions[Grid.GetRow(controlGrid)].ActualHeight
-                }
-		    });
-		    //////////////////////////////////////////////////////////////
 
             window.MainGrid.Children.Add(controlGrid);
 		}

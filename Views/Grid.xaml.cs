@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -245,9 +246,9 @@ namespace GridSetter.Views
                 for (var y = 0; y < actualColSpan; y++)
                 {
                     if (y % 2 != 0)
-                        UserInterfaceTools.AddGridSplitter(MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Vertical);
+                        UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Vertical);
                     else if (i % 2 != 0)
-                        UserInterfaceTools.AddGridSplitter(MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Horizontal);
+                        UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow + i, currentCol + y, DirectionsEnum.Horizontal);
                     else
                     {
                         UserInterfaceTools.AddGridButtons(this, currentRow + i, currentCol + y);
@@ -275,14 +276,14 @@ namespace GridSetter.Views
             MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { Width = new GridLength(5, GridUnitType.Pixel) });
             UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Left, currentCol);
             for (var i = 0; i < rowAmount; i++)
-                UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Vertical);
+                UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Vertical);
 
             MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { MinWidth = CellMinWidth, Width = new GridLength(1, GridUnitType.Star) });
             UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Left, currentCol);
             for (var i = 0; i < rowAmount; i++)
             {
                 if (i % 2 != 0)
-                    UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Horizontal);
+                    UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Horizontal);
                 else
                 {
                     UserInterfaceTools.AddGridButtons(this, i, currentCol);
@@ -309,7 +310,7 @@ namespace GridSetter.Views
             for (var i = 0; i < rowAmount; i++)
             {
                 if (i % 2 != 0)
-                    UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Horizontal);
+                    UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Horizontal);
                 else
                 {
                     UserInterfaceTools.AddGridButtons(this, i, currentCol);
@@ -320,7 +321,7 @@ namespace GridSetter.Views
             MainGrid.ColumnDefinitions.Insert(currentCol, new ColumnDefinition { Width = new GridLength(5, GridUnitType.Pixel) });
             UserInterfaceTools.MoveUiElementsColumn(MainGrid, DirectionsEnum.Right, currentCol);
             for (var i = 0; i < rowAmount; i++)
-                UserInterfaceTools.AddGridSplitter(MainGrid, i, currentCol, DirectionsEnum.Vertical);
+                UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Vertical);
 
             UserInterfaceTools.UpdateControlButtons(MainGrid);
         }
@@ -339,14 +340,14 @@ namespace GridSetter.Views
             MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { Height = new GridLength(5, GridUnitType.Pixel) });
             UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Up, currentRow);
             for (var i = 0; i < colAmount; i++)
-                UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Horizontal);
+                UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Horizontal);
 
             MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { MinHeight = CellMinHeight, Height = new GridLength(1, GridUnitType.Star) });
             UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Up, currentRow);
             for (var i = 0; i < colAmount; i++)
             {
                 if (i % 2 != 0)
-                    UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Vertical);
+                    UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Vertical);
                 else
                 {
                     UserInterfaceTools.AddGridButtons(this, currentRow, i);
@@ -373,7 +374,7 @@ namespace GridSetter.Views
             for (var i = 0; i < colAmount; i++)
             {
                 if (i % 2 != 0)
-                    UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Vertical);
+                    UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Vertical);
                 else
                 {
                     UserInterfaceTools.AddGridButtons(this, currentRow, i);
@@ -384,7 +385,7 @@ namespace GridSetter.Views
             MainGrid.RowDefinitions.Insert(currentRow, new RowDefinition { Height = new GridLength(5, GridUnitType.Pixel) });
             UserInterfaceTools.MoveUiElementsRow(MainGrid, DirectionsEnum.Down, currentRow);
             for (var i = 0; i < colAmount; i++)
-                UserInterfaceTools.AddGridSplitter(MainGrid, currentRow, i, DirectionsEnum.Horizontal);
+                UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Horizontal);
 
             UserInterfaceTools.UpdateControlButtons(MainGrid);
         }
@@ -689,60 +690,45 @@ namespace GridSetter.Views
 		    }
         }
 
-        /// <summary>
-        /// Adapt the size of the control buttons.
-        /// </summary>
-	    public void Grid_OnSizeChanged(object sender, SizeChangedEventArgs e)
+	    public void GridSplitter_DragDeltaUpdated(object sender, DragDeltaEventArgs args)
 	    {
-            // TODO event not fired when it gets interesting...
-	        if (!(sender is GGrid grid)) return;
-	        var mergeButtons = grid.Children.Cast<UIElement>().Where(x => x is Button).ToList();
-            var mergeButton = mergeButtons.Cast<Button>().FirstOrDefault(b => b.Name.Contains("merge"));
-            var arcButton = grid.Children.Cast<ArcButton>().FirstOrDefault();
-	        var insideGrid = arcButton.Content as GGrid;
-
-	        Rect? bounds = LayoutInformation.GetLayoutClip(grid)?.Bounds;
-	        var scaleTransform = insideGrid.RenderTransform as ScaleTransform;
-            if (bounds != null)
+	        foreach (var grid in MainGrid.Children.Cast<FrameworkElement>().Where(x => x.Name == "SetupGrid"))
 	        {
-	            var visibleSize = new Size(bounds.Value.Width, bounds.Value.Height);
-                //double.NaN working ?
-                var mergeSize = mergeButton.Height == double.NaN ? 2 * mergeButton.Width : 2 * mergeButton.Height;
+	            var mergeButtons = ((GGrid)grid).Children.Cast<UIElement>().Where(x => x is Button).ToList();
+	            var mergeButton = mergeButtons.Cast<Button>().FirstOrDefault(b => b.Name.Contains("merge"));
+                var arcButton = ((GGrid)grid).Children.Cast<ArcButton>().FirstOrDefault();
+	            var insideGrid = arcButton.Content as GGrid;
+                var scaleTransform = insideGrid.LayoutTransform as ScaleTransform;
+                Rect? bounds = LayoutInformation.GetLayoutClip(grid)?.Bounds;
+	            if (bounds != null)
+	            {
+	                var visibleSize = new Size(bounds.Value.Width, bounds.Value.Height);
+	                //double.NaN working ?
+	                var mergeSize = mergeButton.Height == double.NaN ? 2 * mergeButton.Width : 2 * mergeButton.Height;
 
-	            if (visibleSize.Height - mergeSize <= insideGrid.Height)
-	            {
-	                var offset = grid.ActualHeight - visibleSize.Height;
-                    var coeff = MathUtil.Round((visibleSize.Height - offset - mergeSize) / insideGrid.Height);
-	                scaleTransform.ScaleX = MathUtil.Round(scaleTransform.ScaleX * coeff);
-	                scaleTransform.ScaleY = scaleTransform.ScaleX;
-	            }
-	            else if (visibleSize.Width - mergeSize <= insideGrid.Width)
-	            {
-	                var offset = grid.ActualWidth - visibleSize.Width;
-	                var coeff = MathUtil.Round((visibleSize.Width - offset - mergeSize) / insideGrid.Width);
-	                scaleTransform.ScaleX = MathUtil.Round(scaleTransform.ScaleX * coeff);
-	                scaleTransform.ScaleY = scaleTransform.ScaleX;
-	            }
+	                if (visibleSize.Height - mergeSize <= insideGrid.Height)
+	                {
+	                    var offset = grid.ActualHeight - visibleSize.Height;
+	                    var coeff = MathUtil.Round((visibleSize.Height - offset - mergeSize) / insideGrid.Height);
+	                    scaleTransform.ScaleX = MathUtil.Round(coeff);
+	                    scaleTransform.ScaleY = scaleTransform.ScaleX;
+	                }
+	                else if (visibleSize.Width - mergeSize <= insideGrid.Width)
+	                {
+	                    var offset = grid.ActualWidth - visibleSize.Width;
+	                    var coeff = MathUtil.Round((visibleSize.Width - offset - mergeSize) / insideGrid.Width);
+	                    scaleTransform.ScaleX = MathUtil.Round(coeff);
+	                    scaleTransform.ScaleY = scaleTransform.ScaleX;
+	                }
+                }
+	            //else
+	            //{
+	            //    scaleTransform.ScaleX = 1;
+	            //    scaleTransform.ScaleY = 1;
+	            //}
+
+	            insideGrid.RenderTransform = scaleTransform;
             }
-	        else
-	        {
-                scaleTransform.ScaleX = 1;
-	            scaleTransform.ScaleY = 1;
-	        }
-
-            insideGrid.RenderTransform = scaleTransform;
-	    }
-
-	    public void Grid_TargetUpdated(object sender, DataTransferEventArgs args)
-	    {
-	        if (args.Property == ClipProperty)
-	        {
-
-	        }
-	        if (sender is GGrid grid)
-	        {
-
-	        }
 	    }
 
         /// <summary>
