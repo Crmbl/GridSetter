@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -10,7 +9,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CustomShapeWpfButton;
-using CustomShapeWpfButton.Enums;
 using CustomShapeWpfButton.Utils;
 using GridSetter.Utils;
 using GridSetter.Utils.Enums;
@@ -192,6 +190,9 @@ namespace GridSetter.Views
 
         #region Events
 
+        /// <summary>
+        /// Set the right flag on window loaded.
+        /// </summary>
         private void Grid_Loaded(object sender, RoutedEventArgs e)
 	    {
 	        if (sender is Grid senderWindow)
@@ -232,39 +233,24 @@ namespace GridSetter.Views
         /// </summary>
         public void GridSplitter_DragDeltaUpdated(object sender, DragDeltaEventArgs args)
         {
-            foreach (var grid in MainGrid.Children.Cast<FrameworkElement>().Where(x => x.Name == "SetupGrid"))
-            {
-                var arcButton = ((GGrid)grid).Children.Cast<ArcButton>().FirstOrDefault();
-                if (!(arcButton?.Content is GGrid insideGrid)) continue;
-
-                var scaleTransform = insideGrid.LayoutTransform as ScaleTransform;
-                var bounds = LayoutInformation.GetLayoutClip(grid)?.Bounds;
-                if (bounds != null || scaleTransform.ScaleX < 1)
-                {
-                    Size element = bounds != null ? new Size(bounds.Value.Width, bounds.Value.Height) : new Size(grid.ActualWidth, grid.ActualHeight);
-                    //30 == merge button height/width * 2 (defined in App.xaml)
-                    var coeffH = MathUtil.Round((element.Height - 30) / insideGrid.Height);
-                    var coeffW = MathUtil.Round((element.Width - 30) / insideGrid.Width);
-                    scaleTransform.ScaleX = coeffH > coeffW ? coeffW : coeffH;
-                    scaleTransform.ScaleY = scaleTransform.ScaleX;
-
-                    scaleTransform.CenterX = arcButton.ActualWidth / 2;
-                    scaleTransform.CenterY = arcButton.ActualHeight / 2;
-                }
-                else
-                {
-                    scaleTransform.ScaleX = 1;
-                    scaleTransform.ScaleY = 1;
-                    scaleTransform.CenterX = 0;
-                    scaleTransform.CenterY = 0;
-                }
-
-                arcButton.UpdateButtonsProperty("Foreground", 
-                    scaleTransform.ScaleX >= 0.8 ? "#000000" : insideGrid.Children.Cast<BaseArcButton>().FirstOrDefault()?.Background);
-
-                insideGrid.RenderTransform = scaleTransform;
-            }
+            UserInterfaceTools.ScaleControlButtons(MainGrid);
         }
+
+        /// <summary>
+        /// When the ArcButton is first loaded.
+        /// </summary>
+	    public void ArcButton_Loaded(object sender, RoutedEventArgs args)
+	    {
+            //TODO problem with centering when created
+	        //UserInterfaceTools.ScaleControlButtons(MainGrid);
+        }
+
+	    public void ArcButton_LayoutUpdated(object sender, EventArgs args)
+	    {
+	        //TODO problem with centering when created
+	        UserInterfaceTools.ScaleControlButtons(MainGrid);
+	    }
+
 
         /// <summary>
         /// Remove a column on click.
@@ -297,6 +283,7 @@ namespace GridSetter.Views
             }
 
             UserInterfaceTools.UpdateControlButtons(MainGrid);
+            UserInterfaceTools.ScaleControlButtons(MainGrid);
         }
 
         #region Add events
@@ -331,6 +318,7 @@ namespace GridSetter.Views
             }
 
             UserInterfaceTools.UpdateControlButtons(MainGrid);
+            UserInterfaceTools.ScaleControlButtons(MainGrid);
         }
 
         /// <summary>
@@ -363,6 +351,7 @@ namespace GridSetter.Views
                 UserInterfaceTools.AddGridSplitter(this, MainGrid, i, currentCol, DirectionsEnum.Vertical);
 
             UserInterfaceTools.UpdateControlButtons(MainGrid);
+            UserInterfaceTools.ScaleControlButtons(MainGrid);
         }
 
         /// <summary>
@@ -395,6 +384,7 @@ namespace GridSetter.Views
             }
 
             UserInterfaceTools.UpdateControlButtons(MainGrid);
+            UserInterfaceTools.ScaleControlButtons(MainGrid);
         }
 
         /// <summary>
@@ -427,6 +417,7 @@ namespace GridSetter.Views
                 UserInterfaceTools.AddGridSplitter(this, MainGrid, currentRow, i, DirectionsEnum.Horizontal);
 
             UserInterfaceTools.UpdateControlButtons(MainGrid);
+            UserInterfaceTools.ScaleControlButtons(MainGrid);
         }
 
         #endregion // Add events
@@ -454,6 +445,7 @@ namespace GridSetter.Views
             UserInterfaceTools.AddGridButtons(this, currentRow, currentCol - dicSpan["colSpan"] - 1, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
             UserInterfaceTools.AddMediaCanvas(this, currentRow, currentCol - dicSpan["colSpan"] - 1, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
             UserInterfaceTools.UpdateControlButtons(MainGrid);
+            UserInterfaceTools.ScaleControlButtons(MainGrid);
         }
 
         /// <summary>
@@ -477,6 +469,7 @@ namespace GridSetter.Views
             UserInterfaceTools.AddGridButtons(this, currentRow, currentCol, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
             UserInterfaceTools.AddMediaCanvas(this, currentRow, currentCol, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
             UserInterfaceTools.UpdateControlButtons(MainGrid);
+            UserInterfaceTools.ScaleControlButtons(MainGrid);
         }
 
         /// <summary>
@@ -500,6 +493,7 @@ namespace GridSetter.Views
             UserInterfaceTools.AddGridButtons(this, currentRow - dicSpan["rowSpan"] - 1, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
             UserInterfaceTools.AddMediaCanvas(this, currentRow - dicSpan["rowSpan"] - 1, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
             UserInterfaceTools.UpdateControlButtons(MainGrid);
+            UserInterfaceTools.ScaleControlButtons(MainGrid);
         }
 
         /// <summary>
@@ -523,6 +517,7 @@ namespace GridSetter.Views
             UserInterfaceTools.AddGridButtons(this, currentRow, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
             UserInterfaceTools.AddMediaCanvas(this, currentRow, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
             UserInterfaceTools.UpdateControlButtons(MainGrid);
+            UserInterfaceTools.ScaleControlButtons(MainGrid);
         }
 
         #endregion // Merge events
@@ -877,5 +872,11 @@ namespace GridSetter.Views
         #endregion // Media events
 
         #endregion // Events
+
+        #region Private Methods
+
+        
+
+        #endregion //Private Methods
     }
 }

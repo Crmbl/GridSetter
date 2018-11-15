@@ -2,11 +2,13 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CustomShapeWpfButton;
 using CustomShapeWpfButton.Enums;
+using CustomShapeWpfButton.Utils;
 using GridSetter.Utils.Converters;
 using GridSetter.Utils.Enums;
 using Application = System.Windows.Application;
@@ -370,14 +372,15 @@ namespace GridSetter.Utils
                 { Position.Center, "Split" }
             };
             ArcButton arcButton = new ArcButton(230, values);
+		    arcButton.Loaded += window.ArcButton_Loaded;
+		    arcButton.LayoutUpdated += window.ArcButton_LayoutUpdated;
             arcButton.LeftClick += window.AddLeftColButton_OnClick;
             arcButton.RightClick += window.AddRightColButton_OnClick;
             arcButton.TopClick += window.AddUpRowButton_OnClick;
             arcButton.BottomClick += window.AddDownRowButton_OnClick;
             arcButton.CenterClick += window.SplitButton_OnClick;
-
 		    if (arcButton.Content is Grid arcButtonGrid)
-                arcButtonGrid.LayoutTransform = new ScaleTransform(1, 1);
+		        arcButtonGrid.LayoutTransform = new ScaleTransform();
 
             var mergeTopButton = new Button { Style = Application.Current.Resources["MergeTopButtonStyle"] as Style, Name = "mergeTopButton", Visibility = Visibility.Collapsed};
 			mergeTopButton.Click += window.MergeTopButton_OnClick;
@@ -656,11 +659,48 @@ namespace GridSetter.Utils
 			}
 		}
 
-		/// <summary>
-		/// Remove the content of a grid, picture/movie...
-		/// </summary>
-		/// <param name="grid">The grid where we want to delete the content.</param>
-		public static void RemoveContentFromGrid(Grid grid)
+	    /// <summary>
+	    /// Scale the control buttons according to the space available.
+	    /// </summary>
+	    public static void ScaleControlButtons(Grid mainGrid)
+	    {
+	        foreach (var grid in mainGrid.Children.Cast<FrameworkElement>().Where(x => x.Name == "SetupGrid"))
+	        {
+	            var arcButton = ((Grid)grid).Children.Cast<ArcButton>().FirstOrDefault();
+	            if (!(arcButton?.Content is Grid insideGrid)) return;
+
+	            var scaleTransform = insideGrid.LayoutTransform as ScaleTransform;
+	            var bounds = LayoutInformation.GetLayoutClip(grid)?.Bounds;
+	            if (bounds != null || scaleTransform.ScaleX < 1)
+	            {
+	                Size element = bounds != null ? new Size(bounds.Value.Width, bounds.Value.Height) : new Size(grid.ActualWidth, grid.ActualHeight);
+	                //30 == merge button height/width * 2 (defined in App.xaml)
+	                var coeffH = MathUtil.Round((element.Height - 30) / insideGrid.Height);
+	                var coeffW = MathUtil.Round((element.Width - 30) / insideGrid.Width);
+	                scaleTransform.ScaleX = coeffH > coeffW ? coeffW : coeffH;
+	                scaleTransform.ScaleY = scaleTransform.ScaleX;
+
+	                scaleTransform.CenterX = MathUtil.Round(arcButton.ActualWidth / 2);
+	                scaleTransform.CenterY = MathUtil.Round(arcButton.ActualHeight / 2);
+	            }
+	            else
+	            {
+	                scaleTransform.ScaleX = 1;
+	                scaleTransform.ScaleY = 1;
+	                scaleTransform.CenterX = 0;
+	                scaleTransform.CenterY = 0;
+	            }
+
+	            arcButton.UpdateButtonsProperty("TextVisibility", scaleTransform.ScaleX >= 0.8);
+	            insideGrid.RenderTransform = scaleTransform;
+	        }
+	    }
+
+        /// <summary>
+        /// Remove the content of a grid, picture/movie...
+        /// </summary>
+        /// <param name="grid">The grid where we want to delete the content.</param>
+        public static void RemoveContentFromGrid(Grid grid)
 		{
 		    foreach (var item in grid.Children.Cast<UIElement>().Where(e => e is Canvas && e.Visibility == Visibility.Visible).ToList())
 		    {
