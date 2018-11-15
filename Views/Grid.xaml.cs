@@ -1,16 +1,16 @@
 ﻿using System;
-using System.ComponentModel;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CustomShapeWpfButton;
+using CustomShapeWpfButton.Enums;
 using CustomShapeWpfButton.Utils;
 using GridSetter.Utils;
 using GridSetter.Utils.Enums;
@@ -228,47 +228,42 @@ namespace GridSetter.Views
         #region Setup
 
         /// <summary>
-        /// Adapt the size of the control buttons.
+        /// Update the arcbutton scale when resizing the grids.
         /// </summary>
-	    public void Grid_OnSizeChanged(object sender, SizeChangedEventArgs e)
+        public void GridSplitter_DragDeltaUpdated(object sender, DragDeltaEventArgs args)
         {
-            // TODO event not fired when it gets interesting...
-            if (!(sender is GGrid grid)) return;
-            var mergeButtons = grid.Children.Cast<UIElement>().Where(x => x is Button).ToList();
-            var mergeButton = mergeButtons.Cast<Button>().FirstOrDefault(b => b.Name.Contains("merge"));
-            var arcButton = grid.Children.Cast<ArcButton>().FirstOrDefault();
-            var insideGrid = arcButton.Content as GGrid;
-
-            Rect? bounds = LayoutInformation.GetLayoutClip(grid)?.Bounds;
-            var scaleTransform = insideGrid.RenderTransform as ScaleTransform;
-            if (bounds != null)
+            foreach (var grid in MainGrid.Children.Cast<FrameworkElement>().Where(x => x.Name == "SetupGrid"))
             {
-                var visibleSize = new Size(bounds.Value.Width, bounds.Value.Height);
-                //double.NaN working ?
-                var mergeSize = mergeButton.Height == double.NaN ? 2 * mergeButton.Width : 2 * mergeButton.Height;
+                var arcButton = ((GGrid)grid).Children.Cast<ArcButton>().FirstOrDefault();
+                if (!(arcButton?.Content is GGrid insideGrid)) continue;
 
-                if (visibleSize.Height - mergeSize <= insideGrid.Height)
+                var scaleTransform = insideGrid.LayoutTransform as ScaleTransform;
+                var bounds = LayoutInformation.GetLayoutClip(grid)?.Bounds;
+                if (bounds != null || scaleTransform.ScaleX < 1)
                 {
-                    var offset = grid.ActualHeight - visibleSize.Height;
-                    var coeff = MathUtil.Round((visibleSize.Height - offset - mergeSize) / insideGrid.Height);
-                    scaleTransform.ScaleX = MathUtil.Round(scaleTransform.ScaleX * coeff);
+                    Size element = bounds != null ? new Size(bounds.Value.Width, bounds.Value.Height) : new Size(grid.ActualWidth, grid.ActualHeight);
+                    //30 == merge button height/width * 2 (defined in App.xaml)
+                    var coeffH = MathUtil.Round((element.Height - 30) / insideGrid.Height);
+                    var coeffW = MathUtil.Round((element.Width - 30) / insideGrid.Width);
+                    scaleTransform.ScaleX = coeffH > coeffW ? coeffW : coeffH;
                     scaleTransform.ScaleY = scaleTransform.ScaleX;
-                }
-                else if (visibleSize.Width - mergeSize <= insideGrid.Width)
-                {
-                    var offset = grid.ActualWidth - visibleSize.Width;
-                    var coeff = MathUtil.Round((visibleSize.Width - offset - mergeSize) / insideGrid.Width);
-                    scaleTransform.ScaleX = MathUtil.Round(scaleTransform.ScaleX * coeff);
-                    scaleTransform.ScaleY = scaleTransform.ScaleX;
-                }
-            }
-            else
-            {
-                scaleTransform.ScaleX = 1;
-                scaleTransform.ScaleY = 1;
-            }
 
-            insideGrid.RenderTransform = scaleTransform;
+                    scaleTransform.CenterX = arcButton.ActualWidth / 2;
+                    scaleTransform.CenterY = arcButton.ActualHeight / 2;
+                }
+                else
+                {
+                    scaleTransform.ScaleX = 1;
+                    scaleTransform.ScaleY = 1;
+                    scaleTransform.CenterX = 0;
+                    scaleTransform.CenterY = 0;
+                }
+
+                arcButton.UpdateButtonsProperty("Foreground", 
+                    scaleTransform.ScaleX >= 0.8 ? "#000000" : insideGrid.Children.Cast<BaseArcButton>().FirstOrDefault()?.Background);
+
+                insideGrid.RenderTransform = scaleTransform;
+            }
         }
 
         /// <summary>
@@ -733,47 +728,6 @@ namespace GridSetter.Views
 		        }
 		    }
         }
-
-	    public void GridSplitter_DragDeltaUpdated(object sender, DragDeltaEventArgs args)
-	    {
-	        foreach (var grid in MainGrid.Children.Cast<FrameworkElement>().Where(x => x.Name == "SetupGrid"))
-	        {
-	            var mergeButtons = ((GGrid)grid).Children.Cast<UIElement>().Where(x => x is Button).ToList();
-	            var mergeButton = mergeButtons.Cast<Button>().FirstOrDefault(b => b.Name.Contains("merge"));
-                var arcButton = ((GGrid)grid).Children.Cast<ArcButton>().FirstOrDefault();
-	            var insideGrid = arcButton.Content as GGrid;
-                var scaleTransform = insideGrid.LayoutTransform as ScaleTransform;
-                Rect? bounds = LayoutInformation.GetLayoutClip(grid)?.Bounds;
-	            if (bounds != null)
-	            {
-	                var visibleSize = new Size(bounds.Value.Width, bounds.Value.Height);
-	                //double.NaN working ?
-	                var mergeSize = mergeButton.Height == double.NaN ? 2 * mergeButton.Width : 2 * mergeButton.Height;
-
-	                if (visibleSize.Height - mergeSize <= insideGrid.Height)
-	                {
-	                    var offset = grid.ActualHeight - visibleSize.Height;
-	                    var coeff = MathUtil.Round((visibleSize.Height - offset - mergeSize) / insideGrid.Height);
-	                    scaleTransform.ScaleX = MathUtil.Round(coeff);
-	                    scaleTransform.ScaleY = scaleTransform.ScaleX;
-	                }
-	                else if (visibleSize.Width - mergeSize <= insideGrid.Width)
-	                {
-	                    var offset = grid.ActualWidth - visibleSize.Width;
-	                    var coeff = MathUtil.Round((visibleSize.Width - offset - mergeSize) / insideGrid.Width);
-	                    scaleTransform.ScaleX = MathUtil.Round(coeff);
-	                    scaleTransform.ScaleY = scaleTransform.ScaleX;
-	                }
-                }
-	            //else
-	            //{
-	            //    scaleTransform.ScaleX = 1;
-	            //    scaleTransform.ScaleY = 1;
-	            //}
-
-	            insideGrid.RenderTransform = scaleTransform;
-            }
-	    }
 
         /// <summary>
         /// Show the media control buttons on enter.

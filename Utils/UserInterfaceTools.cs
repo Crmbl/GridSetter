@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -23,18 +22,18 @@ namespace GridSetter.Utils
 	/// </summary>
 	public static class UserInterfaceTools
 	{
-		#region Public methods
+        #region Public methods
 
-		#region Controls
+        #region Controls
 
-		/// <summary>
-		/// Add the gridSplitter between to grids.
-		/// </summary>
-		/// <param name="grid">Defines the grid to attach to button into.</param>
-		/// <param name="rowId">The row where the gridSplitter will be created.</param>
-		/// <param name="colId">The column where the gridSplitter will be created.</param>
-		/// <param name="direction">The direction for the gridSplitter.</param>
-		public static void AddGridSplitter(Views.Grid window, Grid grid, int rowId, int colId, DirectionsEnum direction)
+        /// <summary>
+        /// Add the gridSplitter between to grids.
+        /// </summary>
+        /// <param name="grid">Defines the grid to attach to button into.</param>
+        /// <param name="rowId">The row where the gridSplitter will be created.</param>
+        /// <param name="colId">The column where the gridSplitter will be created.</param>
+        /// <param name="direction">The direction for the gridSplitter.</param>
+        public static void AddGridSplitter(Views.Grid window, Grid grid, int rowId, int colId, DirectionsEnum direction)
 		{
 			GridSplitter gridSplitter;
 		    if (direction == DirectionsEnum.Vertical)
@@ -378,11 +377,7 @@ namespace GridSetter.Utils
             arcButton.CenterClick += window.SplitButton_OnClick;
 
 		    if (arcButton.Content is Grid arcButtonGrid)
-		    {
-                arcButtonGrid.LayoutTransform = new ScaleTransform();
-                //arcButtonGrid.RenderTransform = new ScaleTransform();
-		        arcButtonGrid.RenderTransformOrigin = new Point(0.5, 0.5);
-            }
+                arcButtonGrid.LayoutTransform = new ScaleTransform(1, 1);
 
             var mergeTopButton = new Button { Style = Application.Current.Resources["MergeTopButtonStyle"] as Style, Name = "mergeTopButton", Visibility = Visibility.Collapsed};
 			mergeTopButton.Click += window.MergeTopButton_OnClick;
