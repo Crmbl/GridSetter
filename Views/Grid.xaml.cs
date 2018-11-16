@@ -237,20 +237,12 @@ namespace GridSetter.Views
         }
 
         /// <summary>
-        /// When the ArcButton is first loaded.
+        /// Update the arcbutton scaling and positioning on LayoutUpdated.
         /// </summary>
-	    public void ArcButton_Loaded(object sender, RoutedEventArgs args)
+        public void ArcButton_LayoutUpdated(object sender, EventArgs args)
 	    {
-            //TODO problem with centering when created
-	        //UserInterfaceTools.ScaleControlButtons(MainGrid);
-        }
-
-	    public void ArcButton_LayoutUpdated(object sender, EventArgs args)
-	    {
-	        //TODO problem with centering when created
 	        UserInterfaceTools.ScaleControlButtons(MainGrid);
 	    }
-
 
         /// <summary>
         /// Remove a column on click.

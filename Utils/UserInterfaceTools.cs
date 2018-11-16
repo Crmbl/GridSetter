@@ -31,6 +31,7 @@ namespace GridSetter.Utils
         /// <summary>
         /// Add the gridSplitter between to grids.
         /// </summary>
+        /// <param name="window">The main window.</param>
         /// <param name="grid">Defines the grid to attach to button into.</param>
         /// <param name="rowId">The row where the gridSplitter will be created.</param>
         /// <param name="colId">The column where the gridSplitter will be created.</param>
@@ -371,8 +372,7 @@ namespace GridSetter.Utils
                 { Position.Bottom, "Bottom" },
                 { Position.Center, "Split" }
             };
-            ArcButton arcButton = new ArcButton(230, values);
-		    arcButton.Loaded += window.ArcButton_Loaded;
+            ArcButton arcButton = new ArcButton(230, values, backgroundPressed: "#ff5252");
 		    arcButton.LayoutUpdated += window.ArcButton_LayoutUpdated;
             arcButton.LeftClick += window.AddLeftColButton_OnClick;
             arcButton.RightClick += window.AddRightColButton_OnClick;
@@ -382,16 +382,16 @@ namespace GridSetter.Utils
 		    if (arcButton.Content is Grid arcButtonGrid)
 		        arcButtonGrid.LayoutTransform = new ScaleTransform();
 
-            var mergeTopButton = new Button { Style = Application.Current.Resources["MergeTopButtonStyle"] as Style, Name = "mergeTopButton", Visibility = Visibility.Collapsed};
-			mergeTopButton.Click += window.MergeTopButton_OnClick;
-			var mergeDownButton = new Button { Style = Application.Current.Resources["MergeBottomButtonStyle"] as Style, Name = "mergeDownButton", Visibility = Visibility.Collapsed };
-			mergeDownButton.Click += window.MergeDownButton_OnClick;
-			var mergeLeftButton = new Button { Style = Application.Current.Resources["MergeLeftButtonStyle"] as Style, Name = "mergeLeftButton", Visibility = Visibility.Collapsed };
-			mergeLeftButton.Click += window.MergeLeftButton_OnClick;
-			var mergeRightButton = new Button { Style = Application.Current.Resources["MergeRightButtonStyle"] as Style, Name = "mergeRightButton", Visibility = Visibility.Collapsed };
-			mergeRightButton.Click += window.MergeRightButton_OnClick;
+        	var mergeTopButton = new Button { Style = Application.Current.Resources["MergeTopButtonStyle"] as Style, Name = "mergeTopButton", IsEnabled = false };
+		    var mergeDownButton = new Button { Style = Application.Current.Resources["MergeBottomButtonStyle"] as Style, Name = "mergeDownButton", IsEnabled = false };
+		    var mergeLeftButton = new Button { Style = Application.Current.Resources["MergeLeftButtonStyle"] as Style, Name = "mergeLeftButton", IsEnabled = false };
+		    var mergeRightButton = new Button { Style = Application.Current.Resources["MergeRightButtonStyle"] as Style, Name = "mergeRightButton", IsEnabled = false };
+		    mergeTopButton.Click += window.MergeTopButton_OnClick;
+            mergeDownButton.Click += window.MergeDownButton_OnClick;
+            mergeLeftButton.Click += window.MergeLeftButton_OnClick;
+            mergeRightButton.Click += window.MergeRightButton_OnClick;
 
-		    controlGrid.Children.Add(arcButton);
+            controlGrid.Children.Add(arcButton);
 		    controlGrid.Children.Add(mergeTopButton);
 		    controlGrid.Children.Add(mergeDownButton);
 		    controlGrid.Children.Add(mergeLeftButton);
@@ -643,15 +643,15 @@ namespace GridSetter.Utils
 				var mergeRightButton = mergeButtonsList.Cast<Button>().FirstOrDefault(b => b.Name.Equals("mergeRightButton"));
 				var splitButton = buttonsList.Cast<ArcButton>().FirstOrDefault();
 
-				if (mergeTopButton != null)
-					mergeTopButton.Visibility = NeighborChecker(mainGrid, grid, DirectionsEnum.Up) ? Visibility.Visible : Visibility.Hidden;
-				if (mergeDownButton != null)
-					mergeDownButton.Visibility = NeighborChecker(mainGrid, grid, DirectionsEnum.Down) ? Visibility.Visible : Visibility.Hidden;
-				if (mergeLeftButton != null)
-					mergeLeftButton.Visibility = NeighborChecker(mainGrid, grid, DirectionsEnum.Left) ? Visibility.Visible : Visibility.Hidden;
-				if (mergeRightButton != null)
-					mergeRightButton.Visibility = NeighborChecker(mainGrid, grid, DirectionsEnum.Right) ? Visibility.Visible : Visibility.Hidden;
-			    if (splitButton == null) continue;
+                if (mergeTopButton != null)
+			        mergeTopButton.IsEnabled = NeighborChecker(mainGrid, grid, DirectionsEnum.Up);
+                if (mergeDownButton != null)
+                    mergeDownButton.IsEnabled = NeighborChecker(mainGrid, grid, DirectionsEnum.Down);
+                if (mergeLeftButton != null)
+                    mergeLeftButton.IsEnabled = NeighborChecker(mainGrid, grid, DirectionsEnum.Left);
+                if (mergeRightButton != null)
+                    mergeRightButton.IsEnabled = NeighborChecker(mainGrid, grid, DirectionsEnum.Right);
+                if (splitButton == null) continue;
 			    if (Grid.GetColumnSpan(grid) > 1 || Grid.GetRowSpan(grid) > 1)
 			        splitButton.UpdateButtonProperty(Position.Center, "Visibility", true);
 			    else
@@ -668,12 +668,12 @@ namespace GridSetter.Utils
 	        {
 	            var arcButton = ((Grid)grid).Children.Cast<ArcButton>().FirstOrDefault();
 	            if (!(arcButton?.Content is Grid insideGrid)) return;
-
+                
 	            var scaleTransform = insideGrid.LayoutTransform as ScaleTransform;
 	            var bounds = LayoutInformation.GetLayoutClip(grid)?.Bounds;
 	            if (bounds != null || scaleTransform.ScaleX < 1)
 	            {
-	                Size element = bounds != null ? new Size(bounds.Value.Width, bounds.Value.Height) : new Size(grid.ActualWidth, grid.ActualHeight);
+	                var element = bounds != null ? new Size(bounds.Value.Width, bounds.Value.Height) : new Size(grid.ActualWidth, grid.ActualHeight);
 	                //30 == merge button height/width * 2 (defined in App.xaml)
 	                var coeffH = MathUtil.Round((element.Height - 30) / insideGrid.Height);
 	                var coeffW = MathUtil.Round((element.Width - 30) / insideGrid.Width);
@@ -692,7 +692,7 @@ namespace GridSetter.Utils
 	            }
 
 	            arcButton.UpdateButtonsProperty("TextVisibility", scaleTransform.ScaleX >= 0.8);
-	            insideGrid.RenderTransform = scaleTransform;
+	            insideGrid.LayoutTransform = scaleTransform;
 	        }
 	    }
 

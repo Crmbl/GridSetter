@@ -138,6 +138,9 @@
                 <Trigger Property="Button.IsPressed" Value="true">
                     <Setter Property="Button.Background" Value="#FFEDBC"/>
                 </Trigger>
+                <Trigger Property="Button.IsEnabled" Value="false">
+                    <Setter Property="Button.Background" Value="#84817a" />
+                </Trigger>
             </Style.Triggers>
         </Style>
 
