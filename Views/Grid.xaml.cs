@@ -3,13 +3,12 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CustomShapeWpfButton;
-using CustomShapeWpfButton.Utils;
 using GridSetter.Utils;
 using GridSetter.Utils.Enums;
 using GridSetter.ViewModels;
@@ -128,6 +127,11 @@ namespace GridSetter.Views
         /// </summary>
 	    private GridSetterViewModel GridSetterRef { get; }
 
+        /// <summary>
+        /// Is switching monitor ?
+        /// </summary>
+        private bool IsSwitching { get; set; }
+
         #region Static
 
         /// <summary>
@@ -145,6 +149,11 @@ namespace GridSetter.Views
         /// </summary>
         public static readonly RoutedCommand ToggleTaskbarCommand = new RoutedCommand();
 
+        /// <summary>
+        /// The routed command for the shortcut
+        /// </summary>
+        public static readonly RoutedCommand SwitchMonitorCommand = new RoutedCommand();
+
         #endregion // Static
 
         #endregion // Properties
@@ -152,7 +161,7 @@ namespace GridSetter.Views
         #region Constructors
 
         /// <summary>
-        /// Default parameterless constructor.
+        /// Default constructor.
         /// </summary>
         public Grid(GridSetterViewModel parentRef)
 		{
@@ -182,8 +191,10 @@ namespace GridSetter.Views
             ToggleLockCommand.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
             ToDesktopCommand.InputGestures.Add(new KeyGesture(Key.Q, ModifierKeys.Control));
             ToggleTaskbarCommand.InputGestures.Add(new KeyGesture(Key.W, ModifierKeys.Control));
+            SwitchMonitorCommand.InputGestures.Add(new KeyGesture(Key.D1, ModifierKeys.Control));
 
             Loaded += Grid_Loaded;
+            StateChanged += Grid_StateChanged;
         }
 
         #endregion // Constructors
@@ -202,33 +213,60 @@ namespace GridSetter.Views
 	    }
 
         /// <summary>
+        /// Set Maximized after quick hack minimized.
+        /// </summary>
+        private void Grid_StateChanged(object sender, EventArgs e)
+        {
+            if (!IsSwitching) return;
+            IsSwitching = false;
+            SwitchMonitor();
+            WindowState = WindowState.Maximized;
+        }
+
+        /// <summary>
         /// Toggle lock on shortcut press (ctrl + a).
         /// </summary>
         private void ShortcutToggleLock(object sender, ExecutedRoutedEventArgs e)
 	    {
-            // TODO TESTING 
-            //Screen futurMonitor = null;
-            //Screen currentMonitor = Screen.FromPoint(new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y));
-            //foreach (var screen in Screen.AllScreens)
-            //{
-            //    if (screen.DeviceName == currentMonitor.DeviceName) continue;
-
-            //    futurMonitor = screen;
-            //    IsPrimaryMonitor = !IsPrimaryMonitor;
-            //}
-
-            //Width = futurMonitor.Bounds.Width;
-            //Height = futurMonitor.Bounds.Height;
-            //var gridHandle = FindWindow(null, "GridSetter");
-            //SetWindowPos(gridHandle, IntPtr.Zero, futurMonitor.Bounds.X, futurMonitor.Bounds.Y, futurMonitor.Bounds.Width, futurMonitor.Bounds.Height, SWP_NOZORDER | SWP_SHOWWINDOW);
-
-            GridSetterRef.ToggleLockGrid();
+           GridSetterRef.ToggleLockGrid();
         }
 
-		/// <summary>
-		/// To desktop on shortcut press (ctrl + q).
-		/// </summary>
-		private void ShortcutToDesktop(object sender, ExecutedRoutedEventArgs e)
+        /// <summary>
+        /// Switch on another monitor (ctrl + 1).
+        /// </summary>
+        private void SwitchMonitor()
+        {
+            var handle = new WindowInteropHelper(this).Handle;
+            var currentScreen = Screen.FromHandle(handle);
+            foreach (var screen in Screen.AllScreens)
+            {
+                if (screen.DeviceName == currentScreen.DeviceName)
+                    continue;
+
+                IsPrimaryMonitor = screen.Primary;
+                Width = screen.Bounds.Width;
+                Height = screen.Bounds.Height;
+                Left = screen.Bounds.Left;
+                Top = screen.Bounds.Top;
+
+                SetWindowPos(handle, IntPtr.Zero, (int)Left, (int)Top, (int)Width, (int)Height, SWP_NOSIZE);
+                break;
+            }
+        }
+
+        /// <summary>
+        /// Init switch on another monitor (ctrl + 1).
+        /// </summary>
+        public void InitSwitchMonitor(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
+        {
+            IsSwitching = true;
+            WindowState = WindowState.Minimized;
+        }
+
+        /// <summary>
+        /// To desktop on shortcut press (ctrl + q).
+        /// </summary>
+        private void ShortcutToDesktop(object sender, ExecutedRoutedEventArgs e)
 		{
             if (WindowState != WindowState.Minimized)
                 WindowState = WindowState.Minimized;
