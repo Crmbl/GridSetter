@@ -50,7 +50,6 @@ namespace GridSetter.Utils
 		            ForceCursor = true,
 		            DragIncrement = 0.1
 		        };
-		        gridSplitter.DragDelta += window.GridSplitter_DragDeltaUpdated;
 		    }
 		    else
 		    {
@@ -63,7 +62,6 @@ namespace GridSetter.Utils
 		            ForceCursor = true,
 		            DragIncrement = 0.1
 		        };
-		        gridSplitter.DragDelta += window.GridSplitter_DragDeltaUpdated;
             }
 
 			Grid.SetColumn(gridSplitter, colId);
@@ -363,6 +361,8 @@ namespace GridSetter.Utils
 				Name = "SetupGrid",
 				Background = new SolidColorBrush(Colors.Transparent)
             };
+            controlGrid.MouseEnter += window.ControlGrid_MouseEnter;
+            controlGrid.MouseLeave += window.ControlGrid_MouseLeave;
 
             var values = new Dictionary<Position, string>
             {
@@ -373,7 +373,7 @@ namespace GridSetter.Utils
                 { Position.Center, "Split" }
             };
             ArcButton arcButton = new ArcButton(230, values, backgroundPressed: "#ff5252");
-		    arcButton.LayoutUpdated += window.ArcButton_LayoutUpdated;
+            arcButton.Visibility = Visibility.Hidden;
             arcButton.LeftClick += window.AddLeftColButton_OnClick;
             arcButton.RightClick += window.AddRightColButton_OnClick;
             arcButton.TopClick += window.AddUpRowButton_OnClick;
@@ -664,37 +664,37 @@ namespace GridSetter.Utils
 	    /// </summary>
 	    public static void ScaleControlButtons(Grid mainGrid)
 	    {
-	        foreach (var grid in mainGrid.Children.Cast<FrameworkElement>().Where(x => x.Name == "SetupGrid"))
-	        {
-	            var arcButton = ((Grid)grid).Children.Cast<ArcButton>().FirstOrDefault();
-	            if (!(arcButton?.Content is Grid insideGrid)) return;
-                
-	            var scaleTransform = insideGrid.LayoutTransform as ScaleTransform;
-	            var bounds = LayoutInformation.GetLayoutClip(grid)?.Bounds;
-	            if (bounds != null || scaleTransform.ScaleX < 1)
-	            {
-	                var element = bounds != null ? new Size(bounds.Value.Width, bounds.Value.Height) : new Size(grid.ActualWidth, grid.ActualHeight);
-	                //30 == merge button height/width * 2 (defined in App.xaml)
-	                var coeffH = MathUtil.Round((element.Height - 30) / insideGrid.Height);
-	                var coeffW = MathUtil.Round((element.Width - 30) / insideGrid.Width);
-	                scaleTransform.ScaleX = coeffH > coeffW ? coeffW : coeffH;
-	                scaleTransform.ScaleY = scaleTransform.ScaleX;
+            foreach (var grid in mainGrid.Children.Cast<FrameworkElement>().Where(x => x.Name == "SetupGrid"))
+            {
+                var arcButton = ((Grid)grid).Children.Cast<ArcButton>().FirstOrDefault();
+                if (!(arcButton?.Content is Grid insideGrid) || (arcButton is ArcButton && arcButton.Visibility == Visibility.Visible)) return;
 
-	                scaleTransform.CenterX = MathUtil.Round(arcButton.ActualWidth / 2);
-	                scaleTransform.CenterY = MathUtil.Round(arcButton.ActualHeight / 2);
-	            }
-	            else
-	            {
-	                scaleTransform.ScaleX = 1;
-	                scaleTransform.ScaleY = 1;
-	                scaleTransform.CenterX = 0;
-	                scaleTransform.CenterY = 0;
-	            }
+                var scaleTransform = insideGrid.LayoutTransform as ScaleTransform;
+                var bounds = LayoutInformation.GetLayoutClip(grid)?.Bounds;
+                if (bounds != null || scaleTransform.ScaleX < 1)
+                {
+                    var element = bounds != null ? new Size(bounds.Value.Width, bounds.Value.Height) : new Size(grid.ActualWidth, grid.ActualHeight);
+                    //30 == merge button height/width * 2 (defined in App.xaml)
+                    var coeffH = MathUtil.Round((element.Height - 30) / insideGrid.Height);
+                    var coeffW = MathUtil.Round((element.Width - 30) / insideGrid.Width);
+                    scaleTransform.ScaleX = coeffH > coeffW ? coeffW : coeffH;
+                    scaleTransform.ScaleY = scaleTransform.ScaleX;
 
-	            arcButton.UpdateButtonsProperty("TextVisibility", scaleTransform.ScaleX >= 0.8);
-	            insideGrid.LayoutTransform = scaleTransform;
-	        }
-	    }
+                    scaleTransform.CenterX = MathUtil.Round(arcButton.ActualWidth / 2);
+                    scaleTransform.CenterY = MathUtil.Round(arcButton.ActualHeight / 2);
+                }
+                else
+                {
+                    scaleTransform.ScaleX = 1;
+                    scaleTransform.ScaleY = 1;
+                    scaleTransform.CenterX = 0;
+                    scaleTransform.CenterY = 0;
+                }
+
+                arcButton.UpdateButtonsProperty("TextVisibility", scaleTransform.ScaleX >= 0.8);
+                insideGrid.LayoutTransform = scaleTransform;
+            }
+        }
 
         /// <summary>
         /// Remove the content of a grid, picture/movie...

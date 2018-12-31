@@ -229,20 +229,32 @@ namespace GridSetter.Views
         #region Setup
 
         /// <summary>
-        /// Update the arcbutton scale when resizing the grids.
+        /// Event when mouse leaves the bounds of ControlGrid
         /// </summary>
-        public void GridSplitter_DragDeltaUpdated(object sender, DragDeltaEventArgs args)
+        public void ControlGrid_MouseLeave(object sender, MouseEventArgs e)
         {
-            UserInterfaceTools.ScaleControlButtons(MainGrid);
+            var grid = (GGrid)sender;
+            var arcButton = grid.Children.Cast<UIElement>().FirstOrDefault(x => x is ArcButton);
+            if (arcButton == null || !(arcButton is ArcButton) || (arcButton is ArcButton && arcButton.Visibility == Visibility.Hidden))
+                return;
+
+            arcButton.Visibility = Visibility.Hidden;
         }
 
         /// <summary>
-        /// Update the arcbutton scaling and positioning on LayoutUpdated.
+        /// Event when mouse enters the bounds of ControlGrid
         /// </summary>
-        public void ArcButton_LayoutUpdated(object sender, EventArgs args)
-	    {
-	        UserInterfaceTools.ScaleControlButtons(MainGrid);
-	    }
+        public void ControlGrid_MouseEnter(object sender, MouseEventArgs e)
+        {
+            UserInterfaceTools.ScaleControlButtons(MainGrid);
+
+            var grid = (GGrid)sender;
+            var arcButton = grid.Children.Cast<UIElement>().FirstOrDefault(x => x is ArcButton);
+            if (arcButton == null || !(arcButton is ArcButton) || (arcButton is ArcButton && arcButton.Visibility == Visibility.Visible))
+                return;
+
+            arcButton.Visibility = Visibility.Visible;
+        }
 
         /// <summary>
         /// Remove a column on click.
