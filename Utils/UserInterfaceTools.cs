@@ -598,6 +598,41 @@ namespace GridSetter.Utils
 			}
 		}
 
+        /// <summary>
+        /// Checks if there are merged cells, prevent from destroying cells management.
+        /// </summary>
+        private static bool MergedCellsChecker(Grid mainGrid, Grid grid, DirectionsEnum direction)
+        {
+            var currentRow = Grid.GetRow(grid);
+            var currentCol = Grid.GetColumn(grid);
+            //Has to minus 1 because Grid.GetRow/GetColumn starts at 0.
+            var currentRowSpan = Grid.GetRowSpan(grid) - 1;
+            var currentColSpan = Grid.GetColumnSpan(grid) - 1;
+
+            switch (direction)
+            {
+                case DirectionsEnum.Left:
+                    return !mainGrid.Children.Cast<UIElement>().Any(e => Grid.GetColumnSpan(e) > 1 && Grid.GetColumn(e) < currentCol && Grid.GetColumn(e) + Grid.GetColumnSpan(e)-1 >= currentCol);
+                
+                case DirectionsEnum.Right:
+                        return !mainGrid.Children.Cast<UIElement>().Any(e => Grid.GetColumnSpan(e) > 1 && Grid.GetColumn(e) <= currentCol + currentColSpan
+                                && Grid.GetColumn(e) + Grid.GetColumnSpan(e) - 1 > currentCol + currentColSpan);
+
+                case DirectionsEnum.Up:
+                    return !mainGrid.Children.Cast<UIElement>().Any(e => Grid.GetRowSpan(e) > 1 && Grid.GetRow(e) < currentRow && Grid.GetRow(e) + Grid.GetRowSpan(e)-1 >= currentRow);
+
+                case DirectionsEnum.Down:
+                    return !mainGrid.Children.Cast<UIElement>().Any(e => Grid.GetRowSpan(e) > 1 && Grid.GetRow(e) <= currentRow + currentRowSpan
+                                && Grid.GetRow(e) + Grid.GetRowSpan(e) - 1 > currentRow + currentRowSpan);
+
+                case DirectionsEnum.None:
+                    return currentRowSpan > 0 || currentColSpan > 0;
+
+                default:
+                    return true;
+            }
+        }
+
 		/// <summary>
 		/// Lock or unlock the buttons on click.
 		/// </summary>
@@ -651,12 +686,14 @@ namespace GridSetter.Utils
                     mergeLeftButton.IsEnabled = NeighborChecker(mainGrid, grid, DirectionsEnum.Left);
                 if (mergeRightButton != null)
                     mergeRightButton.IsEnabled = NeighborChecker(mainGrid, grid, DirectionsEnum.Right);
+                    
                 if (splitButton == null) continue;
-			    if (Grid.GetColumnSpan(grid) > 1 || Grid.GetRowSpan(grid) > 1)
-			        splitButton.UpdateButtonProperty(Position.Center, "Visibility", true);
-			    else
-			        splitButton.UpdateButtonProperty(Position.Center, "Visibility", false);
-			}
+                splitButton.UpdateButtonProperty(Position.Top, "Visibility", MergedCellsChecker(mainGrid, grid, DirectionsEnum.Up));
+                splitButton.UpdateButtonProperty(Position.Bottom, "Visibility", MergedCellsChecker(mainGrid, grid, DirectionsEnum.Down));
+                splitButton.UpdateButtonProperty(Position.Left, "Visibility", MergedCellsChecker(mainGrid, grid, DirectionsEnum.Left));
+                splitButton.UpdateButtonProperty(Position.Right, "Visibility", MergedCellsChecker(mainGrid, grid, DirectionsEnum.Right));
+			    splitButton.UpdateButtonProperty(Position.Center, "Visibility", MergedCellsChecker(mainGrid, grid, DirectionsEnum.None));
+            }
 		}
 
 	    /// <summary>
