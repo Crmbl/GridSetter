@@ -206,8 +206,24 @@ namespace GridSetter.Views
         /// </summary>
         private void ShortcutToggleLock(object sender, ExecutedRoutedEventArgs e)
 	    {
-	        GridSetterRef.ToggleLockGrid();
-	    }
+            // TODO TESTING 
+            //Screen futurMonitor = null;
+            //Screen currentMonitor = Screen.FromPoint(new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y));
+            //foreach (var screen in Screen.AllScreens)
+            //{
+            //    if (screen.DeviceName == currentMonitor.DeviceName) continue;
+
+            //    futurMonitor = screen;
+            //    IsPrimaryMonitor = !IsPrimaryMonitor;
+            //}
+
+            //Width = futurMonitor.Bounds.Width;
+            //Height = futurMonitor.Bounds.Height;
+            //var gridHandle = FindWindow(null, "GridSetter");
+            //SetWindowPos(gridHandle, IntPtr.Zero, futurMonitor.Bounds.X, futurMonitor.Bounds.Y, futurMonitor.Bounds.Width, futurMonitor.Bounds.Height, SWP_NOZORDER | SWP_SHOWWINDOW);
+
+            GridSetterRef.ToggleLockGrid();
+        }
 
 		/// <summary>
 		/// To desktop on shortcut press (ctrl + q).
