@@ -152,6 +152,7 @@ namespace GridSetter.Utils
                     Width = image.Width
                 };
 
+                ImageBehavior.SetRepeatBehavior(image, System.Windows.Media.Animation.RepeatBehavior.Forever);
                 ImageBehavior.SetAnimatedSource(image, imageToDrop);
             }
             else if (VideoTypes.Any(type => type.ToLower().Equals(fileType)))
