@@ -29,7 +29,7 @@ namespace GridSetter.Utils
         #region Controls
 
         /// <summary>
-        /// Add the gridSplitter between to grids.
+        /// Add the gridSplitter between two grids.
         /// </summary>
         /// <param name="window">The main window.</param>
         /// <param name="grid">Defines the grid to attach to button into.</param>
@@ -221,12 +221,13 @@ namespace GridSetter.Utils
                 Name = "MediaButtons",
                 Background = new SolidColorBrush(Colors.Transparent),
                 ClipToBounds = true,
-                MaxWidth = 195,
+                MaxWidth = 220,
                 VerticalAlignment = VerticalAlignment.Top
             };
             controlGrid.MouseEnter += window.MediaButtons_OnMouseEnter;
             controlGrid.MouseLeave += window.MediaButtons_OnMouseLeave;
 
+            controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
             controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
             controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
             controlGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
@@ -258,12 +259,23 @@ namespace GridSetter.Utils
             };
             resizeButton.Click += window.MediaControl_OnClick;
 
+            Button removeContentButton = new Button
+            {
+                Style = Application.Current.Resources["ButtonImageBase"] as Style,
+                Name = "RemoveContentButton",
+                Visibility = Visibility.Hidden,
+                Tag = Application.Current.Resources["RecycleImage"] as BitmapImage
+            };
+            removeContentButton.Click += window.MediaControl_OnClick;
+
             Grid.SetColumn(takeHeightButton, 0);
             Grid.SetColumn(takeWidthButton, 1);
             Grid.SetColumn(resizeButton, 2);
+            Grid.SetColumn(removeContentButton, 3);
             controlGrid.Children.Add(takeHeightButton);
             controlGrid.Children.Add(takeWidthButton);
             controlGrid.Children.Add(resizeButton);
+            controlGrid.Children.Add(removeContentButton);
             controlGrid.SetBinding(Canvas.LeftProperty, new MultiBinding
             {
                 Converter = new CenterConverter(),

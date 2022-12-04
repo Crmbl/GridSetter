@@ -176,14 +176,18 @@ namespace GridSetter.ViewModels
             {
                 ResetNewLabel = "Reset";
                 CurrentGrid = new Grid(this);
+                CurrentGrid.WindowState = System.Windows.WindowState.Minimized;
                 CurrentGrid.Show();
+                CurrentGrid.WindowState = System.Windows.WindowState.Maximized;
             }
             else if (ResetNewLabel.Equals("Reset"))
             {
                 ToggleLockLabel = "Lock";
                 CurrentGrid.Close();
                 CurrentGrid = new Grid(this);
+                CurrentGrid.WindowState = System.Windows.WindowState.Minimized;
                 CurrentGrid.Show();
+                CurrentGrid.WindowState = System.Windows.WindowState.Maximized;
             }
 
             OnGridCreatedEvent(EventArgs.Empty);

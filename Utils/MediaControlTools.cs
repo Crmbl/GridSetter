@@ -139,8 +139,10 @@ namespace GridSetter.Utils
 
                 BitmapImage imageToDrop = new BitmapImage();
                 imageToDrop.BeginInit();
+                imageToDrop.CacheOption = BitmapCacheOption.OnLoad;
                 imageToDrop.UriSource = new Uri(files.First());
                 imageToDrop.EndInit();
+                imageToDrop.Freeze();
 
                 image.Width = imageToDrop.Width;
                 image.Height = imageToDrop.Height;

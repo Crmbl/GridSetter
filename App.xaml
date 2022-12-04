@@ -49,8 +49,8 @@
                             <Image Source="{TemplateBinding Tag}" 
                                    VerticalAlignment="Center" 
                                    HorizontalAlignment="Center"
-                                   Height="30"
-                                   Width="30"/>
+                                   Height="32"
+                                   Width="32"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -70,8 +70,8 @@
                             <Image Source="{TemplateBinding Tag}" 
                                    VerticalAlignment="Center" 
                                    HorizontalAlignment="Center"
-                                   Height="30"
-                                   Width="30"/>
+                                   Height="32"
+                                   Width="32"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -270,6 +270,7 @@
 
         <BitmapImage x:Key="Background" UriSource="/Resources/Images/background0.png" />
         <BitmapImage x:Key="ResizeImage" UriSource="/Resources/Images/resize.png" />
+        <BitmapImage x:Key="RecycleImage" UriSource="/Resources/Images/recycle.png" />
         <BitmapImage x:Key="EnlargeHeightImage" UriSource="/Resources/Images/height.png" />
         <BitmapImage x:Key="EnlargeWidthImage" UriSource="/Resources/Images/width.png" />
         <BitmapImage x:Key="MuteImage" UriSource="/Resources/Images/mute.png" />

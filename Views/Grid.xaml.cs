@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -10,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CustomShapeWpfButton;
 using GridSetter.Utils;
+using GridSetter.Utils.Converters;
 using GridSetter.Utils.Enums;
 using GridSetter.ViewModels;
 using WpfAnimatedGif;
@@ -20,10 +23,7 @@ using DataFormats = System.Windows.DataFormats;
 using DragEventArgs = System.Windows.DragEventArgs;
 using GGrid = System.Windows.Controls.Grid;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
-// ReSharper disable CompareOfFloatsByEqualityOperator
-// ReSharper disable PossibleInvalidOperationException
-// ReSharper disable InconsistentNaming
-// ReSharper disable MemberCanBePrivate.Global
+using BBinding = System.Windows.Data.Binding;
 
 namespace GridSetter.Views
 {
@@ -954,6 +954,12 @@ namespace GridSetter.Views
 
                     video.Play();
                     break;
+
+                case "RemoveContentButton":
+                    var mediaButtons = UserInterfaceTools.FindParent(child);
+                    var mediaCanvas = UserInterfaceTools.FindParent(mediaButtons);
+                    ResetMedia(image != null && image.Source != null, mediaCanvas as Canvas);
+                    break;
             }
         }
 
@@ -1062,10 +1068,135 @@ namespace GridSetter.Views
 
         #endregion // Events
 
-        #region Private Methods
+        #region Private methods
 
+        private void ResetMedia(bool isImage, Canvas canvas)
+        {
+            if (isImage)
+            {
+                Image image = new Image
+                {
+                    Name = "Image",
+                    ClipToBounds = true,
+                    RenderTransformOrigin = new Point(0.5, 0.5)
+                };
 
+                image.SetBinding(Canvas.TopProperty, new MultiBinding
+                {
+                    Converter = new CenterConverter(),
+                    ConverterParameter = "top",
+                    Mode = BindingMode.TwoWay,
+                    Bindings = {
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = image },
+                    new BBinding("ActualHeight") { Source = image }
+                }
+                });
+                image.SetBinding(Canvas.LeftProperty, new MultiBinding
+                {
+                    Converter = new CenterConverter(),
+                    ConverterParameter = "left",
+                    Mode = BindingMode.TwoWay,
+                    Bindings = {
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = image },
+                    new BBinding("ActualHeight") { Source = image }
+                }
+                });
 
-        #endregion //Private Methods
+                image.RenderTransform = new TransformGroup
+                {
+                    Children = new TransformCollection
+                {
+                    new TranslateTransform(),
+                    new ScaleTransform()
+                }
+                };
+                image.MouseLeftButtonDown += Media_OnMouseLeftButtonDown;
+                image.MouseLeftButtonUp += Media_OnMouseLeftButtonUp;
+                image.MouseMove += Media_OnMouseMove;
+                image.MouseDown += Media_MouseDown;
+
+                var oldImage = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is Image);
+                var index = canvas.Children.IndexOf(oldImage);
+                ((Image)oldImage).Source = null;
+                canvas.Children.RemoveAt(index);
+                canvas.Children.Insert(index, image);
+            }
+            else
+            {
+                MediaElement video = new MediaElement
+                {
+                    Name = "Video",
+                    ClipToBounds = true,
+                    RenderTransformOrigin = new Point(0.5, 0.5)
+                };
+
+                video.SetBinding(Canvas.TopProperty, new MultiBinding
+                {
+                    Converter = new CenterConverter(),
+                    ConverterParameter = "top",
+                    Mode = BindingMode.TwoWay,
+                    Bindings = {
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = video },
+                    new BBinding("ActualHeight") { Source = video }
+                }
+                });
+                video.SetBinding(Canvas.LeftProperty, new MultiBinding
+                {
+                    Converter = new CenterConverter(),
+                    ConverterParameter = "left",
+                    Mode = BindingMode.TwoWay,
+                    Bindings = {
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = video },
+                    new BBinding("ActualHeight") { Source = video }
+                }
+                });
+
+                video.RenderTransform = new TransformGroup
+                {
+                    Children = new TransformCollection
+                {
+                    new TranslateTransform(),
+                    new ScaleTransform()
+                }
+                };
+                video.MouseLeftButtonDown += Media_OnMouseLeftButtonDown;
+                video.MouseLeftButtonUp += Media_OnMouseLeftButtonUp;
+                video.MouseMove += Media_OnMouseMove;
+                video.MouseDown += Media_MouseDown;
+                video.MediaEnded += Video_OnMediaEnded;
+                video.MediaFailed += Video_OnMediaFailed;
+                video.MediaOpened += Video_MediaOpened;
+
+                video.Tag = true;
+
+                var oldVideo = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is MediaElement);
+                var index = canvas.Children.IndexOf(oldVideo);
+                ((MediaElement)oldVideo).Stop();
+                ((MediaElement)oldVideo).Source = null;
+                ((MediaElement)oldVideo).UnloadedBehavior = MediaState.Close;
+                oldVideo = null;
+                canvas.Children.RemoveAt(index);
+                canvas.Children.Insert(index, video);
+            }
+
+            canvas.UpdateLayout();
+            var GCThread = new Thread(new ThreadStart(delegate
+            {
+                Thread.Sleep(500);
+                GC.Collect();
+                Thread.CurrentThread.Abort();
+            }));
+            GCThread.Start();
+        }
+
+        #endregion //Private methods
     }
 }
