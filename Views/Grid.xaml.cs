@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
+using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -12,7 +11,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CustomShapeWpfButton;
 using GridSetter.Utils;
-using GridSetter.Utils.Converters;
 using GridSetter.Utils.Enums;
 using GridSetter.ViewModels;
 using WpfAnimatedGif;
@@ -23,7 +21,6 @@ using DataFormats = System.Windows.DataFormats;
 using DragEventArgs = System.Windows.DragEventArgs;
 using GGrid = System.Windows.Controls.Grid;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
-using BBinding = System.Windows.Data.Binding;
 
 namespace GridSetter.Views
 {
@@ -350,6 +347,8 @@ namespace GridSetter.Views
             var actualColSpan = GGrid.GetColumnSpan(parent);
             var actualRowSpan = GGrid.GetRowSpan(parent);
 
+            var mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == currentRow && GGrid.GetColumn(u) == currentCol && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+            UserInterfaceTools.ResetMedia(this, mediaCanvas);
             UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.None);
             for (var i = 0; i < actualRowSpan; i++)
             {
@@ -522,9 +521,17 @@ namespace GridSetter.Views
             var currentColSpan = GGrid.GetColumnSpan(parent);
             var currentRowSpan = GGrid.GetRowSpan(parent);
 
+            var mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == currentRow && GGrid.GetColumn(u) == (currentCol - 2) && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+            UserInterfaceTools.ResetMedia(this, mediaCanvas);
             var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol - 2, DirectionsEnum.Left);
             for (var i = 0; i < currentRowSpan; i++)
+            {
+                mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == (currentRow + i) && GGrid.GetColumn(u) == (currentCol - 1) && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+                UserInterfaceTools.ResetMedia(this, mediaCanvas);
                 UserInterfaceTools.DeleteContent(MainGrid, currentRow + i, currentCol - 1, DirectionsEnum.Left);
+            }
+            mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == currentRow && GGrid.GetColumn(u) == currentCol && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+            UserInterfaceTools.ResetMedia(this, mediaCanvas);
             UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Left);
 
             UserInterfaceTools.AddGridButtons(this, currentRow, currentCol - dicSpan["colSpan"] - 1, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
@@ -546,9 +553,17 @@ namespace GridSetter.Views
             var currentColSpan = GGrid.GetColumnSpan(parent);
             var currentRowSpan = GGrid.GetRowSpan(parent);
 
+            var mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == currentRow && GGrid.GetColumn(u) == currentCol && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+            UserInterfaceTools.ResetMedia(this, mediaCanvas);
             UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Right);
             for (var i = 0; i < currentRowSpan; i++)
+            {
+                mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == (currentRow + i) && GGrid.GetColumn(u) == (currentCol + currentColSpan) && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+                UserInterfaceTools.ResetMedia(this, mediaCanvas);
                 UserInterfaceTools.DeleteContent(MainGrid, currentRow + i, currentCol + currentColSpan, DirectionsEnum.Right);
+            }
+            mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == currentRow && GGrid.GetColumn(u) == (currentCol + currentColSpan + 1) && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+            UserInterfaceTools.ResetMedia(this, mediaCanvas);
             var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol + currentColSpan + 1, DirectionsEnum.Right);
 
             UserInterfaceTools.AddGridButtons(this, currentRow, currentCol, currentColSpan + dicSpan["colSpan"] + 1, dicSpan["rowSpan"]);
@@ -570,9 +585,17 @@ namespace GridSetter.Views
             var currentRowSpan = GGrid.GetRowSpan(parent);
             var currentColSpan = GGrid.GetColumnSpan(parent);
 
+            var mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == (currentRow - 2) && GGrid.GetColumn(u) == currentCol && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+            UserInterfaceTools.ResetMedia(this, mediaCanvas);
             var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow - 2, currentCol, DirectionsEnum.Up);
             for (var i = 0; i < currentColSpan; i++)
+            {
+                mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == (currentRow - 1) && GGrid.GetColumn(u) == (currentCol + i) && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+                UserInterfaceTools.ResetMedia(this, mediaCanvas);
                 UserInterfaceTools.DeleteContent(MainGrid, currentRow - 1, currentCol + i, DirectionsEnum.Up);
+            }
+            mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == currentRow && GGrid.GetColumn(u) == currentCol && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+            UserInterfaceTools.ResetMedia(this, mediaCanvas);
             UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Up);
 
             UserInterfaceTools.AddGridButtons(this, currentRow - dicSpan["rowSpan"] - 1, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
@@ -594,9 +617,17 @@ namespace GridSetter.Views
             var currentRowSpan = GGrid.GetRowSpan(parent);
             var currentColSpan = GGrid.GetColumnSpan(parent);
 
+            var mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == currentRow && GGrid.GetColumn(u) == currentCol && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+            UserInterfaceTools.ResetMedia(this, mediaCanvas);
             UserInterfaceTools.DeleteContent(MainGrid, currentRow, currentCol, DirectionsEnum.Down);
             for (var i = 0; i < currentColSpan; i++)
+            {
+                mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == (currentRow + currentRowSpan) && GGrid.GetColumn(u) == (currentCol + i) && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+                UserInterfaceTools.ResetMedia(this, mediaCanvas);
                 UserInterfaceTools.DeleteContent(MainGrid, currentRow + currentRowSpan, currentCol + i, DirectionsEnum.Down);
+            }
+            mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == (currentRow + currentRowSpan + 1) && GGrid.GetColumn(u) == currentCol && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+            UserInterfaceTools.ResetMedia(this, mediaCanvas);
             var dicSpan = UserInterfaceTools.DeleteContent(MainGrid, currentRow + currentRowSpan + 1, currentCol, DirectionsEnum.Down);
 
             UserInterfaceTools.AddGridButtons(this, currentRow, currentCol, rowSpan: currentRowSpan + dicSpan["rowSpan"] + 1, colSpan: dicSpan["colSpan"]);
@@ -958,7 +989,7 @@ namespace GridSetter.Views
                 case "RemoveContentButton":
                     var mediaButtons = UserInterfaceTools.FindParent(child);
                     var mediaCanvas = UserInterfaceTools.FindParent(mediaButtons);
-                    ResetMedia(image != null && image.Source != null, mediaCanvas as Canvas);
+                    UserInterfaceTools.ResetMedia(this, mediaCanvas as Canvas);
                     break;
             }
         }
@@ -1067,136 +1098,5 @@ namespace GridSetter.Views
         #endregion // Media events
 
         #endregion // Events
-
-        #region Private methods
-
-        private void ResetMedia(bool isImage, Canvas canvas)
-        {
-            if (isImage)
-            {
-                Image image = new Image
-                {
-                    Name = "Image",
-                    ClipToBounds = true,
-                    RenderTransformOrigin = new Point(0.5, 0.5)
-                };
-
-                image.SetBinding(Canvas.TopProperty, new MultiBinding
-                {
-                    Converter = new CenterConverter(),
-                    ConverterParameter = "top",
-                    Mode = BindingMode.TwoWay,
-                    Bindings = {
-                    new BBinding("ActualWidth") { Source = canvas },
-                    new BBinding("ActualHeight") { Source = canvas },
-                    new BBinding("ActualWidth") { Source = image },
-                    new BBinding("ActualHeight") { Source = image }
-                }
-                });
-                image.SetBinding(Canvas.LeftProperty, new MultiBinding
-                {
-                    Converter = new CenterConverter(),
-                    ConverterParameter = "left",
-                    Mode = BindingMode.TwoWay,
-                    Bindings = {
-                    new BBinding("ActualWidth") { Source = canvas },
-                    new BBinding("ActualHeight") { Source = canvas },
-                    new BBinding("ActualWidth") { Source = image },
-                    new BBinding("ActualHeight") { Source = image }
-                }
-                });
-
-                image.RenderTransform = new TransformGroup
-                {
-                    Children = new TransformCollection
-                {
-                    new TranslateTransform(),
-                    new ScaleTransform()
-                }
-                };
-                image.MouseLeftButtonDown += Media_OnMouseLeftButtonDown;
-                image.MouseLeftButtonUp += Media_OnMouseLeftButtonUp;
-                image.MouseMove += Media_OnMouseMove;
-                image.MouseDown += Media_MouseDown;
-
-                var oldImage = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is Image);
-                var index = canvas.Children.IndexOf(oldImage);
-                ((Image)oldImage).Source = null;
-                canvas.Children.RemoveAt(index);
-                canvas.Children.Insert(index, image);
-            }
-            else
-            {
-                MediaElement video = new MediaElement
-                {
-                    Name = "Video",
-                    ClipToBounds = true,
-                    RenderTransformOrigin = new Point(0.5, 0.5)
-                };
-
-                video.SetBinding(Canvas.TopProperty, new MultiBinding
-                {
-                    Converter = new CenterConverter(),
-                    ConverterParameter = "top",
-                    Mode = BindingMode.TwoWay,
-                    Bindings = {
-                    new BBinding("ActualWidth") { Source = canvas },
-                    new BBinding("ActualHeight") { Source = canvas },
-                    new BBinding("ActualWidth") { Source = video },
-                    new BBinding("ActualHeight") { Source = video }
-                }
-                });
-                video.SetBinding(Canvas.LeftProperty, new MultiBinding
-                {
-                    Converter = new CenterConverter(),
-                    ConverterParameter = "left",
-                    Mode = BindingMode.TwoWay,
-                    Bindings = {
-                    new BBinding("ActualWidth") { Source = canvas },
-                    new BBinding("ActualHeight") { Source = canvas },
-                    new BBinding("ActualWidth") { Source = video },
-                    new BBinding("ActualHeight") { Source = video }
-                }
-                });
-
-                video.RenderTransform = new TransformGroup
-                {
-                    Children = new TransformCollection
-                {
-                    new TranslateTransform(),
-                    new ScaleTransform()
-                }
-                };
-                video.MouseLeftButtonDown += Media_OnMouseLeftButtonDown;
-                video.MouseLeftButtonUp += Media_OnMouseLeftButtonUp;
-                video.MouseMove += Media_OnMouseMove;
-                video.MouseDown += Media_MouseDown;
-                video.MediaEnded += Video_OnMediaEnded;
-                video.MediaFailed += Video_OnMediaFailed;
-                video.MediaOpened += Video_MediaOpened;
-
-                video.Tag = true;
-
-                var oldVideo = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is MediaElement);
-                var index = canvas.Children.IndexOf(oldVideo);
-                ((MediaElement)oldVideo).Stop();
-                ((MediaElement)oldVideo).Source = null;
-                ((MediaElement)oldVideo).UnloadedBehavior = MediaState.Close;
-                oldVideo = null;
-                canvas.Children.RemoveAt(index);
-                canvas.Children.Insert(index, video);
-            }
-
-            canvas.UpdateLayout();
-            var GCThread = new Thread(new ThreadStart(delegate
-            {
-                Thread.Sleep(500);
-                GC.Collect();
-                Thread.CurrentThread.Abort();
-            }));
-            GCThread.Start();
-        }
-
-        #endregion //Private methods
     }
 }

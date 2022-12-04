@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CustomShapeWpfButton;
@@ -14,8 +17,10 @@ using GridSetter.Utils.Enums;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
 using Cursors = System.Windows.Input.Cursors;
-using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using Panel = System.Windows.Controls.Panel;
+using BBinding = System.Windows.Data.Binding;
+using HorizontalAlignment = System.Windows.HorizontalAlignment;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace GridSetter.Utils
 {
@@ -107,10 +112,10 @@ namespace GridSetter.Utils
                 ConverterParameter = "top",
                 Mode = BindingMode.TwoWay,
                 Bindings = {
-                    new Binding("ActualWidth") { Source = canvas },
-                    new Binding("ActualHeight") { Source = canvas },
-                    new Binding("ActualWidth") { Source = image },
-                    new Binding("ActualHeight") { Source = image }
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = image },
+                    new BBinding("ActualHeight") { Source = image }
                 }
             });
             image.SetBinding(Canvas.LeftProperty, new MultiBinding
@@ -119,10 +124,10 @@ namespace GridSetter.Utils
                 ConverterParameter = "left",
                 Mode = BindingMode.TwoWay,
                 Bindings = {
-                    new Binding("ActualWidth") { Source = canvas },
-                    new Binding("ActualHeight") { Source = canvas },
-                    new Binding("ActualWidth") { Source = image },
-                    new Binding("ActualHeight") { Source = image }
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = image },
+                    new BBinding("ActualHeight") { Source = image }
                 }
             });
 
@@ -156,10 +161,10 @@ namespace GridSetter.Utils
                 ConverterParameter = "top",
                 Mode = BindingMode.TwoWay,
                 Bindings = {
-                    new Binding("ActualWidth") { Source = canvas },
-                    new Binding("ActualHeight") { Source = canvas },
-                    new Binding("ActualWidth") { Source = video },
-                    new Binding("ActualHeight") { Source = video }
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = video },
+                    new BBinding("ActualHeight") { Source = video }
                 }
             });
             video.SetBinding(Canvas.LeftProperty, new MultiBinding
@@ -168,10 +173,10 @@ namespace GridSetter.Utils
                 ConverterParameter = "left",
                 Mode = BindingMode.TwoWay,
                 Bindings = {
-                    new Binding("ActualWidth") { Source = canvas },
-                    new Binding("ActualHeight") { Source = canvas },
-                    new Binding("ActualWidth") { Source = video },
-                    new Binding("ActualHeight") { Source = video }
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = video },
+                    new BBinding("ActualHeight") { Source = video }
                 }
             });
 
@@ -282,10 +287,10 @@ namespace GridSetter.Utils
                 ConverterParameter = "left",
                 Mode = BindingMode.TwoWay,
                 Bindings = {
-                    new Binding("ActualWidth") { Source = canvas },
-                    new Binding("ActualHeight") { Source = canvas },
-                    new Binding("ActualWidth") { Source = controlGrid },
-                    new Binding("ActualHeight") { Source = controlGrid }
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = controlGrid },
+                    new BBinding("ActualHeight") { Source = controlGrid }
                 }
             });
 
@@ -352,10 +357,10 @@ namespace GridSetter.Utils
                 ConverterParameter = "left",
                 Mode = BindingMode.TwoWay,
                 Bindings = {
-                    new Binding("ActualWidth") { Source = canvas },
-                    new Binding("ActualHeight") { Source = canvas },
-                    new Binding("ActualWidth") { Source = controlGrid },
-                    new Binding("ActualHeight") { Source = controlGrid }
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = controlGrid },
+                    new BBinding("ActualHeight") { Source = controlGrid }
                 }
             });
             controlGrid.SetBinding(Canvas.TopProperty, new MultiBinding
@@ -364,10 +369,10 @@ namespace GridSetter.Utils
                 ConverterParameter = "top",
                 Mode = BindingMode.TwoWay,
                 Bindings = {
-                    new Binding("ActualWidth") { Source = canvas },
-                    new Binding("ActualHeight") { Source = canvas },
-                    new Binding("ActualWidth") { Source = controlGrid },
-                    new Binding("ActualHeight") { Source = controlGrid }
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = controlGrid },
+                    new BBinding("ActualHeight") { Source = controlGrid }
                 }
             });
 
@@ -411,10 +416,10 @@ namespace GridSetter.Utils
                 ConverterParameter = "left",
                 Mode = BindingMode.TwoWay,
                 Bindings = {
-                    new Binding("ActualWidth") { Source = canvas },
-                    new Binding("ActualHeight") { Source = canvas },
-                    new Binding("ActualWidth") { Source = controlGrid },
-                    new Binding("ActualHeight") { Source = controlGrid }
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = controlGrid },
+                    new BBinding("ActualHeight") { Source = controlGrid }
                 }
             });
             controlGrid.SetBinding(Canvas.TopProperty, new MultiBinding
@@ -423,10 +428,10 @@ namespace GridSetter.Utils
                 ConverterParameter = "top",
                 Mode = BindingMode.TwoWay,
                 Bindings = {
-                    new Binding("ActualWidth") { Source = canvas },
-                    new Binding("ActualHeight") { Source = canvas },
-                    new Binding("ActualWidth") { Source = controlGrid },
-                    new Binding("ActualHeight") { Source = controlGrid }
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = controlGrid },
+                    new BBinding("ActualHeight") { Source = controlGrid }
                 }
             });
 
@@ -856,6 +861,141 @@ namespace GridSetter.Utils
                     video.Visibility = Visibility.Hidden;
                 }
             }
+        }
+
+        /// <summary>
+        /// Remove the mediaElement/Image of a grid.
+        /// </summary>
+        /// <param name="grid">The grid where we want to delete the content.</param>
+        public static void ResetMedia(Views.Grid grid, Canvas canvas)
+        {
+            if (canvas == null)
+                return;
+
+            var oldImage = canvas.Children.Cast<UIElement>().FirstOrDefault(e => e is Image) as Image;
+            var oldVideo = canvas.Children.Cast<UIElement>().FirstOrDefault(e => e is MediaElement) as MediaElement;
+            if (oldImage != null && oldImage.Source != null)
+            {
+                Image image = new Image
+                {
+                    Name = "Image",
+                    ClipToBounds = true,
+                    RenderTransformOrigin = new Point(0.5, 0.5)
+                };
+
+                image.SetBinding(Canvas.TopProperty, new MultiBinding
+                {
+                    Converter = new CenterConverter(),
+                    ConverterParameter = "top",
+                    Mode = BindingMode.TwoWay,
+                    Bindings = {
+                        new BBinding("ActualWidth") { Source = canvas },
+                        new BBinding("ActualHeight") { Source = canvas },
+                        new BBinding("ActualWidth") { Source = image },
+                    new BBinding("ActualHeight") { Source = image }
+                }
+                });
+                image.SetBinding(Canvas.LeftProperty, new MultiBinding
+                {
+                    Converter = new CenterConverter(),
+                    ConverterParameter = "left",
+                    Mode = BindingMode.TwoWay,
+                    Bindings = {
+                        new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = image },
+                    new BBinding("ActualHeight") { Source = image }
+                }
+                });
+
+                image.RenderTransform = new TransformGroup
+                {
+                    Children = new TransformCollection
+                {
+                    new TranslateTransform(),
+                    new ScaleTransform()
+                }
+                };
+                image.MouseLeftButtonDown += grid.Media_OnMouseLeftButtonDown;
+                image.MouseLeftButtonUp += grid.Media_OnMouseLeftButtonUp;
+                image.MouseMove += grid.Media_OnMouseMove;
+                image.MouseDown += grid.Media_MouseDown;
+
+                var index = canvas.Children.IndexOf(oldImage);
+                oldImage.Source = null;
+                canvas.Children.RemoveAt(index);
+                canvas.Children.Insert(index, image);
+            }
+
+            if (oldVideo != null && oldVideo.Source != null)
+            {
+                MediaElement video = new MediaElement
+                {
+                    Name = "Video",
+                    ClipToBounds = true,
+                    RenderTransformOrigin = new Point(0.5, 0.5)
+                };
+
+                video.SetBinding(Canvas.TopProperty, new MultiBinding
+                {
+                    Converter = new CenterConverter(),
+                    ConverterParameter = "top",
+                    Mode = BindingMode.TwoWay,
+                    Bindings = {
+                        new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = video },
+                    new BBinding("ActualHeight") { Source = video }
+                }
+                });
+                video.SetBinding(Canvas.LeftProperty, new MultiBinding
+                {
+                    Converter = new CenterConverter(),
+                    ConverterParameter = "left",
+                    Mode = BindingMode.TwoWay,
+                    Bindings = {
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = video },
+                    new BBinding("ActualHeight") { Source = video }
+                }
+                });
+
+                video.RenderTransform = new TransformGroup
+                {
+                    Children = new TransformCollection
+                    {
+                        new TranslateTransform(),
+                        new ScaleTransform()
+                    }
+                };
+                video.MouseLeftButtonDown += grid.Media_OnMouseLeftButtonDown;
+                video.MouseLeftButtonUp += grid.Media_OnMouseLeftButtonUp;
+                video.MouseMove += grid.Media_OnMouseMove;
+                video.MouseDown += grid.Media_MouseDown;
+                video.MediaEnded += grid.Video_OnMediaEnded;
+                video.MediaFailed += grid.Video_OnMediaFailed;
+                video.MediaOpened += grid.Video_MediaOpened;
+
+                video.Tag = true;
+
+                var index = canvas.Children.IndexOf(oldVideo);
+                oldVideo.Stop();
+                oldVideo.Source = null;
+                oldVideo.UnloadedBehavior = MediaState.Close;
+                oldVideo = null;
+                canvas.Children.RemoveAt(index);
+                canvas.Children.Insert(index, video);
+            }
+
+            canvas.UpdateLayout();
+            var GCThread = new Thread(new ThreadStart(delegate
+            {
+                Thread.Sleep(500);
+                GC.Collect();
+                Thread.CurrentThread.Abort();
+            }));
+            GCThread.Start();
         }
 
         #endregion // Tools
