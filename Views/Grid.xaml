@@ -10,7 +10,7 @@
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="True">
     <Window.Background>
-        <SolidColorBrush Color="Azure" Opacity="0.3" />
+        <SolidColorBrush Color="White" Opacity="0.01" />
     </Window.Background>
     <Window.CommandBindings>
         <CommandBinding Command="{x:Static local:Grid.ToggleLockCommand}" Executed="ShortcutToggleLock"/>
