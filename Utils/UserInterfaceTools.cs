@@ -892,8 +892,8 @@ namespace GridSetter.Utils
                         new BBinding("ActualWidth") { Source = canvas },
                         new BBinding("ActualHeight") { Source = canvas },
                         new BBinding("ActualWidth") { Source = image },
-                    new BBinding("ActualHeight") { Source = image }
-                }
+                        new BBinding("ActualHeight") { Source = image }
+                    }
                 });
                 image.SetBinding(Canvas.LeftProperty, new MultiBinding
                 {
@@ -902,19 +902,19 @@ namespace GridSetter.Utils
                     Mode = BindingMode.TwoWay,
                     Bindings = {
                         new BBinding("ActualWidth") { Source = canvas },
-                    new BBinding("ActualHeight") { Source = canvas },
-                    new BBinding("ActualWidth") { Source = image },
-                    new BBinding("ActualHeight") { Source = image }
-                }
+                        new BBinding("ActualHeight") { Source = canvas },
+                        new BBinding("ActualWidth") { Source = image },
+                        new BBinding("ActualHeight") { Source = image }
+                    }
                 });
 
                 image.RenderTransform = new TransformGroup
                 {
                     Children = new TransformCollection
-                {
-                    new TranslateTransform(),
-                    new ScaleTransform()
-                }
+                    {
+                        new TranslateTransform(),
+                        new ScaleTransform()
+                    }
                 };
                 image.MouseLeftButtonDown += grid.Media_OnMouseLeftButtonDown;
                 image.MouseLeftButtonUp += grid.Media_OnMouseLeftButtonUp;
@@ -943,10 +943,10 @@ namespace GridSetter.Utils
                     Mode = BindingMode.TwoWay,
                     Bindings = {
                         new BBinding("ActualWidth") { Source = canvas },
-                    new BBinding("ActualHeight") { Source = canvas },
-                    new BBinding("ActualWidth") { Source = video },
-                    new BBinding("ActualHeight") { Source = video }
-                }
+                        new BBinding("ActualHeight") { Source = canvas },
+                        new BBinding("ActualWidth") { Source = video },
+                        new BBinding("ActualHeight") { Source = video }
+                    }
                 });
                 video.SetBinding(Canvas.LeftProperty, new MultiBinding
                 {
@@ -954,11 +954,11 @@ namespace GridSetter.Utils
                     ConverterParameter = "left",
                     Mode = BindingMode.TwoWay,
                     Bindings = {
-                    new BBinding("ActualWidth") { Source = canvas },
-                    new BBinding("ActualHeight") { Source = canvas },
-                    new BBinding("ActualWidth") { Source = video },
-                    new BBinding("ActualHeight") { Source = video }
-                }
+                        new BBinding("ActualWidth") { Source = canvas },
+                        new BBinding("ActualHeight") { Source = canvas },
+                        new BBinding("ActualWidth") { Source = video },
+                        new BBinding("ActualHeight") { Source = video }
+                    }
                 });
 
                 video.RenderTransform = new TransformGroup
