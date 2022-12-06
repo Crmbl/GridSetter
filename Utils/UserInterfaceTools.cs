@@ -733,20 +733,24 @@ namespace GridSetter.Utils
         public static void ToggleLockControlButtons(Grid mainGrid, bool isLocked)
         {
             var elementList = mainGrid.Children.Cast<FrameworkElement>().Where(e => e.Name == "SetupGrid" || e.Name == "MediaCanvas").ToList();
+            
+            var mediaCanvasVisibilityMatch = elementList.Where(x => x.Name == "MediaCanvas").All(x => x.Visibility == Visibility.Collapsed) || elementList.Where(x => x.Name == "MediaCanvas").All(x => x.Visibility == Visibility.Visible);
+            var setupGridVisibilityMatch = elementList.Where(x => x.Name == "SetupGrid").All(x => x.Visibility == Visibility.Collapsed) || elementList.Where(x => x.Name == "SetupGrid").All(x => x.Visibility == Visibility.Visible);
+            var needFix = !(mediaCanvasVisibilityMatch && setupGridVisibilityMatch); //Mistmatch correction (bug if merging/splitting at the same time)
+
             foreach (var uiElement in elementList)
             {
                 if (uiElement is Canvas canvas && canvas.Name == "MediaCanvas")
                 {
                     var image = (Image)canvas.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
                     var video = (MediaElement)canvas.Children.Cast<UIElement>().FirstOrDefault(e => e is MediaElement);
-
                     if (image?.Source != null || video?.Source != null)
-                        canvas.Opacity = canvas.Opacity < 1 ? 1 : 0.3;
+                        canvas.Opacity = !needFix ? (canvas.Opacity < 1 ? 1 : 0.3) : 1;
                     else
-                        canvas.Visibility = canvas.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
+                        canvas.Visibility = !needFix ? (canvas.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed) : Visibility.Visible;
                 }
                 else
-                    uiElement.Visibility = uiElement.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
+                    uiElement.Visibility = !needFix ? (uiElement.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed) : Visibility.Collapsed;
             }
 
             if (!isLocked)

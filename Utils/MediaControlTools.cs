@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CustomShapeWpfButton;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -104,6 +105,10 @@ namespace GridSetter.Utils
             var files = (string[])dragEventArgs.Data.GetData(DataFormats.FileDrop);
             if (files == null || files.Length > 1) return;
             if (!(sender is Canvas canvas)) return;
+
+            var ggrid = UserInterfaceTools.FindParent(canvas) as Grid;
+            var grid = ggrid.Parent as Views.Grid;
+            UserInterfaceTools.ResetMedia(grid, canvas);
 
             var fileType = files.First().Split('.').Last();
             if (ImageTypes.Any(type => type.ToLower().Equals(fileType)))
