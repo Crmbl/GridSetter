@@ -1,5 +1,4 @@
-﻿using CustomShapeWpfButton;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -8,7 +7,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using WpfAnimatedGif;
-// ReSharper disable CompareOfFloatsByEqualityOperator
 
 namespace GridSetter.Utils
 {
@@ -102,15 +100,30 @@ namespace GridSetter.Utils
         /// </summary>
         public static void MediaDrop(object sender, DragEventArgs dragEventArgs)
         {
-            var files = (string[])dragEventArgs.Data.GetData(DataFormats.FileDrop);
-            if (files == null || files.Length > 1) return;
+            AddMedia(sender, dragEventArgs);
+        }
+
+        /// <summary>
+        /// Add media.
+        /// </summary>
+        public static void AddMedia(object sender, DragEventArgs dragEventArgs = null, string fileName = null, Views.Grid grid = null)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                var files = (string[])dragEventArgs.Data.GetData(DataFormats.FileDrop);
+                if (files == null || files.Length > 1) return;
+                fileName = files.First();
+            }
             if (!(sender is Canvas canvas)) return;
 
-            var ggrid = UserInterfaceTools.FindParent(canvas) as Grid;
-            var grid = ggrid.Parent as Views.Grid;
+            if (grid == null)
+            {
+                var ggrid = UserInterfaceTools.FindParent(canvas) as Grid;
+                grid = ggrid.Parent as Views.Grid;
+            }
             UserInterfaceTools.ResetMedia(grid, canvas);
 
-            var fileType = files.First().Split('.').Last();
+            var fileType = fileName.Split('.').Last();
             if (ImageTypes.Any(type => type.ToLower().Equals(fileType)))
             {
                 var imageControl = canvas.Children.Cast<UIElement>().FirstOrDefault(c => c is Image);
@@ -145,7 +158,7 @@ namespace GridSetter.Utils
                 BitmapImage imageToDrop = new BitmapImage();
                 imageToDrop.BeginInit();
                 imageToDrop.CacheOption = BitmapCacheOption.OnLoad;
-                imageToDrop.UriSource = new Uri(files.First());
+                imageToDrop.UriSource = new Uri(fileName);
                 imageToDrop.EndInit();
                 imageToDrop.Freeze();
 
@@ -194,7 +207,7 @@ namespace GridSetter.Utils
                 translateTransform.X = 0;
 
                 video.BeginInit();
-                video.Source = new Uri(files.First());
+                video.Source = new Uri(fileName);
                 video.EndInit();
 
                 video.Volume = 0;

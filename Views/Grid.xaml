@@ -17,5 +17,6 @@
         <CommandBinding Command="{x:Static local:Grid.ToDesktopCommand}" Executed="ShortcutToDesktop"/>
         <CommandBinding Command="{x:Static local:Grid.ToggleTaskbarCommand}" Executed="ShortcutToggleTaskbar"/>
         <CommandBinding Command="{x:Static local:Grid.SwitchMonitorCommand}" Executed="InitSwitchMonitor"/>
+        <CommandBinding Command="{x:Static local:Grid.ExportGridCommand}" Executed="ShortcutExportGrid"/>
     </Window.CommandBindings>
 </Window>

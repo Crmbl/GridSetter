@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CustomShapeWpfButton;
@@ -20,7 +19,6 @@ using Cursors = System.Windows.Input.Cursors;
 using Panel = System.Windows.Controls.Panel;
 using BBinding = System.Windows.Data.Binding;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace GridSetter.Utils
 {

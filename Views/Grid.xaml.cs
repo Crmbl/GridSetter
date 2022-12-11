@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -161,6 +163,11 @@ namespace GridSetter.Views
         /// </summary>
         public static readonly RoutedCommand SwitchMonitorCommand = new RoutedCommand();
 
+        /// <summary>
+        /// The routed command for the shortcut
+        /// </summary>
+        public static readonly RoutedCommand ExportGridCommand = new RoutedCommand();
+
         #endregion // Static
 
         #endregion // Properties
@@ -170,9 +177,8 @@ namespace GridSetter.Views
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public Grid(GridSetterViewModel parentRef)
+        public Grid(GridSetterViewModel parentRef, GridViewModel importGrid = null)
         {
-            //TODO -Ability to change screen ? -To resize ? 
             InitializeComponent();
 
             GridSetterRef = parentRef;
@@ -187,17 +193,103 @@ namespace GridSetter.Views
 
             IsPrimaryMonitor = Screen.FromPoint(new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y)).Primary;
             MainGrid = new GGrid { ShowGridLines = false };
-            MainGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = CellMinWidth, Width = new GridLength(1, GridUnitType.Star) });
-            MainGrid.RowDefinitions.Add(new RowDefinition { MinHeight = CellMinHeight, Height = new GridLength(1, GridUnitType.Star) });
+            
+            if (importGrid == null)
+            {
+                MainGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = CellMinWidth, Width = new GridLength(1, GridUnitType.Star) });
+                MainGrid.RowDefinitions.Add(new RowDefinition { MinHeight = CellMinHeight, Height = new GridLength(1, GridUnitType.Star) });
 
-            AddChild(MainGrid);
-            UserInterfaceTools.AddGridButtons(this);
-            UserInterfaceTools.AddMediaCanvas(this);
+                AddChild(MainGrid);
+                UserInterfaceTools.AddGridButtons(this);
+                UserInterfaceTools.AddMediaCanvas(this);
+            }
+            else
+            {
+                for (var z = 0; z < importGrid.NbRow; z++)
+                {
+                    if (z % 2 == 0)
+                        MainGrid.RowDefinitions.Add(new RowDefinition { MinHeight = CellMinHeight, Height = new GridLength(1, GridUnitType.Star) });
+                    else
+                    {
+                        MainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(5, GridUnitType.Pixel) });
+                        for (var i = 0; i < importGrid.NbCol; i++)
+                            UserInterfaceTools.AddGridSplitter(this, MainGrid, z, i, DirectionsEnum.Horizontal);
+                    }
+                }
+
+                for (var z = 0; z < importGrid.NbCol; z++)
+                {
+                    if (z % 2 == 0)
+                    {
+                        MainGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = CellMinWidth, Width = new GridLength(1, GridUnitType.Star) });
+                        for (var i = 0; i < importGrid.NbRow; i += 2)
+                        {
+                            UserInterfaceTools.AddGridButtons(this, i, z);
+                            UserInterfaceTools.AddMediaCanvas(this, i, z);
+                        }
+                    }
+                    else
+                    {
+                        MainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(5, GridUnitType.Pixel) });
+                        for (var i = 0; i < importGrid.NbRow; i += 2)
+                            UserInterfaceTools.AddGridSplitter(this, MainGrid, i, z, DirectionsEnum.Vertical);
+                    }
+                }
+
+                UserInterfaceTools.UpdateControlButtons(MainGrid);
+                UserInterfaceTools.ScaleControlButtons(MainGrid);
+
+                foreach (var cell in importGrid.Cells)
+                {
+                    var mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == cell.Row && GGrid.GetColumn(u) == cell.Col && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+                    UserInterfaceTools.ResetMedia(this, mediaCanvas);
+                    UserInterfaceTools.DeleteContent(MainGrid, cell.Row, cell.Col, DirectionsEnum.Down);
+
+                    if (cell.ColSpan > 1 && cell.RowSpan == 1)
+                    {
+                        for (var i = 1; i < cell.ColSpan; i++)
+                        {
+                            mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == cell.Row && GGrid.GetColumn(u) == (cell.Col + i) && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+                            UserInterfaceTools.ResetMedia(this, mediaCanvas);
+                            UserInterfaceTools.DeleteContent(MainGrid, cell.Row, cell.Col + i, DirectionsEnum.Right);
+                        }
+                    }
+                    else if (cell.RowSpan > 1 && cell.ColSpan == 1)
+                    {
+                        for (var i = 1; i < cell.RowSpan; i++)
+                        {
+                            mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == (cell.Row + i) && GGrid.GetColumn(u) == cell.Col && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+                            UserInterfaceTools.ResetMedia(this, mediaCanvas);
+                            UserInterfaceTools.DeleteContent(MainGrid, cell.Row + i, cell.Col, DirectionsEnum.Down);
+                        }
+                    }
+                    else if (cell.ColSpan > 1 && cell.ColSpan > 1)
+                    {
+                        for (var x = 0; x < cell.RowSpan; x++)
+                        {
+                            for (var i = 0; i < cell.ColSpan; i++)
+                            {
+                                mediaCanvas = MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => GGrid.GetRow(u) == (cell.Row + x) && GGrid.GetColumn(u) == (cell.Col + i) && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+                                UserInterfaceTools.ResetMedia(this, mediaCanvas);
+                                UserInterfaceTools.DeleteContent(MainGrid, cell.Row + x, cell.Col + i, DirectionsEnum.Right);
+                            }
+                        }
+                    }
+
+                    UserInterfaceTools.AddGridButtons(this, cell.Row, cell.Col, rowSpan: cell.RowSpan, colSpan: cell.ColSpan);
+                    UserInterfaceTools.AddMediaCanvas(this, cell.Row, cell.Col, rowSpan: cell.RowSpan, colSpan: cell.ColSpan);
+                }
+
+                AddChild(MainGrid);
+            }
+            
             UserInterfaceTools.UpdateControlButtons(MainGrid);
+            UserInterfaceTools.ScaleControlButtons(MainGrid);
 
             ToggleLockCommand.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
             ToDesktopCommand.InputGestures.Add(new KeyGesture(Key.Q, ModifierKeys.Control));
             ToggleTaskbarCommand.InputGestures.Add(new KeyGesture(Key.W, ModifierKeys.Control));
+            ExportGridCommand.InputGestures.Add(new KeyGesture(Key.X, ModifierKeys.Control));
             SwitchMonitorCommand.InputGestures.Add(new KeyGesture(Key.D1, ModifierKeys.Control));
 
             Loaded += Grid_Loaded;
@@ -217,7 +309,12 @@ namespace GridSetter.Views
         /// </summary>
         private void Grid_MouseMove(object sender, MouseEventArgs e)
         {
-            if (MouseTimer != null)
+            if (GridSetterRef.ParentRef.WindowState != WindowState.Minimized && MouseTimer != null)
+            {
+                MouseTimer.Stop();
+                Mouse.OverrideCursor = Cursors.Arrow;
+            }
+            else if (MouseTimer != null)
             {
                 MouseTimer.Stop();
                 Mouse.OverrideCursor = null;
@@ -279,9 +376,17 @@ namespace GridSetter.Views
         }
 
         /// <summary>
+        /// Export grid to a file on shortcut press (ctrl + x).
+        /// </summary>
+        private void ShortcutExportGrid(object sender, ExecutedRoutedEventArgs e)
+        {
+            GridSetterRef.ExportGrid();
+        }
+
+        /// <summary>
         /// Init switch on another monitor (ctrl + 1).
         /// </summary>
-        public void InitSwitchMonitor(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
+        private void InitSwitchMonitor(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
         {
             IsSwitching = true;
             WindowState = WindowState.Minimized;

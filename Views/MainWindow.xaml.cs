@@ -9,6 +9,8 @@ using GridSetter.ViewModels;
 using Cursors = System.Windows.Input.Cursors;
 using static System.Windows.Application;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using System.IO;
+using System.Windows.Controls;
 
 namespace GridSetter.Views
 {
@@ -39,11 +41,12 @@ namespace GridSetter.Views
         public MainWindow()
         {
             InitializeComponent();
-            ViewModel = new GridSetterViewModel();
+            ViewModel = new GridSetterViewModel(this);
             ViewModel.NewCreatedEvent += (sender, args) => SetNotifyIconMenuItems();
             ViewModel.ToggleStateChangedEvent += (sender, args) => SetNotifyIconMenuItems();
 
             DataContext = ViewModel;
+            DropDownImport.DropDownContent = ViewModel.GetDropDownContent();
 
             #region System Tray Icon
 
@@ -193,7 +196,6 @@ namespace GridSetter.Views
         /// <summary>
         /// Defines the number on the system tray icon and set it.
         /// </summary>
-        /// <returns></returns>
         private static Icon GetNumberedIcon()
         {
             //var resource = GetResourceStream(new Uri("pack://application:,,,/Resources/Images/cube.ico"));
@@ -220,6 +222,26 @@ namespace GridSetter.Views
             bitmap.Dispose();
 
             return createdIcon;
+        }
+
+        /// <summary>
+        /// Command for the import dropdownbutton.
+        /// </summary>
+        public class FileSelectionCommand : ICommand
+        {
+            public GridSetterViewModel ViewModel { get; set; }
+
+            public void Execute(object parameter)
+            {
+                ViewModel.ImportGrid(parameter.ToString());
+            }
+
+            public bool CanExecute(object parameter)
+            {
+                return true;
+            }
+
+            public event EventHandler CanExecuteChanged;
         }
 
         #endregion // Methods
