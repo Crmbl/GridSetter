@@ -244,6 +244,26 @@ namespace GridSetter.Views
             public event EventHandler CanExecuteChanged;
         }
 
+        /// <summary>
+        /// Command for the delete dropdownbutton.
+        /// </summary>
+        public class FileDeletionCommand : ICommand
+        {
+            public GridSetterViewModel ViewModel { get; set; }
+
+            public void Execute(object parameter)
+            {
+                ViewModel.DeleteJson(parameter.ToString());
+            }
+
+            public bool CanExecute(object parameter)
+            {
+                return true;
+            }
+
+            public event EventHandler CanExecuteChanged;
+        }
+
         #endregion // Methods
     }
 }

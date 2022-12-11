@@ -5,6 +5,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using GridSetter.Utils;
 using GridSetter.Views;
 using Newtonsoft.Json;
@@ -43,14 +46,14 @@ namespace GridSetter.ViewModels
 		/// </summary>
 		private string _toggleLockLabel;
 
-        #endregion // Instance Variables
+		#endregion // Instance Variables
 
-        #region Properties
+		#region Properties
 
-        /// <summary>
-        /// Defines the app title.
-        /// </summary>
-        public string AppTitle
+		/// <summary>
+		/// Defines the app title.
+		/// </summary>
+		public string AppTitle
 		{
 			get => _appTitle;
 			set
@@ -123,20 +126,20 @@ namespace GridSetter.ViewModels
 		/// </summary>
 		public ActionCommand ExportGridCommand { get; set; }
 
-        /// <summary>
-        /// Command to remove all content from every cells.
-        /// </summary>
-        public ActionCommand EmptyContentCommand { get; set; }
+		/// <summary>
+		/// Command to remove all content from every cells.
+		/// </summary>
+		public ActionCommand EmptyContentCommand { get; set; }
 
-        /// <summary>
-        /// Get the MainWindow ref.
-        /// </summary>
-        public MainWindow ParentRef { get; set; }
+		/// <summary>
+		/// Get the MainWindow ref.
+		/// </summary>
+		public MainWindow ParentRef { get; set; }
 
-        /// <summary>
-        /// Keep in memory the grid.
-        /// </summary>
-        public GGrid CurrentGrid { get; set; }
+		/// <summary>
+		/// Keep in memory the grid.
+		/// </summary>
+		public GGrid CurrentGrid { get; set; }
 
 		/// <summary>
 		/// Event when the grid has been created.
@@ -232,7 +235,7 @@ namespace GridSetter.ViewModels
 
 				if (force)
 					ResetNewLabel = "Reset";
-            }
+			}
 			else if (ToggleLockLabel.Equals("Unlock"))
 			{
 				UserInterfaceTools.ToggleLockControlButtons(CurrentGrid.MainGrid, false);
@@ -251,7 +254,7 @@ namespace GridSetter.ViewModels
 
 			var i = 0;
 			var exists = false;
-			var filename = "C:\\Users\\Axel\\Downloads\\grid-template.json";
+			var filename = $"{System.Reflection.Assembly.GetEntryAssembly().Location.Replace("GridSetter.exe", "")}\\Imports\\grid-template.json";
 			do
 			{
 				if (System.IO.File.Exists(filename))
@@ -268,7 +271,7 @@ namespace GridSetter.ViewModels
 			using (StreamWriter sw = System.IO.File.CreateText(filename))
 			{
 				var jsonCells = new GridViewModel(CurrentGrid.MainGrid.ColumnDefinitions.Count, CurrentGrid.MainGrid.RowDefinitions.Count);
-				foreach (Canvas cell in mediaCells)
+				foreach (Canvas cell in mediaCells.OrderBy(x => WGrid.GetRow(x)).ThenBy(x => WGrid.GetColumn(x)))
 				{
 					var width = cell.ActualWidth;
 					var height = cell.ActualHeight;
@@ -284,8 +287,20 @@ namespace GridSetter.ViewModels
 						source = ImageBehavior.GetAnimatedSource(image).ToString();
 					if (video?.Source != null)
 						source = video?.Source.ToString();
+					if (width == 0.0 || height == 0.0)
+					{
+						var setupGrid = CurrentGrid.MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => WGrid.GetRow(u) == row && WGrid.GetColumn(u) == col && u is WGrid _control && _control.Name.Equals("SetupGrid")) as WGrid;
+						width = setupGrid.ActualWidth;
+						height = setupGrid.ActualHeight;
+					}
 
-					jsonCells.Cells.Add(new CellViewModel(width, height, col, row, colSpan, rowSpan, source));
+					var innerCells = new List<InnerCellViewModel>();
+					for (var z = col; z < col + colSpan; z++)
+						for (var w = row; w < row + rowSpan; w++)
+                            if (z % 2 == 0 && w % 2 == 0)
+                                innerCells.Add(new InnerCellViewModel(CurrentGrid.MainGrid.ColumnDefinitions[z].ActualWidth, CurrentGrid.MainGrid.RowDefinitions[w].ActualHeight, z, w));
+
+                    jsonCells.Cells.Add(new CellViewModel(width, height, col, row, colSpan, rowSpan, source, innerCells));
 				}
 
 				sw.WriteLine(JsonConvert.SerializeObject(jsonCells, Formatting.Indented));
@@ -294,77 +309,104 @@ namespace GridSetter.ViewModels
 			ParentRef.DropDownImport.DropDownContent = GetDropDownContent();
 		}
 
-        /// <summary>
-        /// Setup the list for the Import grid dropdown button.
-        /// </summary>
-        public Canvas GetDropDownContent()
-        {
-            var downloads = new DirectoryInfo("C:\\Users\\Axel\\Downloads");
-            var files = downloads.GetFiles("grid-template*.json");
+		/// <summary>
+		/// Setup the list for the Import grid dropdown button.
+		/// </summary>
+		public Canvas GetDropDownContent()
+		{
+			var exeDir = new DirectoryInfo($"{System.Reflection.Assembly.GetEntryAssembly().Location.Replace("GridSetter.exe", "")}\\Imports");
+			var files = exeDir.GetFiles("grid-template*.json");
 
-            var brushConverter = new System.Windows.Media.BrushConverter();
-            var canvas = new Canvas()
-            {
-                Width = 197,
-                Height = files.Length * 22,
-                Background = (System.Windows.Media.Brush)brushConverter.ConvertFrom("#dddddddd")
-            };
+			var brushConverter = new System.Windows.Media.BrushConverter();
+			var canvas = new Canvas()
+			{
+				Width = 197,
+				Height = files.Length * 22,
+				Background = (System.Windows.Media.Brush)brushConverter.ConvertFrom("#dddddddd")
+			};
 
-            for (var i = 0; i < files.Length; i++)
-            {
-                var textBlock = new TextBlock
-                {
-                    Text = files[i].Name,
-                    Style = ParentRef.FindResource("DropDownTextBlockStyle") as Style
+			for (var i = 0; i < files.Length; i++)
+			{
+				var button = new Button()
+				{
+                    Style = ParentRef.FindResource("DropDownButtonImageBase") as Style,
+                    Tag = Application.Current.Resources["CrossImage"] as BitmapImage
                 };
+				var textBlock = new TextBlock
+				{
+					Text = files[i].Name,
+					Style = ParentRef.FindResource("DropDownTextBlockStyle") as Style
+				};
 
-                var margin = textBlock.Margin;
-                margin.Top = i == 0 ? 2 : 22 * i;
-                textBlock.Margin = margin;
+				var margin = textBlock.Margin;
+				margin.Top = i == 0 ? 2 : 22 * i;
+				textBlock.Margin = margin;
+                var marginBtn = button.Margin;
+                marginBtn.Top = i == 0 ? 2 : 22 * i;
+                button.Margin = marginBtn;
 
                 var mouseBinding = new MouseBinding(new FileSelectionCommand() { ViewModel = this }, new MouseGesture(MouseAction.LeftClick)) { CommandParameter = files[i].Name };
-                textBlock.InputBindings.Add(mouseBinding);
-                canvas.Children.Add(textBlock);
-            }
+				textBlock.InputBindings.Add(mouseBinding);
+				var mouseBindingBtn = new MouseBinding(new FileDeletionCommand() { ViewModel = this }, new MouseGesture(MouseAction.LeftClick)) { CommandParameter = files[i].Name };
+				button.InputBindings.Add(mouseBindingBtn);
 
-            return canvas;
-        }
+                canvas.Children.Add(button);
+				canvas.Children.Add(textBlock);
+			}
+
+			return canvas;
+		}
 
 		/// <summary>
 		/// Import grid from file and create it accordingly.
 		/// </summary>
 		/// <param name="fileName">The exported grid.</param>
-        public void ImportGrid(string fileName)
+		public void ImportGrid(string fileName)
 		{
-			var fullPath = $"C:\\Users\\Axel\\Downloads\\{ fileName}";
-            if (!System.IO.File.Exists(fullPath))
+			var fullPath = $"{System.Reflection.Assembly.GetEntryAssembly().Location.Replace("GridSetter.exe", "")}\\Imports\\{fileName}";
+			if (!System.IO.File.Exists(fullPath))
 				return;
 
-            GridViewModel json;
-            using (StreamReader sr = System.IO.File.OpenText(fullPath))
+			GridViewModel json;
+			using (StreamReader sr = System.IO.File.OpenText(fullPath))
 			{
-                json = JsonConvert.DeserializeObject<GridViewModel>(sr.ReadToEnd());
+				json = JsonConvert.DeserializeObject<GridViewModel>(sr.ReadToEnd());
 			}
 
 			if (CurrentGrid != null)
 				CurrentGrid.Close();
 
-            CurrentGrid = new GGrid(this, json);
-            CurrentGrid.WindowState = WindowState.Minimized;
-            CurrentGrid.Show();
-            CurrentGrid.WindowState = WindowState.Maximized;
-            ToggleLockGrid(true);
+			CurrentGrid = new GGrid(this, json);
+			CurrentGrid.WindowState = WindowState.Minimized;
+			CurrentGrid.Show();
+			CurrentGrid.WindowState = WindowState.Maximized;
+			ToggleLockGrid(true);
 
-
-            //test
-            foreach (var cell in json.Cells)
-            {
-                if (!string.IsNullOrWhiteSpace(cell.Source))
+			foreach (var cell in json.Cells) //Add content and resize rows/cols
+			{
+                foreach (var innerCell in cell.InnerCells)
                 {
-                    var mediaCanvas = CurrentGrid.MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => System.Windows.Controls.Grid.GetRow(u) == cell.Row && System.Windows.Controls.Grid.GetColumn(u) == cell.Col && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
-                    MediaControlTools.AddMedia(mediaCanvas, fileName: cell.Source, grid: CurrentGrid);
+                    CurrentGrid.MainGrid.ColumnDefinitions[innerCell.Col].Width = new GridLength(innerCell.Width, GridUnitType.Star);
+                    CurrentGrid.MainGrid.RowDefinitions[innerCell.Row].Height = new GridLength(innerCell.Height, GridUnitType.Star);
                 }
-            }
+
+				if (!string.IsNullOrWhiteSpace(cell.Source))
+				{
+					var mediaCanvas = CurrentGrid.MainGrid.Children.Cast<UIElement>().FirstOrDefault(u => WGrid.GetRow(u) == cell.Row && WGrid.GetColumn(u) == cell.Col && u is Canvas _canvas && _canvas.Name.Equals("MediaCanvas")) as Canvas;
+					MediaControlTools.AddMedia(mediaCanvas, fileName: cell.Source, grid: CurrentGrid);
+				}
+			}
+		}
+
+        /// <summary>
+        /// Delete the json file used to import.
+        /// </summary>
+        /// <param name="fileName">The exported grid to delete.</param>
+        public void DeleteJson(string fileName)
+		{
+            var fullPath = $"{System.Reflection.Assembly.GetEntryAssembly().Location.Replace("GridSetter.exe", "")}\\Imports\\{fileName}";
+			System.IO.File.Delete(fullPath);
+            ParentRef.DropDownImport.DropDownContent = GetDropDownContent();
         }
 
         /// <summary>

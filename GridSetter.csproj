@@ -257,5 +257,8 @@
   <ItemGroup>
     <Resource Include="Resources\Images\grid.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\delete.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
