@@ -88,7 +88,7 @@ namespace GridSetter.Views
         {
             if (e.ChangedButton == MouseButton.Left)
             {
-                ((MainWindow)sender).Cursor = Cursors.None;
+                //((MainWindow)sender).Cursor = Cursors.None;
                 DragMove();
             }
         }
