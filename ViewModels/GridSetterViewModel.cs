@@ -396,7 +396,10 @@ namespace GridSetter.ViewModels
 					MediaControlTools.AddMedia(mediaCanvas, fileName: cell.Source, grid: CurrentGrid);
 				}
 			}
-		}
+
+            if (ParentRef.WindowState == WindowState.Normal)
+                ParentRef.WindowState = WindowState.Minimized;
+        }
 
         /// <summary>
         /// Delete the json file used to import.
