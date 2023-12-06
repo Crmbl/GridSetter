@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -187,13 +184,16 @@ namespace GridSetter.Views
             Left = 0;
             Top = 0;
 
-            Screen currentScreen = Screen.FromPoint(new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y));
+            var mousePosition = System.Windows.Forms.Control.MousePosition;
+            Screen currentScreen = Screen.FromPoint(new System.Drawing.Point(mousePosition.X, mousePosition.Y));
             Width = currentScreen.Bounds.Width;
             Height = currentScreen.Bounds.Height;
-
-            IsPrimaryMonitor = Screen.FromPoint(new System.Drawing.Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y)).Primary;
+            Left = currentScreen.Bounds.Left;
+            Top = currentScreen.Bounds.Top;
+            IsPrimaryMonitor = Screen.FromPoint(new System.Drawing.Point(mousePosition.X, mousePosition.Y)).Primary;
             MainGrid = new GGrid { ShowGridLines = false };
-            
+            SetWindowPos(new WindowInteropHelper(this).Handle, IntPtr.Zero, (int)Left, (int)Top, (int)Width, (int)Height, SWP_NOSIZE);
+
             if (importGrid == null)
             {
                 MainGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = CellMinWidth, Width = new GridLength(1, GridUnitType.Star) });
@@ -282,7 +282,7 @@ namespace GridSetter.Views
 
                 AddChild(MainGrid);
             }
-            
+
             UserInterfaceTools.UpdateControlButtons(MainGrid);
             UserInterfaceTools.ScaleControlButtons(MainGrid);
 
