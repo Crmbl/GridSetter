@@ -159,6 +159,7 @@ namespace GridSetter.Views
             var bitmapEmptyAll = Bitmap.FromFile($"{AppDomain.CurrentDomain.BaseDirectory}\\Resources\\Images\\eraser.png");
             var bitmapExit = Bitmap.FromFile($"{AppDomain.CurrentDomain.BaseDirectory}\\Resources\\Images\\exit.png");
 
+            NotifyIcon.Text = "Grid Setter";
             NotifyIcon.ContextMenuStrip.Items.Clear();
             NotifyIcon.ContextMenuStrip.Items.Add("Maximize", bitmapMaximize, (s, e) => { Show(); WindowState = WindowState.Normal; NotifyIcon.Visible = false; });
             if (ViewModel.ResetNewLabel == "New")
