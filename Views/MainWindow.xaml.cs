@@ -106,6 +106,7 @@ namespace GridSetter.Views
         /// </summary>
         private void WindowMouseEnter(object sender, MouseEventArgs e)
         {
+            Mouse.OverrideCursor = Cursors.Arrow;
             ((MainWindow)sender).Cursor = Cursors.Arrow;
         }
 
