@@ -89,7 +89,7 @@ namespace GridSetter.Utils
                 Visibility = Visibility.Collapsed,
                 AllowDrop = true,
                 ClipToBounds = true,
-                Background = new SolidColorBrush(Colors.Transparent)
+                Background = new SolidColorBrush(Color.FromArgb(1, 255, 255, 255))
             };
             canvas.Drop += window.MediaCanvas_OnDrop;
             canvas.MouseWheel += window.MediaCanvas_OnMouseWheel;
@@ -207,9 +207,66 @@ namespace GridSetter.Utils
             Panel.SetZIndex(canvas, 10);
             window.MainGrid.Children.Add(canvas);
 
+            AddPassThroughButton(window, canvas);
             AddMediaButtons(window, canvas);
             AddVideoVolumeSlider(window, canvas);
             AddVideoTimeSlider(window, canvas);
+        }
+
+        private static void AddPassThroughButton(Views.Grid window, Canvas canvas)
+        {
+            Grid controlGrid = new Grid
+            {
+                Name = "EmptyCanvasButton",
+                Background = new SolidColorBrush(Colors.Transparent),
+                MaxHeight = 55,
+                Width = 55,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            controlGrid.MouseEnter += window.MediaButtons_OnMouseEnter;
+            controlGrid.MouseLeave += window.MediaButtons_OnMouseLeave;
+
+            controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            controlGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+
+            Button passThroughButton = new Button
+            {
+                Style = Application.Current.Resources["ButtonImageBase"] as Style,
+                Name = "PassThroughButton",
+                Visibility = Visibility.Hidden,
+                Tag = Application.Current.Resources["ThroughImage"] as BitmapImage
+            };
+            passThroughButton.Click += window.MediaControl_OnClick;
+
+            Grid.SetRow(passThroughButton, 0);
+            controlGrid.Children.Add(passThroughButton);
+            controlGrid.SetBinding(Canvas.LeftProperty, new MultiBinding
+            {
+                Converter = new RightConverter(),
+                ConverterParameter = "right",
+                Mode = BindingMode.TwoWay,
+                Bindings = {
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = controlGrid },
+                    new BBinding("ActualHeight") { Source = controlGrid }
+                }
+            });
+            controlGrid.SetBinding(Canvas.TopProperty, new MultiBinding
+            {
+                Converter = new CenterConverter(),
+                ConverterParameter = "top",
+                Mode = BindingMode.TwoWay,
+                Bindings = {
+                    new BBinding("ActualWidth") { Source = canvas },
+                    new BBinding("ActualHeight") { Source = canvas },
+                    new BBinding("ActualWidth") { Source = controlGrid },
+                    new BBinding("ActualHeight") { Source = controlGrid }
+                }
+            });
+
+            canvas.Children.Add(controlGrid);
         }
 
         /// <summary>
@@ -449,7 +506,7 @@ namespace GridSetter.Utils
             var controlGrid = new Grid
             {
                 Name = "SetupGrid",
-                Background = new SolidColorBrush(Colors.Transparent)
+                Background = new SolidColorBrush(Color.FromArgb(1, 255, 255, 255))
             };
             controlGrid.MouseEnter += window.ControlGrid_MouseEnter;
             controlGrid.MouseLeave += window.ControlGrid_MouseLeave;

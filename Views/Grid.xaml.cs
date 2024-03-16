@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -138,6 +139,11 @@ namespace GridSetter.Views
         /// </summary>
         private bool BlockTimeValueChangeEvent { get; set; }
 
+        /// <summary>
+        /// Keep track of every passing through canvas.
+        /// </summary>
+        private List<Canvas> PassThroughCanvas { get; set; }
+
         #region Static
 
         /// <summary>
@@ -164,6 +170,11 @@ namespace GridSetter.Views
         /// The routed command for the shortcut
         /// </summary>
         public static readonly RoutedCommand ExportGridCommand = new RoutedCommand();
+
+        /// <summary>
+        /// The routed command for the shortcut
+        /// </summary>
+        public static readonly RoutedCommand DisablePassThroughCommand = new RoutedCommand();
 
         #endregion // Static
 
@@ -291,6 +302,7 @@ namespace GridSetter.Views
             ToggleTaskbarCommand.InputGestures.Add(new KeyGesture(Key.W, ModifierKeys.Control));
             ExportGridCommand.InputGestures.Add(new KeyGesture(Key.X, ModifierKeys.Control));
             SwitchMonitorCommand.InputGestures.Add(new KeyGesture(Key.D1, ModifierKeys.Control));
+            DisablePassThroughCommand.InputGestures.Add(new KeyGesture(Key.C, ModifierKeys.Control));
 
             Loaded += Grid_Loaded;
             StateChanged += Grid_StateChanged;
@@ -399,6 +411,23 @@ namespace GridSetter.Views
         {
             if (WindowState != WindowState.Minimized)
                 WindowState = WindowState.Minimized;
+        }
+
+        /// <summary>
+        /// To disable passthrough and remove topmost (ctrl + c).
+        /// </summary>
+        private void ShortcutDisablePassThrough(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (this.Topmost == true)
+                this.Topmost = false;
+            if (PassThroughCanvas != null)
+            {
+                foreach (var canvas in PassThroughCanvas)
+                    canvas.Background = new SolidColorBrush(Color.FromArgb(1, 255, 255, 255));
+
+                PassThroughCanvas.Clear();
+                PassThroughCanvas = null;
+            }
         }
 
         /// <summary>
@@ -955,14 +984,15 @@ namespace GridSetter.Views
         public void MediaButtons_OnMouseEnter(object sender, MouseEventArgs args)
         {
             if (!(sender is GGrid grid)) return;
-            if (grid.Name != "MediaButtons" && grid.Name != "VideoButtons" && grid.Name != "VideoTimeSlider") return;
+            if (grid.Name != "MediaButtons" && grid.Name != "VideoButtons" && grid.Name != "VideoTimeSlider" && grid.Name != "EmptyCanvasButton") return;
             if (!(UserInterfaceTools.FindParent(grid) is Canvas parent)) return;
 
             var image = parent.Children.Cast<UIElement>().FirstOrDefault(e => e is Image);
             var video = parent.Children.Cast<UIElement>().FirstOrDefault(e => e is MediaElement);
 
             if ((grid.Name == "VideoButtons" || grid.Name == "VideoTimeSlider") && (video as MediaElement)?.Source == null) return;
-            if ((image as Image)?.Source == null && (video as MediaElement)?.Source == null) return;
+            if ((image as Image)?.Source == null && (video as MediaElement)?.Source == null && grid.Name != "EmptyCanvasButton") return;
+            if (((image as Image)?.Source != null || (video as MediaElement)?.Source != null) && grid.Name == "EmptyCanvasButton") return;
 
             foreach (var child in grid.Children)
                 if (child is FrameworkElement fElement)
@@ -990,7 +1020,7 @@ namespace GridSetter.Views
         public void MediaButtons_OnMouseLeave(object sender, MouseEventArgs args)
         {
             if (!(sender is GGrid grid)) return;
-            if (grid.Name != "MediaButtons" && grid.Name != "VideoButtons" && grid.Name != "VideoTimeSlider") return;
+            if (grid.Name != "MediaButtons" && grid.Name != "VideoButtons" && grid.Name != "VideoTimeSlider" && grid.Name != "EmptyCanvasButton") return;
 
             foreach (var child in grid.Children)
                 if (child is FrameworkElement fElement)
@@ -1095,6 +1125,16 @@ namespace GridSetter.Views
                     var mediaButtons = UserInterfaceTools.FindParent(child);
                     var mediaCanvas = UserInterfaceTools.FindParent(mediaButtons);
                     UserInterfaceTools.ResetMedia(this, mediaCanvas as Canvas);
+                    break;
+
+                case "PassThroughButton":
+                    if (this.Topmost == false)
+                        this.Topmost = true;
+                    if (PassThroughCanvas == null)
+                        PassThroughCanvas = new List<Canvas>();
+
+                    PassThroughCanvas.Add((Canvas)canvas);
+                    PassThroughCanvas.Last().Background = new SolidColorBrush(Color.FromArgb(0, 255, 255, 255));
                     break;
             }
         }

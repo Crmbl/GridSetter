@@ -10,7 +10,7 @@
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="True">
     <Window.Background>
-        <SolidColorBrush Color="White" Opacity="0.01" />
+        <SolidColorBrush Color="Transparent" />
     </Window.Background>
     <Window.CommandBindings>
         <CommandBinding Command="{x:Static local:Grid.ToggleLockCommand}" Executed="ShortcutToggleLock"/>
@@ -18,5 +18,6 @@
         <CommandBinding Command="{x:Static local:Grid.ToggleTaskbarCommand}" Executed="ShortcutToggleTaskbar"/>
         <CommandBinding Command="{x:Static local:Grid.SwitchMonitorCommand}" Executed="InitSwitchMonitor"/>
         <CommandBinding Command="{x:Static local:Grid.ExportGridCommand}" Executed="ShortcutExportGrid"/>
+        <CommandBinding Command="{x:Static local:Grid.DisablePassThroughCommand}" Executed="ShortcutDisablePassThrough"/>
     </Window.CommandBindings>
 </Window>

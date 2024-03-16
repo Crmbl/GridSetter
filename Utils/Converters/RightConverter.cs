@@ -25,7 +25,7 @@ namespace GridSetter.Utils.Converters
                 case "left":
                     return canvasWidth - 55;
                 case "right":
-                    return canvasWidth + 55;
+                    return 55;
                 default:
                     return 0;
             }

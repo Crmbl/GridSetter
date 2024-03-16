@@ -323,5 +323,6 @@
         <BitmapImage x:Key="VolumeImage" UriSource="/Resources/Images/volume.png" />
         <BitmapImage x:Key="ReloadImage" UriSource="/Resources/Images/reload.png" />
         <BitmapImage x:Key="CrossImage" UriSource="/Resources/Images/delete.png" />
+        <BitmapImage x:Key="ThroughImage" UriSource="/Resources/Images/through.png" />
     </Application.Resources>
 </Application>
